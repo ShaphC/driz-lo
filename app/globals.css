@@ -10,8 +10,13 @@
   box-sizing: border-box;
 }
 
+html {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
+  min-height: 100%;
 }
 
 button {
@@ -22,7 +27,7 @@ button {
 .scene {
   position: relative;
   min-height: 100dvh;
-  overflow: hidden;
+  overflow-x: clip;
   display: flex;
   flex-direction: column;
   background: #281813 url("/scenes/coffee-sunset.png") center / cover no-repeat;
@@ -47,7 +52,7 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 28px 5%;
+  padding: 24px 5%;
 }
 
 .brand {
@@ -87,6 +92,7 @@ button {
   justify-content: center;
   align-items: center;
   min-width: 0;
+  padding: 10px 0;
 }
 
 .scene-label {
@@ -95,6 +101,7 @@ button {
   font-size: 13px;
   text-align: center;
   letter-spacing: 0.3px;
+  line-height: 1.5;
 }
 
 .timer-panel {
@@ -210,9 +217,12 @@ button {
   color: #ffddbd;
 }
 
+/* Tablet and mobile */
+
 @media (max-width: 800px) {
   .workspace {
     grid-template-columns: minmax(0, 1fr);
+    align-items: start;
     gap: 20px;
     padding: 10px 20px 35px;
   }
@@ -255,5 +265,10 @@ button {
 
   .durations button {
     font-size: 12px;
+  }
+
+  .session-count {
+    font-size: 10px;
+    letter-spacing: 0.5px;
   }
 }

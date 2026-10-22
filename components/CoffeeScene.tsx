@@ -3,12 +3,14 @@
 import { useId } from "react";
 import "./CoffeeScene.css";
 
-interface CoffeeSceneProps {
+type CoffeeSceneProps = {
   progress: number;
   running: boolean;
   mode: "focus" | "break";
   completed: number;
-}
+};
+
+const MAX_VISIBLE_CUPS = 6;
 
 export default function CoffeeScene({
   progress,
@@ -17,352 +19,420 @@ export default function CoffeeScene({
   completed,
 }: CoffeeSceneProps) {
   const id = useId().replace(/:/g, "");
-  const focus = mode === "focus";
-  const fill = focus ? Math.max(0, Math.min(1, progress)) : 1;
-  const brewing = focus && running && fill < 1;
-  const hasCoffee = fill > 0 || !focus;
+  const isFocus = mode === "focus";
+  const fill = isFocus ? Math.max(0, Math.min(1, progress)) : 1;
 
-  const liquidBottom = 430;
-  const liquidHeight = 139 * fill;
-  const liquidTop = liquidBottom - liquidHeight;
+  const brewing = isFocus && running && fill < 1;
+  const liquidTop = 421 - fill * 125;
+  const cups = Math.min(completed, MAX_VISIBLE_CUPS);
+  const dropDistance = Math.max(0, liquidTop - 288);
 
   return (
-    <div className="drizzlo-coffee-scene">
-      <div className="coffee-scene-glow" />
+    <div className="drizlo-coffee-scene">
+      <div className="drizlo-ambient-light" />
 
       <svg
-        className="coffee-artwork"
-        viewBox="0 0 600 540"
+        className="drizlo-coffee-art"
+        viewBox="0 0 640 570"
         role="img"
-        aria-label={`Coffee brewing, ${Math.round(fill * 100)} percent full`}
+        aria-label={`Coffee carafe ${Math.round(fill * 100)} percent full`}
       >
         <defs>
           <linearGradient id={`${id}-glass`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="#FFE2B0" stopOpacity=".4" />
-            <stop offset=".3" stopColor="#FFF4DB" stopOpacity=".08" />
-            <stop offset=".75" stopColor="#FFF0C5" stopOpacity=".13" />
-            <stop offset="1" stopColor="#FFCF91" stopOpacity=".48" />
+            <stop offset="0" stopColor="#FFF1D7" stopOpacity=".48" />
+            <stop offset=".25" stopColor="#FFF1D7" stopOpacity=".06" />
+            <stop offset=".75" stopColor="#FFF1D7" stopOpacity=".1" />
+            <stop offset="1" stopColor="#FFD39D" stopOpacity=".4" />
           </linearGradient>
 
-          <linearGradient id={`${id}-coffee`} x1="0" y1="0" x2="1" y2=".2">
-            <stop offset="0" stopColor="#38170F" />
-            <stop offset=".38" stopColor="#713017" />
-            <stop offset=".72" stopColor="#9B481C" />
-            <stop offset="1" stopColor="#421B11" />
+          <linearGradient id={`${id}-coffee`} x1="0" y1="0" x2="1" y2=".25">
+            <stop offset="0" stopColor="#4C2116" />
+            <stop offset=".45" stopColor="#8F421E" />
+            <stop offset="1" stopColor="#3B180F" />
           </linearGradient>
 
-          <linearGradient id={`${id}-ceramic`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#FFE4B7" />
-            <stop offset=".55" stopColor="#D5A77C" />
-            <stop offset="1" stopColor="#8F5A3C" />
+          <linearGradient id={`${id}-ceramic`} x1="0" y1="0" x2=".8" y2="1">
+            <stop offset="0" stopColor="#FFE5BB" />
+            <stop offset=".55" stopColor="#D7A478" />
+            <stop offset="1" stopColor="#8C533B" />
           </linearGradient>
 
-          <linearGradient id={`${id}-wood`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#B36C43" />
-            <stop offset=".4" stopColor="#7B412B" />
-            <stop offset="1" stopColor="#48271F" />
+          <linearGradient id={`${id}-table`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#B9784D" />
+            <stop offset=".35" stopColor="#815036" />
+            <stop offset="1" stopColor="#4B2A23" />
           </linearGradient>
 
-          <radialGradient id={`${id}-halo`}>
-            <stop offset="0" stopColor="#FFD194" stopOpacity=".35" />
-            <stop offset="1" stopColor="#FFD194" stopOpacity="0" />
+          <radialGradient id={`${id}-sun`}>
+            <stop offset="0" stopColor="#FFD3A0" stopOpacity=".55" />
+            <stop offset="1" stopColor="#FFB46D" stopOpacity="0" />
           </radialGradient>
 
-          <clipPath id={`${id}-carafe-clip`}>
-            <path d="M226 281 L374 281 L393 397 Q395 439 355 444 L245 444 Q205 439 207 397 Z" />
+          <clipPath id={`${id}-inside`}>
+            <path d="M236 291 H387 L408 403 Q411 441 367 447 H256 Q212 441 215 403 Z" />
           </clipPath>
 
-          <filter id={`${id}-shadow`}>
-            <feGaussianBlur stdDeviation="10" />
+          <filter id={`${id}-blur`}>
+            <feGaussianBlur stdDeviation="13" />
           </filter>
         </defs>
 
-        {/* Ambient lighting */}
-        <ellipse
-          cx="300"
-          cy="265"
-          rx="260"
-          ry="245"
-          fill={`url(#${id}-halo)`}
+        {/* Warm sunlight */}
+        <circle
+          className="drizlo-sunlight"
+          cx="465"
+          cy="132"
+          r="205"
+          fill={`url(#${id}-sun)`}
         />
 
         {/* Window */}
-        <g opacity=".5">
-          <path
-            d="M60 25 V365 M540 25 V365 M60 185 H540"
-            stroke="#FFD9A4"
-            strokeWidth="8"
-            opacity=".3"
-          />
-          <circle cx="470" cy="105" r="48" fill="#F7A85B" opacity=".2" />
+        <g opacity=".28" stroke="#FFD8A3" strokeWidth="9">
+          <path d="M54 0 V380 M585 0 V380 M54 174 H585" />
         </g>
 
         {/* Countertop */}
         <ellipse
-          cx="300"
-          cy="461"
-          rx="225"
+          cx="315"
+          cy="464"
+          rx="235"
           ry="25"
           fill="#1B0C0A"
           opacity=".5"
-          filter={`url(#${id}-shadow)`}
+          filter={`url(#${id}-blur)`}
         />
 
-        <rect
-          x="25"
-          y="450"
-          width="550"
-          height="21"
-          rx="7"
-          fill={`url(#${id}-wood)`}
-        />
+        <path d="M10 453 H630 V477 H10 Z" fill={`url(#${id}-table)`} />
+        <path d="M10 456 H630" stroke="#E6A46C" strokeWidth="3" />
+        <rect x="10" y="477" width="620" height="93" fill="#4B2A23" />
 
-        <path d="M30 455 H570" stroke="#E8A36B" strokeWidth="2" opacity=".6" />
-
-        <rect x="35" y="471" width="530" height="65" fill="#48271F" />
-
-        <path
-          d="M55 489 Q240 479 540 497 M80 518 Q320 507 520 525"
-          stroke="#A35F3C"
-          strokeWidth="2"
-          opacity=".25"
-          fill="none"
-        />
+        <g stroke="#BA7950" opacity=".2" fill="none">
+          <path d="M30 499 Q300 487 609 505" />
+          <path d="M40 542 Q310 525 600 550" />
+        </g>
 
         {/* Brewing stand */}
-        <path
-          d="M425 135 V450"
-          stroke="#4C3029"
-          strokeWidth="12"
-          strokeLinecap="round"
-        />
-
-        <path
-          d="M425 159 H300"
-          stroke="#4C3029"
-          strokeWidth="10"
-          strokeLinecap="round"
-        />
-
-        <ellipse cx="425" cy="451" rx="38" ry="7" fill="#38221C" />
+        <g fill="none" stroke="#51332A" strokeLinecap="round">
+          <path d="M442 135 V454" strokeWidth="14" />
+          <path d="M442 159 H312" strokeWidth="11" />
+        </g>
+        <ellipse cx="442" cy="455" rx="42" ry="8" fill="#38221C" />
 
         {/* Ceramic dripper */}
         <path
-          d="M204 151 Q300 136 396 151 L337 249 Q300 271 263 249 Z"
+          d="M215 147 Q312 133 409 147 L351 254 Q312 275 273 254 Z"
           fill={`url(#${id}-ceramic)`}
-          stroke="#F8D5A6"
+          stroke="#F7D8AE"
           strokeWidth="4"
         />
 
-        <g stroke="#9C674B" strokeWidth="2" opacity=".45" fill="none">
-          <path d="M232 158 L279 250" />
-          <path d="M262 155 L290 257" />
-          <path d="M300 155 V259" />
-          <path d="M338 155 L310 257" />
-          <path d="M368 158 L321 250" />
+        <g stroke="#996344" strokeWidth="2" opacity=".4" fill="none">
+          <path d="M243 155 L286 254" />
+          <path d="M278 155 L303 263" />
+          <path d="M312 154 V264" />
+          <path d="M346 155 L321 263" />
+          <path d="M381 155 L338 254" />
         </g>
 
         <ellipse
-          cx="300"
-          cy="151"
-          rx="96"
-          ry="16"
-          fill="#E6B98B"
-          stroke="#FFE0B2"
+          cx="312"
+          cy="147"
+          rx="97"
+          ry="17"
+          fill="#E5B88A"
+          stroke="#FFE2BB"
           strokeWidth="4"
         />
+        <ellipse cx="312" cy="147" rx="80" ry="10" fill="#563126" />
+        <ellipse cx="312" cy="147" rx="63" ry="6" fill="#302019" />
 
-        <ellipse cx="300" cy="151" rx="78" ry="10" fill="#5E3325" />
-        <ellipse cx="300" cy="151" rx="61" ry="6" fill="#302019" />
+        <path d="M298 259 Q312 267 326 259 L319 276 H305 Z" fill="#A96F4D" />
 
-        <path d="M285 256 Q300 264 315 256 L307 272 H293 Z" fill="#B57A55" />
-
-        {/* Carafe handle */}
+        {/* Glass handle */}
         <path
-          d="M374 316 C455 294 459 422 382 417"
+          d="M388 325 C477 297 476 429 397 418"
           fill="none"
-          stroke="#F1C99B"
-          strokeWidth="17"
-          opacity=".65"
+          stroke="#F4CEA1"
+          strokeWidth="19"
           strokeLinecap="round"
+          opacity=".65"
         />
-
         <path
-          d="M386 329 C429 326 432 398 387 401"
+          d="M398 336 C449 326 449 404 399 402"
           fill="none"
-          stroke="#FFF0D5"
+          stroke="#FFF0D4"
           strokeWidth="4"
-          opacity=".45"
+          opacity=".5"
         />
 
-        {/* Glass carafe */}
+        {/* Carafe */}
         <path
-          d="M226 281 L374 281 L393 397 Q395 439 355 444 L245 444 Q205 439 207 397 Z"
+          d="M236 291 H387 L408 403 Q411 441 367 447 H256 Q212 441 215 403 Z"
           fill={`url(#${id}-glass)`}
-          stroke="#FFE5BF"
+          stroke="#FFE4BC"
           strokeWidth="5"
         />
 
-        {/* Liquid */}
-        <g clipPath={`url(#${id}-carafe-clip)`}>
+        {/* Coffee liquid */}
+        <g clipPath={`url(#${id}-inside)`}>
           <rect
-            x="200"
+            x="205"
             y={liquidTop}
-            width="200"
-            height={liquidHeight + 10}
+            width="215"
+            height={Math.max(0, 453 - liquidTop)}
             fill={`url(#${id}-coffee)`}
           />
 
-          {hasCoffee && (
+          {fill > 0 && (
             <>
-              <ellipse
-                className={brewing ? "coffee-surface-moving" : ""}
-                cx="300"
-                cy={liquidTop}
-                rx="96"
-                ry="7"
-                fill="#B66A37"
-                opacity=".85"
-              />
+              <g className={brewing ? "drizlo-liquid-active" : ""}>
+                <ellipse
+                  cx="312"
+                  cy={liquidTop}
+                  rx="103"
+                  ry="7"
+                  fill="#B86C3C"
+                />
+
+                <ellipse
+                  cx="312"
+                  cy={liquidTop - 1}
+                  rx="74"
+                  ry="3"
+                  fill="#E3A069"
+                  opacity=".3"
+                />
+
+                <path
+                  d={`M245 ${liquidTop + 1} Q312 ${liquidTop - 4} 379 ${liquidTop + 1}`}
+                  fill="none"
+                  stroke="#F6C38D"
+                  strokeWidth="1.5"
+                  opacity=".4"
+                />
+              </g>
 
               <path
-                d={`M220 ${liquidTop + 14} Q300 ${liquidTop + 8} 380 ${liquidTop + 14}`}
-                stroke="#E5A061"
+                d={`M224 ${liquidTop + 14} Q312 ${liquidTop + 7} 399 ${liquidTop + 14}`}
+                fill="none"
+                stroke="#F0AF6E"
                 strokeWidth="2"
                 opacity=".45"
-                fill="none"
               />
+
+              {brewing && (
+                <g
+                  className="drizlo-ripple"
+                  style={{
+                    transformOrigin: `312px ${liquidTop}px`,
+                  }}
+                >
+                  <ellipse
+                    cx="312"
+                    cy={liquidTop}
+                    rx="16"
+                    ry="3"
+                    fill="none"
+                    stroke="#F9C58B"
+                    strokeWidth="2"
+                  />
+                </g>
+              )}
             </>
           )}
         </g>
 
         {/* Glass reflections */}
         <path
-          d="M236 296 Q222 359 230 408"
-          stroke="#FFF6E3"
+          d="M245 308 Q231 370 241 418"
+          fill="none"
+          stroke="#FFF7E8"
           strokeWidth="10"
-          opacity=".36"
           strokeLinecap="round"
-          fill="none"
+          opacity=".32"
         />
-
         <path
-          d="M364 302 Q380 365 371 413"
-          stroke="#FFE1B0"
+          d="M379 310 Q395 371 385 420"
+          fill="none"
+          stroke="#FFE4BD"
           strokeWidth="5"
-          opacity=".25"
           strokeLinecap="round"
-          fill="none"
+          opacity=".25"
         />
-
         <path
-          d="M223 281 Q300 270 377 281"
+          d="M232 291 Q312 279 392 291"
           fill="none"
-          stroke="#FFE5BF"
+          stroke="#FFE9C7"
           strokeWidth="7"
           strokeLinecap="round"
         />
 
-        {/* Animated coffee drops */}
+        {/* Falling coffee drops */}
         {brewing && (
-          <g className="coffee-drip-group">
+          <g>
             <ellipse
-              className="coffee-drop coffee-drop-one"
-              cx="300"
-              cy="273"
+              className="drizlo-drop drizlo-drop-a"
+              cx="312"
+              cy="280"
               rx="4"
-              ry="9"
-              fill="#A95727"
+              ry="8"
+              fill="#AC5829"
+              style={
+                {
+                  "--drop-distance": `${dropDistance}px`,
+                } as React.CSSProperties
+              }
             />
-
             <ellipse
-              className="coffee-drop coffee-drop-two"
-              cx="300"
-              cy="273"
+              className="drizlo-drop drizlo-drop-b"
+              cx="312"
+              cy="280"
               rx="3"
               ry="6"
-              fill="#E2A062"
+              fill="#DA8E4B"
+              style={
+                {
+                  "--drop-distance": `${dropDistance}px`,
+                } as React.CSSProperties
+              }
             />
           </g>
         )}
 
         {/* Steam */}
-        {hasCoffee && (
+        {fill > 0.05 && (
           <g
-            className={
-              running || !focus ? "coffee-steam active" : "coffee-steam"
-            }
+            className={`drizlo-steam ${running || !isFocus ? "is-active" : ""}`}
             fill="none"
-            stroke="#FFE6C2"
+            stroke="#FFE9CA"
             strokeWidth="3"
             strokeLinecap="round"
           >
             <path
-              className="steam-path steam-a"
-              d="M256 275 C237 253 273 237 255 210"
+              className="drizlo-steam-line drizlo-steam-one"
+              d="M270 282 C249 260 286 243 267 216"
             />
-
             <path
-              className="steam-path steam-b"
-              d="M301 272 C282 248 320 232 301 204"
+              className="drizlo-steam-line drizlo-steam-two"
+              d="M313 282 C292 257 331 241 312 211"
             />
-
             <path
-              className="steam-path steam-c"
-              d="M344 275 C326 251 361 235 344 208"
+              className="drizlo-steam-line drizlo-steam-three"
+              d="M357 282 C336 260 373 243 355 216"
             />
           </g>
         )}
 
         {/* Coffee beans */}
-        <g fill="#4B2418" stroke="#A46542" strokeWidth="2">
+        <g fill="#492418" stroke="#A46A46" strokeWidth="2">
           <ellipse
-            cx="120"
-            cy="442"
-            rx="10"
-            ry="6"
-            transform="rotate(-25 120 442)"
-          />
-
-          <ellipse
-            cx="145"
-            cy="446"
-            rx="9"
-            ry="5"
-            transform="rotate(18 145 446)"
-          />
-
-          <ellipse
-            cx="480"
-            cy="443"
+            cx="128"
+            cy="445"
             rx="11"
             ry="6"
-            transform="rotate(-10 480 443)"
+            transform="rotate(-24 128 445)"
+          />
+          <ellipse
+            cx="154"
+            cy="448"
+            rx="9"
+            ry="5"
+            transform="rotate(18 154 448)"
+          />
+          <ellipse
+            cx="501"
+            cy="445"
+            rx="11"
+            ry="6"
+            transform="rotate(-10 501 445)"
           />
         </g>
       </svg>
 
-      {/* Animation status */}
-      <div className="coffee-scene-caption">
-        <span className="coffee-scene-indicator" />
-
+      {/* Status below artwork */}
+      <div className="drizlo-scene-status" role="status">
+        <span className={`drizlo-status-dot ${brewing ? "active" : ""}`} />
         <span>
-          {focus
-            ? running
+          {!isFocus
+            ? "Freshly brewed"
+            : brewing
               ? "Brewing slowly..."
-              : fill > 0
-                ? "Brewing paused"
-                : "Ready to brew"
-            : "Freshly brewed"}
+              : fill >= 1
+                ? "Coffee is ready"
+                : fill > 0
+                  ? "Brewing paused"
+                  : "Ready to brew"}
         </span>
       </div>
 
-      {/* Completed sessions */}
-      {completed > 0 && (
-        <div className="coffee-collection-label">
-          {completed} {completed === 1 ? "cup" : "cups"} brewed
+      {/* Completed cups */}
+      <div className="drizlo-cup-shelf">
+        <div className="drizlo-shelf-heading">
+          <span>YOUR COFFEE COLLECTION</span>
+          <span>{completed} brewed</span>
         </div>
-      )}
+
+        <div className="drizlo-shelf-interior">
+          {cups === 0 ? (
+            <span className="drizlo-empty-shelf">
+              Your first cup is waiting.
+            </span>
+          ) : (
+            <div className="drizlo-cups">
+              {Array.from({ length: cups }, (_, index) => (
+                <svg
+                  key={index}
+                  className="drizlo-cup"
+                  viewBox="0 0 52 54"
+                  aria-hidden="true"
+                >
+                  <ellipse
+                    cx="24"
+                    cy="48"
+                    rx="20"
+                    ry="3"
+                    fill="#1E0E0B"
+                    opacity=".35"
+                  />
+                  <path
+                    d="M35 17 C51 14 51 36 36 34"
+                    fill="none"
+                    stroke="#D4A77B"
+                    strokeWidth="5"
+                  />
+                  <path
+                    d="M10 15 H37 L34 42 Q23 48 13 42 Z"
+                    fill="#E4BC90"
+                    stroke="#FFE0B7"
+                    strokeWidth="2"
+                  />
+                  <ellipse
+                    cx="23.5"
+                    cy="15"
+                    rx="13.5"
+                    ry="4"
+                    fill="#6A311D"
+                    stroke="#F4D0A6"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M16 24 L17 37"
+                    stroke="#FFF0D9"
+                    strokeWidth="3"
+                    opacity=".45"
+                  />
+                </svg>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {completed > MAX_VISIBLE_CUPS && (
+          <span className="drizlo-extra-cups">
+            +{completed - MAX_VISIBLE_CUPS} more cups
+          </span>
+        )}
+      </div>
     </div>
   );
 }

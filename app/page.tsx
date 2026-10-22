@@ -17,7 +17,9 @@ interface TimerSession {
 
 const FOCUS = 25;
 const BREAK = 5;
-const STORAGE_KEY = "drizzlo-session-v1";
+
+const STORAGE_KEY = "drizlo-session-v1";
+const LEGACY_STORAGE_KEY = "drizzlo-session-v1";
 
 const DEFAULT_SESSION: TimerSession = {
   mode: "focus",
@@ -31,7 +33,16 @@ const DEFAULT_SESSION: TimerSession = {
 
 function readSession(): TimerSession {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    let stored = localStorage.getItem(STORAGE_KEY);
+
+    if (!stored) {
+      stored = localStorage.getItem(LEGACY_STORAGE_KEY);
+
+      if (stored) {
+        localStorage.setItem(STORAGE_KEY, stored);
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+      }
+    }
 
     if (!stored) return { ...DEFAULT_SESSION };
 
@@ -77,8 +88,7 @@ function readSession(): TimerSession {
 
 export default function Home() {
   const [session, setSession] = useState<TimerSession | null>(null);
-
-  const [now, setNow] = useState<number>(0);
+  const [now, setNow] = useState(0);
 
   useEffect(() => {
     setSession(readSession());
@@ -141,7 +151,7 @@ export default function Home() {
 
         <header className="topbar">
           <div className="brand">
-            drizzlo<span>.</span>
+            drizlo<span>.</span>
           </div>
         </header>
       </main>
@@ -208,7 +218,7 @@ export default function Home() {
 
   function changeDuration(minutes: number): void {
     setSession((current) => {
-      if (!current || current.mode !== "focus") {
+      if (!current || current.mode !== "focus" || current.running) {
         return current;
       }
 
@@ -248,7 +258,7 @@ export default function Home() {
 
       <header className="topbar">
         <div className="brand">
-          drizzlo<span>.</span>
+          drizlo<span>.</span>
         </div>
 
         <div className="session-count">
@@ -258,7 +268,6 @@ export default function Home() {
       </header>
 
       <section className="workspace">
-        {/* Animated coffee scene */}
         <div className="scene-stage">
           <CoffeeScene
             progress={progress}
@@ -276,7 +285,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Timer controls */}
         <aside className="timer-panel">
           <span className="eyebrow">
             {isFocus ? "FOCUS SESSION" : "SHORT BREAK"}

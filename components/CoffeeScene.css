@@ -1,4 +1,4 @@
-.drizzlo-coffee-scene {
+.drizlo-coffee-scene {
   position: relative;
   width: 100%;
   max-width: 760px;
@@ -7,190 +7,375 @@
   flex-direction: column;
   align-items: center;
   isolation: isolate;
+  padding-bottom: 10px;
 }
 
-.coffee-scene-glow {
+/* Ambient lighting */
+
+.drizlo-ambient-light {
   position: absolute;
-  inset: 8% 0 12%;
+  inset: 5% 0 30%;
   z-index: -1;
   border-radius: 50%;
   background: radial-gradient(
     ellipse,
-    rgba(244, 153, 82, 0.17) 0%,
-    rgba(244, 153, 82, 0.04) 45%,
+    rgba(255, 178, 102, 0.22),
+    rgba(255, 178, 102, 0.04) 55%,
     transparent 75%
   );
   pointer-events: none;
+  animation: drizlo-ambient-breathe 10s ease-in-out infinite;
 }
 
-.coffee-artwork {
+.drizlo-coffee-art {
   display: block;
   width: 100%;
-  max-height: min(65vh, 650px);
+  height: auto;
+  max-height: min(59vh, 650px);
   overflow: visible;
-  filter: drop-shadow(0 22px 35px rgba(21, 9, 5, 0.22));
+  flex-shrink: 1;
+  filter: drop-shadow(0 20px 30px rgba(19, 8, 5, 0.24));
 }
 
-/* Coffee droplets */
-.coffee-drop {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation-name: drizzlo-drop;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
+.drizlo-sunlight {
+  animation: drizlo-glow 8s ease-in-out infinite;
 }
 
-.coffee-drop-one {
-  animation-duration: 2.4s;
-}
-
-.coffee-drop-two {
-  animation-duration: 2.4s;
-  animation-delay: -1.2s;
-}
-
-@keyframes drizzlo-drop {
-  0% {
-    transform: translateY(0) scale(0.65);
-    opacity: 0;
-  }
-
-  10% {
-    opacity: 1;
-  }
-
-  75% {
-    opacity: 1;
-  }
-
-  100% {
-    transform: translateY(105px) scale(0.9);
-    opacity: 0;
-  }
-}
-
-/* Liquid surface */
-.coffee-surface-moving {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: drizzlo-surface 2.6s ease-in-out infinite;
-}
-
-@keyframes drizzlo-surface {
+@keyframes drizlo-glow {
   0%,
   100% {
-    transform: scaleY(1);
+    opacity: 0.8;
   }
 
   50% {
-    transform: scaleY(0.55);
+    opacity: 1;
   }
 }
 
-/* Steam */
-.coffee-steam {
-  opacity: 0.12;
+@keyframes drizlo-ambient-breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
 }
 
-.coffee-steam.active {
-  opacity: 0.65;
+/* Coffee droplets */
+
+.drizlo-drop {
+  animation: drizlo-falling-drop 2.4s linear infinite;
+  transform-box: view-box;
+  transform-origin: center;
 }
 
-.steam-path {
-  opacity: 0;
-  animation: drizzlo-steam 4.5s ease-in-out infinite;
-  animation-play-state: paused;
+.drizlo-drop-a {
+  animation-duration: 2.3s;
 }
 
-.coffee-steam.active .steam-path {
-  animation-play-state: running;
+.drizlo-drop-b {
+  animation-duration: 3.1s;
+  animation-delay: -1.4s;
 }
 
-.steam-a {
-  animation-delay: 0s;
-}
-
-.steam-b {
-  animation-delay: -1.5s;
-}
-
-.steam-c {
-  animation-delay: -3s;
-}
-
-@keyframes drizzlo-steam {
+@keyframes drizlo-falling-drop {
   0% {
-    transform: translateY(12px) translateX(0);
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  82% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(var(--drop-distance, 90px)) scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* Liquid movement */
+
+.drizlo-liquid-active {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: drizlo-liquid-motion 3.2s ease-in-out infinite;
+}
+
+@keyframes drizlo-liquid-motion {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+
+  50% {
+    transform: translateY(1px) scaleY(0.8);
+  }
+}
+
+/* Ripple */
+
+.drizlo-ripple {
+  animation: drizlo-ripple-motion 2.4s ease-out infinite;
+}
+
+@keyframes drizlo-ripple-motion {
+  0% {
+    transform: scale(0.2);
     opacity: 0;
   }
 
   30% {
-    opacity: 0.45;
-  }
-
-  70% {
-    opacity: 0.28;
+    opacity: 0.8;
   }
 
   100% {
-    transform: translateY(-40px) translateX(12px);
+    transform: scale(1.8);
     opacity: 0;
   }
 }
 
-/* Caption */
-.coffee-scene-caption {
+/* Steam */
+
+.drizlo-steam {
+  opacity: 0.08;
+}
+
+.drizlo-steam.is-active {
+  opacity: 0.75;
+}
+
+.drizlo-steam-line {
+  opacity: 0;
+  animation: drizlo-steam-rise 4.8s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.drizlo-steam.is-active .drizlo-steam-line {
+  animation-play-state: running;
+}
+
+.drizlo-steam-two {
+  animation-delay: -1.6s;
+}
+
+.drizlo-steam-three {
+  animation-delay: -3.2s;
+}
+
+@keyframes drizlo-steam-rise {
+  0% {
+    transform: translate(0, 12px);
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 0.5;
+  }
+
+  75% {
+    opacity: 0.3;
+  }
+
+  100% {
+    transform: translate(12px, -45px);
+    opacity: 0;
+  }
+}
+
+/* Brewing status */
+
+.drizlo-scene-status {
+  position: relative;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 10px;
+  min-height: 32px;
+  margin-top: 12px;
+  padding: 7px 15px;
+  border: 1px solid rgba(255, 219, 177, 0.18);
+  border-radius: 100px;
+  background: rgba(32, 19, 15, 0.65);
+  backdrop-filter: blur(10px);
+  color: #f6d5ae;
+  font-size: 13px;
+  line-height: 1.4;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.drizlo-status-dot {
+  display: inline-block;
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #a98264;
+}
+
+.drizlo-status-dot.active {
+  background: #f7b678;
+  box-shadow: 0 0 12px rgba(247, 182, 120, 0.75);
+  animation: drizlo-status-pulse 2s ease-in-out infinite;
+}
+
+@keyframes drizlo-status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Collection shelf */
+
+.drizlo-cup-shelf {
+  width: min(100%, 440px);
+  margin-top: 25px;
+  flex-shrink: 0;
+}
+
+.drizlo-shelf-heading {
   display: flex;
   align-items: center;
-  gap: 9px;
-  margin-top: -8px;
-  font-size: 13px;
-  letter-spacing: 0.6px;
-  color: #f2d2ab;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: #f1ceaa;
+  font-size: 10px;
+  letter-spacing: 1.5px;
 }
 
-.coffee-scene-indicator {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #e7a66b;
-  box-shadow: 0 0 10px rgba(231, 166, 107, 0.6);
+.drizlo-shelf-heading span:last-child {
+  letter-spacing: 0.3px;
+  color: #ffd9b0;
 }
 
-.coffee-collection-label {
-  margin-top: 12px;
-  padding: 7px 14px;
-  border: 1px solid rgba(255, 216, 171, 0.18);
-  border-radius: 100px;
-  background: rgba(35, 20, 14, 0.3);
-  color: #f4d5ae;
+.drizlo-shelf-interior {
+  position: relative;
+  min-height: 79px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 9px 15px 15px;
+  border: 1px solid rgba(255, 220, 179, 0.15);
+  border-bottom: 8px solid #a26743;
+  border-radius: 12px 12px 4px 4px;
+  background: linear-gradient(
+    180deg,
+    rgba(23, 12, 10, 0.56),
+    rgba(75, 40, 27, 0.55)
+  );
+  box-shadow:
+    inset 0 8px 20px rgba(0, 0, 0, 0.15),
+    0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+.drizlo-cups {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(2px, 1vw, 12px);
+}
+
+.drizlo-cup {
+  width: clamp(36px, 5vw, 49px);
+  height: auto;
+  flex-shrink: 1;
+  animation: drizlo-cup-arrive 0.6s ease-out both;
+}
+
+@keyframes drizlo-cup-arrive {
+  from {
+    transform: translateY(-10px) scale(0.85);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.drizlo-empty-shelf {
+  align-self: center;
+  color: rgba(255, 225, 193, 0.6);
   font-size: 12px;
-  letter-spacing: 0.4px;
 }
+
+.drizlo-extra-cups {
+  display: block;
+  margin-top: 8px;
+  text-align: right;
+  color: #eac39e;
+  font-size: 11px;
+}
+
+/* Responsive */
 
 @media (max-width: 800px) {
-  .drizzlo-coffee-scene {
-    max-width: 480px;
+  .drizlo-coffee-scene {
+    max-width: 500px;
   }
 
-  .coffee-artwork {
-    max-height: 48vh;
+  .drizlo-coffee-art {
+    max-height: min(43vh, 430px);
   }
 
-  .coffee-scene-caption {
-    margin-top: -16px;
+  .drizlo-scene-status {
+    margin-top: 8px;
+  }
+
+  .drizlo-cup-shelf {
+    margin-top: 18px;
   }
 }
 
+@media (max-width: 420px) {
+  .drizlo-scene-status {
+    font-size: 12px;
+    padding: 7px 12px;
+  }
+
+  .drizlo-shelf-heading {
+    font-size: 9px;
+  }
+
+  .drizlo-cup {
+    width: 38px;
+  }
+}
+
+/* Accessibility */
+
 @media (prefers-reduced-motion: reduce) {
-  .coffee-drop,
-  .coffee-surface-moving,
-  .steam-path {
+  .drizlo-sunlight,
+  .drizlo-ambient-light,
+  .drizlo-drop,
+  .drizlo-liquid-active,
+  .drizlo-ripple,
+  .drizlo-steam-line,
+  .drizlo-status-dot,
+  .drizlo-cup {
     animation: none !important;
   }
 
-  .coffee-steam {
+  .drizlo-drop,
+  .drizlo-ripple {
     opacity: 0;
   }
 }

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Drizzlo — Make Time Feel Beautiful",
+  title: "Drizlo — Make Time Feel Beautiful",
   description:
-    "A cozy, animated focus timer where coffee brews, tea steeps, and every minute becomes something beautiful.",
+    "A cozy animated focus timer where coffee brews, tea steeps, and every minute becomes something beautiful.",
 };
 
 export default function RootLayout({
