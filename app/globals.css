@@ -1,26 +1,259 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #fff2df;
+  background: #1c1311;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.scene {
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #281813 url("/scenes/coffee-sunset.png") center / cover no-repeat;
+}
+
+.scene-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(18, 11, 10, 0.62),
+    rgba(18, 11, 10, 0.18) 55%,
+    rgba(18, 11, 10, 0.64)
+  );
+  pointer-events: none;
+}
+
+.topbar,
+.bottombar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 5%;
+}
+
+.brand {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -1.5px;
+}
+
+.brand span {
+  color: #ffb16e;
+}
+
+.session-count,
+.bottombar {
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  color: #f3cfaa;
+}
+
+.workspace {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.4fr)
+    minmax(300px, 0.8fr);
+  align-items: center;
+  gap: clamp(20px, 4vw, 70px);
+  padding: 20px clamp(24px, 5vw, 100px);
+}
+
+.scene-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-width: 0;
+}
+
+.scene-label {
+  margin-top: 14px;
+  color: #f1cda4;
+  font-size: 13px;
+  text-align: center;
+  letter-spacing: 0.3px;
+}
+
+.timer-panel {
+  justify-self: center;
+  width: 100%;
+  max-width: 390px;
+  padding: 36px;
+  border: 1px solid rgba(255, 220, 177, 0.2);
+  border-radius: 24px;
+  background: rgba(29, 18, 17, 0.55);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.2);
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: #e7ad79;
+}
+
+.time {
+  font-size: clamp(64px, 8vw, 100px);
+  font-weight: 300;
+  letter-spacing: -5px;
+  margin: 15px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-track {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #ffae69;
+  transition: width 0.5s linear;
+}
+
+.timer-description {
+  color: #e6b991;
+  font-size: 14px;
+  margin: 20px 0 30px;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+}
+
+.controls button {
+  padding: 14px 24px;
+  border-radius: 10px;
+  border: none;
+}
+
+.primary-button {
+  flex: 1;
+  background: #f5b579;
+  color: #27140c;
+  font-weight: 700;
+}
+
+.primary-button:hover {
+  background: #ffd0a1;
+}
+
+.secondary-button {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff0de;
+}
+
+.secondary-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.durations {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.durations button {
+  flex: 1;
+  padding: 10px 4px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: #e9c8a5;
+}
+
+.durations button.selected {
+  background: rgba(255, 174, 105, 0.2);
+  border-color: #ffae69;
+}
+
+.durations button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mode-button {
+  margin-top: 22px;
+  background: transparent;
+  border: none;
+  color: #ffbb84;
+  font-size: 13px;
+}
+
+.mode-button:hover {
+  color: #ffddbd;
+}
+
+@media (max-width: 800px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    padding: 10px 20px 35px;
+  }
+
+  .scene-stage {
+    width: 100%;
+  }
+
+  .timer-panel {
+    max-width: 460px;
+    padding: 24px;
+  }
+
+  .time {
+    font-size: 66px;
+  }
+
+  .topbar,
+  .bottombar {
+    padding: 20px;
+  }
+
+  .bottombar {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 420px) {
+  .timer-panel {
+    padding: 20px;
+  }
+
+  .time {
+    font-size: 58px;
+  }
+
+  .durations {
+    gap: 5px;
+  }
+
+  .durations button {
+    font-size: 12px;
+  }
 }
