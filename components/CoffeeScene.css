@@ -3,78 +3,44 @@
   width: 100%;
   max-width: 760px;
   margin: 0 auto;
+
   display: flex;
   flex-direction: column;
   align-items: center;
+
   isolation: isolate;
   padding-bottom: 10px;
 }
 
-/* Ambient lighting */
+/* Transparent illustration layer */
 
-.drizlo-ambient-light {
-  position: absolute;
-  inset: 5% 0 30%;
-  z-index: -1;
-  border-radius: 50%;
-  background: radial-gradient(
-    ellipse,
-    rgba(255, 178, 102, 0.22),
-    rgba(255, 178, 102, 0.04) 55%,
-    transparent 75%
-  );
-  pointer-events: none;
-  animation: drizlo-ambient-breathe 10s ease-in-out infinite;
+.drizlo-coffee-illustration {
+  position: relative;
+  width: 100%;
+  max-width: 690px;
+
+  filter: drop-shadow(0 18px 14px rgba(29, 11, 5, 0.18));
 }
 
 .drizlo-coffee-art {
   display: block;
   width: 100%;
   height: auto;
-  max-height: min(59vh, 650px);
+  max-height: min(62vh, 650px);
+
   overflow: visible;
-  flex-shrink: 1;
-  filter: drop-shadow(0 20px 30px rgba(19, 8, 5, 0.24));
 }
 
-.drizlo-sunlight {
-  animation: drizlo-glow 8s ease-in-out infinite;
-}
-
-@keyframes drizlo-glow {
-  0%,
-  100% {
-    opacity: 0.8;
-  }
-
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes drizlo-ambient-breathe {
-  0%,
-  100% {
-    opacity: 0.75;
-    transform: scale(1);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1.04);
-  }
-}
-
-/* Coffee droplets */
+/* Animated coffee */
 
 .drizlo-drop {
+  transform-box: fill-box;
   animation: drizlo-falling-drop 2.4s linear infinite;
-  transform-box: view-box;
-  transform-origin: center;
+  will-change: transform, opacity;
 }
 
 .drizlo-drop-a {
-  animation-duration: 2.3s;
+  animation-duration: 2.4s;
 }
 
 .drizlo-drop-b {
@@ -84,7 +50,7 @@
 
 @keyframes drizlo-falling-drop {
   0% {
-    transform: translateY(0) scale(0.6);
+    transform: translateY(0);
     opacity: 0;
   }
 
@@ -92,53 +58,55 @@
     opacity: 1;
   }
 
-  82% {
+  80% {
     opacity: 1;
   }
 
   100% {
-    transform: translateY(var(--drop-distance, 90px)) scale(0.8);
+    transform: translateY(var(--drop-distance, 90px));
     opacity: 0;
   }
 }
 
-/* Liquid movement */
+.drizlo-liquid {
+  transition:
+    y 0.7s linear,
+    height 0.7s linear;
+}
 
 .drizlo-liquid-active {
   transform-box: fill-box;
   transform-origin: center;
-  animation: drizlo-liquid-motion 3.2s ease-in-out infinite;
+
+  animation: drizlo-coffee-surface 3s ease-in-out infinite;
 }
 
-@keyframes drizlo-liquid-motion {
+@keyframes drizlo-coffee-surface {
   0%,
   100% {
-    transform: translateY(0) scaleY(1);
+    transform: scaleY(1);
   }
 
   50% {
-    transform: translateY(1px) scaleY(0.8);
+    transform: scaleY(1.14);
   }
 }
-
-/* Ripple */
 
 .drizlo-ripple {
-  animation: drizlo-ripple-motion 2.4s ease-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+
+  animation: drizlo-coffee-ripple 2.4s ease-out infinite;
 }
 
-@keyframes drizlo-ripple-motion {
+@keyframes drizlo-coffee-ripple {
   0% {
-    transform: scale(0.2);
-    opacity: 0;
-  }
-
-  30% {
+    transform: scaleX(0.3);
     opacity: 0.8;
   }
 
   100% {
-    transform: scale(1.8);
+    transform: scaleX(3.8);
     opacity: 0;
   }
 }
@@ -146,48 +114,88 @@
 /* Steam */
 
 .drizlo-steam {
-  opacity: 0.08;
-}
-
-.drizlo-steam.is-active {
-  opacity: 0.75;
-}
-
-.drizlo-steam-line {
-  opacity: 0;
+  opacity: 0.2;
   animation: drizlo-steam-rise 4.8s ease-in-out infinite;
   animation-play-state: paused;
 }
 
-.drizlo-steam.is-active .drizlo-steam-line {
+.is-brewing .drizlo-steam {
+  opacity: 0.65;
   animation-play-state: running;
 }
 
-.drizlo-steam-two {
+.drizlo-steam-2 {
   animation-delay: -1.6s;
 }
 
-.drizlo-steam-three {
+.drizlo-steam-3 {
   animation-delay: -3.2s;
 }
 
 @keyframes drizlo-steam-rise {
   0% {
-    transform: translate(0, 12px);
+    transform: translateY(8px);
     opacity: 0;
   }
 
-  30% {
-    opacity: 0.5;
-  }
-
-  75% {
-    opacity: 0.3;
+  35% {
+    opacity: 0.55;
   }
 
   100% {
-    transform: translate(12px, -45px);
+    transform: translateY(-24px);
     opacity: 0;
+  }
+}
+
+/* Completion notification */
+
+.drizlo-completion-message {
+  position: absolute;
+  z-index: 10;
+
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  width: max-content;
+  max-width: 90%;
+  padding: 15px 20px;
+
+  border-radius: 14px;
+  border: 1px solid rgba(255, 213, 161, 0.35);
+
+  background: rgba(38, 22, 15, 0.86);
+  backdrop-filter: blur(14px);
+
+  color: #ffe4bd;
+  font-size: 13px;
+  text-align: center;
+
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+
+  animation: drizlo-completion-appear 0.7s ease both;
+}
+
+.drizlo-completion-icon {
+  color: #ffcb86;
+  font-size: 20px;
+}
+
+@keyframes drizlo-completion-appear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -42%) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 
@@ -196,159 +204,151 @@
 .drizlo-scene-status {
   position: relative;
   z-index: 5;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
   gap: 10px;
-  min-height: 32px;
-  margin-top: 12px;
-  padding: 7px 15px;
-  border: 1px solid rgba(255, 219, 177, 0.18);
-  border-radius: 100px;
-  background: rgba(32, 19, 15, 0.65);
-  backdrop-filter: blur(10px);
-  color: #f6d5ae;
+
+  margin-top: -14px;
+  padding: 10px 16px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(255, 206, 150, 0.28);
+
+  background: rgba(38, 21, 15, 0.72);
+  backdrop-filter: blur(12px);
+
+  color: #f6d0a5;
   font-size: 13px;
-  line-height: 1.4;
-  letter-spacing: 0.4px;
-  white-space: nowrap;
 }
 
 .drizlo-status-dot {
-  display: inline-block;
-  flex: 0 0 8px;
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #a98264;
+
+  background: #ae8667;
 }
 
 .drizlo-status-dot.active {
-  background: #f7b678;
-  box-shadow: 0 0 12px rgba(247, 182, 120, 0.75);
+  background: #ffc27d;
+  box-shadow: 0 0 12px rgba(255, 181, 105, 0.65);
+
   animation: drizlo-status-pulse 2s ease-in-out infinite;
 }
 
 @keyframes drizlo-status-pulse {
   0%,
   100% {
-    opacity: 1;
+    opacity: 0.6;
   }
 
   50% {
-    opacity: 0.5;
+    opacity: 1;
   }
 }
 
-/* Collection shelf */
+/* Coffee collection */
 
 .drizlo-cup-shelf {
-  width: min(100%, 440px);
-  margin-top: 25px;
-  flex-shrink: 0;
+  position: relative;
+  z-index: 3;
+
+  width: min(100%, 470px);
+  margin-top: 26px;
 }
 
 .drizlo-shelf-heading {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-  color: #f1ceaa;
-  font-size: 10px;
+  align-items: center;
+
+  margin-bottom: 11px;
+
+  color: #f1c59d;
+  font-size: 11px;
   letter-spacing: 1.5px;
 }
 
 .drizlo-shelf-heading span:last-child {
-  letter-spacing: 0.3px;
-  color: #ffd9b0;
+  font-size: 11px;
+  letter-spacing: 0;
 }
 
 .drizlo-shelf-interior {
-  position: relative;
-  min-height: 79px;
   display: flex;
-  align-items: flex-end;
   justify-content: center;
-  padding: 9px 15px 15px;
-  border: 1px solid rgba(255, 220, 179, 0.15);
-  border-bottom: 8px solid #a26743;
-  border-radius: 12px 12px 4px 4px;
-  background: linear-gradient(
-    180deg,
-    rgba(23, 12, 10, 0.56),
-    rgba(75, 40, 27, 0.55)
-  );
+  align-items: center;
+
+  min-height: 90px;
+  padding: 10px 16px;
+
+  border: 1px solid rgba(255, 206, 150, 0.24);
+  border-bottom: 7px solid rgba(177, 110, 66, 0.85);
+  border-radius: 10px 10px 4px 4px;
+
+  background: rgba(37, 19, 13, 0.45);
+  backdrop-filter: blur(8px);
+
   box-shadow:
-    inset 0 8px 20px rgba(0, 0, 0, 0.15),
-    0 8px 20px rgba(0, 0, 0, 0.18);
+    inset 0 12px 20px rgba(21, 9, 6, 0.15),
+    0 8px 22px rgba(20, 9, 5, 0.1);
+}
+
+.drizlo-empty-shelf {
+  color: rgba(255, 221, 184, 0.65);
+  font-size: 13px;
 }
 
 .drizlo-cups {
   display: flex;
-  align-items: flex-end;
+  flex-wrap: wrap;
   justify-content: center;
-  gap: clamp(2px, 1vw, 12px);
+  align-items: end;
+  gap: 10px;
 }
 
 .drizlo-cup {
-  width: clamp(36px, 5vw, 49px);
-  height: auto;
-  flex-shrink: 1;
-  animation: drizlo-cup-arrive 0.6s ease-out both;
-}
+  width: 44px;
+  height: 46px;
 
-@keyframes drizlo-cup-arrive {
-  from {
-    transform: translateY(-10px) scale(0.85);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-}
-
-.drizlo-empty-shelf {
-  align-self: center;
-  color: rgba(255, 225, 193, 0.6);
-  font-size: 12px;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.2));
 }
 
 .drizlo-extra-cups {
   display: block;
   margin-top: 8px;
-  text-align: right;
-  color: #eac39e;
+
+  color: #edc49e;
   font-size: 11px;
+  text-align: right;
 }
 
-/* Responsive */
+/* Smaller screens */
 
 @media (max-width: 800px) {
-  .drizlo-coffee-scene {
-    max-width: 500px;
+  .drizlo-coffee-illustration {
+    max-width: 540px;
   }
 
   .drizlo-coffee-art {
-    max-height: min(43vh, 430px);
+    max-height: min(45vh, 440px);
   }
 
   .drizlo-scene-status {
-    margin-top: 8px;
+    margin-top: -8px;
   }
 
   .drizlo-cup-shelf {
-    margin-top: 18px;
+    margin-top: 20px;
   }
 }
 
 @media (max-width: 420px) {
-  .drizlo-scene-status {
-    font-size: 12px;
-    padding: 7px 12px;
+  .drizlo-completion-message {
+    width: 85%;
+    white-space: normal;
   }
 
   .drizlo-shelf-heading {
@@ -357,25 +357,17 @@
 
   .drizlo-cup {
     width: 38px;
+    height: 40px;
   }
 }
 
-/* Accessibility */
-
 @media (prefers-reduced-motion: reduce) {
-  .drizlo-sunlight,
-  .drizlo-ambient-light,
   .drizlo-drop,
-  .drizlo-liquid-active,
   .drizlo-ripple,
-  .drizlo-steam-line,
-  .drizlo-status-dot,
-  .drizlo-cup {
+  .drizlo-steam,
+  .drizlo-liquid-active,
+  .drizlo-status-dot.active,
+  .drizlo-completion-message {
     animation: none !important;
-  }
-
-  .drizlo-drop,
-  .drizlo-ripple {
-    opacity: 0;
   }
 }

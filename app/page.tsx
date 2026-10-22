@@ -89,6 +89,7 @@ function readSession(): TimerSession {
 export default function Home() {
   const [session, setSession] = useState<TimerSession | null>(null);
   const [now, setNow] = useState(0);
+  const [justCompleted, setJustCompleted] = useState(false);
 
   useEffect(() => {
     setSession(readSession());
@@ -116,6 +117,8 @@ export default function Home() {
 
     if (now < session.endsAt) return;
 
+    const wasFocus = session.mode === "focus";
+
     setSession((current) => {
       if (
         !current ||
@@ -126,11 +129,10 @@ export default function Home() {
         return current;
       }
 
-      const wasFocus = current.mode === "focus";
+      const nextMode: TimerMode = current.mode === "focus" ? "break" : "focus";
 
-      const nextMode: TimerMode = wasFocus ? "break" : "focus";
-
-      const nextDuration = wasFocus ? BREAK : current.focusDuration;
+      const nextDuration =
+        current.mode === "focus" ? BREAK : current.focusDuration;
 
       return {
         ...current,
@@ -139,10 +141,24 @@ export default function Home() {
         remaining: nextDuration * 60,
         running: false,
         endsAt: null,
-        completed: current.completed + (wasFocus ? 1 : 0),
+        completed: current.completed + (current.mode === "focus" ? 1 : 0),
       };
     });
-  }, [now, session?.running, session?.endsAt]);
+
+    if (wasFocus) {
+      setJustCompleted(true);
+    }
+  }, [now, session?.running, session?.endsAt, session?.mode]);
+
+  useEffect(() => {
+    if (!justCompleted) return;
+
+    const timeout = window.setTimeout(() => {
+      setJustCompleted(false);
+    }, 3500);
+
+    return () => window.clearTimeout(timeout);
+  }, [justCompleted]);
 
   if (!session) {
     return (
@@ -178,6 +194,8 @@ export default function Home() {
   const isRunning = session.running;
 
   function toggleTimer(): void {
+    setJustCompleted(false);
+
     setSession((current) => {
       if (!current) return current;
 
@@ -204,6 +222,8 @@ export default function Home() {
   }
 
   function reset(): void {
+    setJustCompleted(false);
+
     setSession((current) => {
       if (!current) return current;
 
@@ -217,6 +237,8 @@ export default function Home() {
   }
 
   function changeDuration(minutes: number): void {
+    setJustCompleted(false);
+
     setSession((current) => {
       if (!current || current.mode !== "focus" || current.running) {
         return current;
@@ -234,6 +256,8 @@ export default function Home() {
   }
 
   function switchMode(): void {
+    setJustCompleted(false);
+
     setSession((current) => {
       if (!current) return current;
 
@@ -268,23 +292,28 @@ export default function Home() {
       </header>
 
       <section className="workspace">
+        {/* Coffee artwork on the left */}
         <div className="scene-stage">
           <CoffeeScene
             progress={progress}
             running={isRunning}
             mode={session.mode}
             completed={session.completed}
+            justCompleted={justCompleted}
           />
 
           <div className="scene-label">
-            {isFocus
-              ? isRunning
-                ? "A little progress, one drop at a time."
-                : "Your next moment of focus awaits."
-              : "Your coffee is ready. Enjoy your break."}
+            {justCompleted
+              ? "Another beautiful moment of focus."
+              : isFocus
+                ? isRunning
+                  ? "A little progress, one drop at a time."
+                  : "Your next moment of focus awaits."
+                : "Your coffee is ready. Enjoy your break."}
           </div>
         </div>
 
+        {/* Existing timer floating over the shared background */}
         <aside className="timer-panel">
           <span className="eyebrow">
             {isFocus ? "FOCUS SESSION" : "SHORT BREAK"}
@@ -302,11 +331,13 @@ export default function Home() {
           </div>
 
           <p className="timer-description">
-            {isFocus
-              ? isRunning
-                ? "One drop at a time."
-                : "Ready when you are."
-              : "Take a moment for yourself."}
+            {justCompleted
+              ? "Beautifully done. Take a moment."
+              : isFocus
+                ? isRunning
+                  ? "One drop at a time."
+                  : "Ready when you are."
+                : "Take a moment for yourself."}
           </p>
 
           <div className="controls">

@@ -24,34 +24,44 @@ button {
   cursor: pointer;
 }
 
+/* Full-screen illustrated environment */
+
 .scene {
   position: relative;
   min-height: 100dvh;
-  overflow-x: clip;
   display: flex;
   flex-direction: column;
-  background: #281813 url("/scenes/coffee-sunset.png") center / cover no-repeat;
+  overflow-x: clip;
+
+  background: #281813 url("/scenes/coffee-sunset.png") center center / cover
+    no-repeat;
 }
 
 .scene-overlay {
   position: absolute;
   inset: 0;
+  z-index: 0;
+
   background: linear-gradient(
     90deg,
-    rgba(18, 11, 10, 0.62),
-    rgba(18, 11, 10, 0.18) 55%,
-    rgba(18, 11, 10, 0.64)
+    rgba(18, 11, 10, 0.4) 0%,
+    rgba(18, 11, 10, 0.12) 45%,
+    rgba(18, 11, 10, 0.36) 100%
   );
+
   pointer-events: none;
 }
 
-.topbar,
-.bottombar {
+/* Header */
+
+.topbar {
   position: relative;
-  z-index: 2;
+  z-index: 10;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
+
   padding: 24px 5%;
 }
 
@@ -59,40 +69,50 @@ button {
   font-size: 28px;
   font-weight: 700;
   letter-spacing: -1.5px;
+  color: #fff0d9;
 }
 
 .brand span {
   color: #ffb16e;
 }
 
-.session-count,
-.bottombar {
+.session-count {
+  color: #f3cfaa;
   font-size: 12px;
   letter-spacing: 1.5px;
-  color: #f3cfaa;
 }
+
+/* Shared scene workspace */
 
 .workspace {
   position: relative;
   z-index: 2;
+
   flex: 1;
-  display: grid;
-  grid-template-columns:
-    minmax(0, 1.4fr)
-    minmax(300px, 0.8fr);
-  align-items: center;
-  gap: clamp(20px, 4vw, 70px);
-  padding: 20px clamp(24px, 5vw, 100px);
+  width: 100%;
+  min-height: 680px;
+
+  display: block;
+
+  padding: 20px 5% 45px;
 }
+
+/* Coffee artwork */
 
 .scene-stage {
   position: relative;
+  z-index: 1;
+
+  width: min(58%, 760px);
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-width: 0;
-  padding: 10px 0;
+
+  padding-top: 0;
+  margin-top: -25px;
 }
 
 .scene-label {
@@ -104,37 +124,64 @@ button {
   line-height: 1.5;
 }
 
+/* Timer glass overlay */
+
 .timer-panel {
-  justify-self: center;
-  width: 100%;
+  position: absolute;
+  z-index: 5;
+
+  top: 50%;
+  right: 6%;
+
+  transform: translateY(-50%);
+
+  width: min(36%, 390px);
   max-width: 390px;
+
   padding: 36px;
+
   border: 1px solid rgba(255, 220, 177, 0.2);
   border-radius: 24px;
+
   background: rgba(29, 18, 17, 0.55);
+
   backdrop-filter: blur(20px);
-  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.2);
+  -webkit-backdrop-filter: blur(20px);
+
+  box-shadow:
+    0 20px 80px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
+
+/* Timer heading */
 
 .eyebrow {
+  display: block;
+  color: #e7ad79;
   font-size: 11px;
   letter-spacing: 3px;
-  color: #e7ad79;
 }
 
+/* Timer display */
+
 .time {
+  margin: 15px 0;
+
+  color: #fff2df;
   font-size: clamp(64px, 8vw, 100px);
   font-weight: 300;
+  line-height: 1.15;
   letter-spacing: -5px;
-  margin: 15px 0;
   font-variant-numeric: tabular-nums;
 }
 
+/* Progress */
+
 .progress-track {
   height: 4px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 5px;
   overflow: hidden;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .progress-fill {
@@ -143,11 +190,16 @@ button {
   transition: width 0.5s linear;
 }
 
+/* Timer description */
+
 .timer-description {
+  margin: 20px 0 30px;
   color: #e6b991;
   font-size: 14px;
-  margin: 20px 0 30px;
+  line-height: 1.5;
 }
+
+/* Timer buttons */
 
 .controls {
   display: flex;
@@ -158,6 +210,14 @@ button {
   padding: 14px 24px;
   border-radius: 10px;
   border: none;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.controls button:active {
+  transform: scale(0.98);
 }
 
 .primary-button {
@@ -180,6 +240,8 @@ button {
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* Duration presets */
+
 .durations {
   display: flex;
   gap: 8px;
@@ -188,11 +250,23 @@ button {
 
 .durations button {
   flex: 1;
+
   padding: 10px 4px;
+
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.15);
+
   background: transparent;
   color: #e9c8a5;
+  font-size: 13px;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.durations button:hover:not(:disabled) {
+  background: rgba(255, 174, 105, 0.1);
 }
 
 .durations button.selected {
@@ -205,10 +279,15 @@ button {
   cursor: not-allowed;
 }
 
+/* Switch mode */
+
 .mode-button {
   margin-top: 22px;
+  padding: 0;
+
   background: transparent;
   border: none;
+
   color: #ffbb84;
   font-size: 13px;
 }
@@ -217,22 +296,91 @@ button {
   color: #ffddbd;
 }
 
-/* Tablet and mobile */
+/* Footer */
+
+.bottombar {
+  position: relative;
+  z-index: 10;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 20px 5% 24px;
+
+  color: #f3cfaa;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+}
+
+/* Medium desktop */
+
+@media (min-width: 801px) and (max-width: 1150px) {
+  .workspace {
+    min-height: 620px;
+    padding-left: 3%;
+    padding-right: 3%;
+  }
+
+  .scene-stage {
+    width: 57%;
+  }
+
+  .timer-panel {
+    right: 3%;
+    width: 38%;
+    padding: 26px;
+  }
+
+  .time {
+    font-size: clamp(58px, 7vw, 82px);
+  }
+}
+
+/* Mobile */
 
 @media (max-width: 800px) {
+  .scene {
+    background-position: center top;
+  }
+
+  .scene-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(18, 11, 10, 0.3) 0%,
+      rgba(18, 11, 10, 0.15) 45%,
+      rgba(18, 11, 10, 0.5) 100%
+    );
+  }
+
   .workspace {
-    grid-template-columns: minmax(0, 1fr);
-    align-items: start;
-    gap: 20px;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 24px;
     padding: 10px 20px 35px;
   }
 
   .scene-stage {
     width: 100%;
+    max-width: 520px;
+    padding: 0;
   }
 
   .timer-panel {
+    position: relative;
+
+    top: auto;
+    right: auto;
+
+    transform: none;
+
+    width: 100%;
     max-width: 460px;
+
     padding: 24px;
   }
 
@@ -242,13 +390,16 @@ button {
 
   .topbar,
   .bottombar {
-    padding: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
   }
 
   .bottombar {
     font-size: 10px;
   }
 }
+
+/* Small phones */
 
 @media (max-width: 420px) {
   .timer-panel {
@@ -270,5 +421,15 @@ button {
   .session-count {
     font-size: 10px;
     letter-spacing: 0.5px;
+  }
+}
+
+/* Accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-fill,
+  .controls button,
+  .durations button {
+    transition: none;
   }
 }
