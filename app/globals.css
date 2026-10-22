@@ -99,20 +99,29 @@ button {
 
 /* Coffee artwork */
 
-.scene-stage {
+.scene {
   position: relative;
-  z-index: 1;
-
-  width: min(58%, 760px);
-  min-width: 0;
-
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  overflow-x: clip;
 
-  padding-top: 0;
-  margin-top: -25px;
+  background: #34211e;
+}
+
+.scene-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  background: linear-gradient(
+    90deg,
+    rgba(18, 11, 10, 0.06) 0%,
+    rgba(18, 11, 10, 0.02) 50%,
+    rgba(18, 11, 10, 0.15) 100%
+  );
+
+  pointer-events: none;
 }
 
 .scene-label {
