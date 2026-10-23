@@ -41,7 +41,8 @@ export default function CoffeeScene({
         className="drizlo-environment"
         viewBox="0 0 1600 900"
         preserveAspectRatio="xMidYMid slice"
-        aria-hidden="true"
+        role="img"
+        aria-label={`Sunset café with a coffee carafe ${Math.round(fill * 100)} percent full`}
       >
         <defs>
           <linearGradient id={`${id}-sky`} x1="0" y1="0" x2="0" y2="1">
@@ -347,18 +348,11 @@ export default function CoffeeScene({
 
         <rect x="0" y="875" width="1600" height="5" fill="#A86D47" />
 
-        {/* Warm atmosphere */}
-        <rect width="1600" height="900" fill="#F4A56B" opacity=".045" />
-      </svg>
+        {/* Brewer and countertop share one coordinate system.
+            Coffee carafe base (local y=472) sits at scene y≈719.
+            Never position the brewer separately with CSS. */}
+        <g className="drizlo-brewer-group" transform="translate(448 190) scale(1.12)">
 
-      {/* Animated coffee brewer */}
-      <div className="drizlo-coffee-illustration">
-        <svg
-          className="drizlo-coffee-art"
-          viewBox="0 0 640 570"
-          role="img"
-          aria-label={`Coffee carafe ${Math.round(fill * 100)} percent full`}
-        >
           <defs>
             <linearGradient id={`${id}-ceramic`} x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stopColor="#FFF0D5" />
@@ -393,6 +387,16 @@ export default function CoffeeScene({
             </clipPath>
           </defs>
 
+          {/* Contact shadow */}
+          <ellipse
+            cx="316"
+            cy="472"
+            rx="145"
+            ry="16"
+            fill="#2C160F"
+            opacity=".55"
+          />
+        
           {/* Brewing stand */}
           <rect x="421" y="172" width="13" height="291" rx="6" fill="#67402D" />
 
@@ -580,17 +584,12 @@ export default function CoffeeScene({
             ))}
           </g>
 
-          {/* Contact shadow */}
-          <ellipse
-            cx="316"
-            cy="472"
-            rx="145"
-            ry="16"
-            fill="#2C160F"
-            opacity=".55"
-          />
-        </svg>
-      </div>
+
+        </g>
+
+        {/* Warm atmosphere */}
+        <rect width="1600" height="900" fill="#F4A56B" opacity=".045" />
+      </svg>
 
       {/* Completion message */}
       {justCompleted && (
@@ -617,21 +616,10 @@ export default function CoffeeScene({
         </span>
       </div>
 
-      {/* Coffee collection */}
-      <div className="drizlo-cup-shelf">
-        <div className="drizlo-shelf-heading">
-          <span>YOUR COFFEE COLLECTION</span>
-          <span>{completed} brewed</span>
-        </div>
-
-        <div className="drizlo-shelf-interior">
-          {cups === 0 ? (
-            <span className="drizlo-empty-shelf">
-              Your first cup is waiting.
-            </span>
-          ) : (
-            <div className="drizlo-cups">
-              {Array.from({ length: cups }, (_, index) => (
+      {/* Completed cups — left-side icons only, no collection panel */}
+      {cups > 0 && (
+        <div className="drizlo-mug-stack" aria-label={`${completed} cups brewed`}>
+          {Array.from({ length: cups }, (_, index) => (
                 <svg
                   key={index}
                   className="drizlo-cup"
@@ -674,17 +662,12 @@ export default function CoffeeScene({
 
                   <ellipse cx="23.5" cy="15" rx="10" ry="2.5" fill="#7B4528" />
                 </svg>
-              ))}
-            </div>
+          ))}
+          {completed > MAX_VISIBLE_CUPS && (
+            <span className="drizlo-mug-overflow">+{completed - MAX_VISIBLE_CUPS}</span>
           )}
         </div>
-
-        {completed > MAX_VISIBLE_CUPS && (
-          <span className="drizlo-extra-cups">
-            +{completed - MAX_VISIBLE_CUPS} more cups
-          </span>
-        )}
-      </div>
+      )}
     </div>
   );
 }
