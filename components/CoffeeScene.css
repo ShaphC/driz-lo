@@ -210,3 +210,18 @@
   .drizlo-completion-message { animation: none !important; }
   .drizlo-liquid { transition: none; }
 }
+
+/* Mobile: nudge the entire brewer down together, keeping it on the countertop.
+   SVG coordinates are preserved because the group and counter share a viewBox. */
+@media (max-width: 800px) {
+  .drizlo-brewer-group {
+    transform: translate(448px, 222px) scale(1.12);
+    transform-origin: 0 0;
+  }
+  .drizlo-scene-status {
+    bottom: calc(10dvh + env(safe-area-inset-bottom));
+    max-width: calc(100vw - 32px);
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+}
