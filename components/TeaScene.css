@@ -24,6 +24,15 @@
   animation: drizlo-tea-bag-float 5s ease-in-out infinite;
   transform-origin: 812px 512px;
 }
+.drizlo-tea-raindrop {
+  animation-name: drizlo-tea-rainfall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+.drizlo-tea-tag {
+  filter: drop-shadow(1px 2px 2px rgba(31, 20, 22, 0.25));
+}
 .drizlo-tea-steam {
   opacity: 0.55;
 }
@@ -67,6 +76,14 @@
   font-size: 12px;
   text-align: center;
   white-space: nowrap;
+}
+@keyframes drizlo-tea-rainfall {
+  from {
+    transform: translateY(-650px);
+  }
+  to {
+    transform: translateY(650px);
+  }
 }
 @keyframes drizlo-tea-swirl {
   0%,
@@ -114,7 +131,8 @@
 @media (prefers-reduced-motion: reduce) {
   .drizlo-tea-diffusion,
   .drizlo-tea-bag,
-  .drizlo-tea-steam path {
+  .drizlo-tea-steam path,
+  .drizlo-tea-raindrop {
     animation: none;
   }
 }

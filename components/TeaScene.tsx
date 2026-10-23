@@ -121,15 +121,31 @@ export default function TeaScene({
             <ellipse cx="565" cy="215" rx="130" ry="15" />
             <ellipse cx="1040" cy="173" rx="165" ry="19" />
           </g>
-          {Array.from({ length: 24 }, (_, i) => (
-            <path
-              key={i}
-              d={`M${370 + i * 42} ${115 + (i % 5) * 36} l-19 53`}
-              stroke="#e1e6e4"
-              strokeWidth="2"
-              opacity={0.14 + (i % 3) * 0.05}
-            />
-          ))}
+          {/* Rain falls behind the window frame, independently of the timer. */}
+          <g className="drizlo-tea-rain" aria-hidden="true">
+            {Array.from({ length: 52 }, (_, i) => {
+              const x = 355 + ((i * 137) % 970);
+              const y = 85 + ((i * 83) % 540);
+              const length = 22 + ((i * 11) % 35);
+              return (
+                <line
+                  key={i}
+                  className="drizlo-tea-raindrop"
+                  x1={x}
+                  y1={y}
+                  x2={x - 8}
+                  y2={y + length}
+                  stroke="#e8f2f0"
+                  strokeWidth={i % 4 === 0 ? 2.3 : 1.4}
+                  opacity={0.16 + (i % 4) * 0.065}
+                  style={{
+                    animationDelay: `${-((i * 0.73) % 4.8)}s`,
+                    animationDuration: `${2.8 + (i % 6) * 0.43}s`,
+                  }}
+                />
+              );
+            })}
+          </g>
         </g>
         <path d="M820 55V659" stroke="#604840" strokeWidth="24" />
         <path d="M330 654H1350" stroke="#604840" strokeWidth="24" />
@@ -256,40 +272,51 @@ export default function TeaScene({
           opacity=".75"
         />
 
-        {/* Tea bag suspended in cup. */}
-        <path
-          d="M812 395 Q815 432 811 514"
-          fill="none"
-          stroke="#eee0c9"
-          strokeWidth="2.5"
-        />
+        {/* Square tea sachet inside the cup, with its string over the right rim. */}
         <g className="drizlo-tea-bag">
           <path
-            d="M790 512 L834 512 L831 569 Q810 582 792 569Z"
+            d="M790 512 H834 V563 Q834 567 830 567 H794 Q790 567 790 563Z"
             fill="#d5c0a0"
-            fillOpacity=".7"
+            fillOpacity=".76"
             stroke="#e9d8bd"
             strokeWidth="2"
           />
           <path
-            d="M792 544 Q811 539 833 546 L831 569 Q810 582 792 569Z"
+            d="M792 542 Q812 537 832 544 V563 Q832 565 829 565 H795 Q792 565 792 562Z"
             fill="#805137"
             opacity=".8"
           />
           <path
-            d="M793 512 L812 525 L834 512"
+            d="M792 512 L812 524 L832 512"
             fill="none"
             stroke="#eee0c9"
             strokeWidth="2"
           />
         </g>
+        {/* The string runs up from the bag and drapes over the cup's right lip. */}
         <path
-          d="M812 395 L844 394 L847 417 L816 418Z"
-          fill="#e8b783"
-          stroke="#f3d6aa"
-          strokeWidth="2"
+          d="M812 513 Q810 487 840 478 Q872 463 905 468 Q915 469 918 481 L922 500"
+          fill="none"
+          stroke="#f4e4cf"
+          strokeWidth="2.6"
+          strokeLinecap="round"
         />
-        <circle cx="831" cy="406" r="3" fill="#9b6042" />
+        {/* Paper tag hangs outside the right side of the cup. */}
+        <g className="drizlo-tea-tag">
+          <path
+            d="M909 500 L935 497 L938 523 L913 526Z"
+            fill="#e8b783"
+            stroke="#f3d6aa"
+            strokeWidth="2.5"
+          />
+          <circle cx="923" cy="504" r="2.7" fill="#9b6042" />
+          <path
+            d="M917 515 L931 513"
+            stroke="#b77d55"
+            strokeWidth="1.5"
+            opacity=".7"
+          />
+        </g>
 
         <g
           className="drizlo-tea-steam"
