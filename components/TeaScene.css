@@ -1,0 +1,120 @@
+.drizlo-tea-scene {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  pointer-events: none;
+}
+.drizlo-tea-environment {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  z-index: -1;
+  pointer-events: none;
+}
+.drizlo-tea-liquid {
+  transition: opacity 0.7s ease;
+}
+.drizlo-tea-diffusion {
+  animation: drizlo-tea-swirl 9s ease-in-out infinite;
+  transform-origin: 810px 555px;
+}
+.drizlo-tea-bag {
+  animation: drizlo-tea-bag-float 5s ease-in-out infinite;
+  transform-origin: 812px 512px;
+}
+.drizlo-tea-steam {
+  opacity: 0.55;
+}
+.drizlo-tea-steam path {
+  animation: drizlo-tea-steam-rise 5s ease-in-out infinite;
+}
+.drizlo-tea-steam-two {
+  animation-delay: -1.8s !important;
+}
+.drizlo-tea-steam-three {
+  animation-delay: -3.3s !important;
+}
+.drizlo-tea-cups {
+  position: fixed;
+  z-index: 5;
+  left: 22px;
+  top: 33%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 23px;
+  filter: drop-shadow(0 2px 5px #24151a88);
+}
+.drizlo-tea-cups-extra {
+  font-size: 12px;
+  color: #ffe2bd;
+}
+.drizlo-tea-status {
+  position: fixed;
+  z-index: 5;
+  left: 50%;
+  bottom: calc(78px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  max-width: calc(100vw - 40px);
+  padding: 9px 16px;
+  border: 1px solid #ffdcad33;
+  border-radius: 999px;
+  background: #271b20a8;
+  backdrop-filter: blur(10px);
+  color: #ffe5c5;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+@keyframes drizlo-tea-swirl {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(8px, -5px) scale(1.08);
+  }
+}
+@keyframes drizlo-tea-bag-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(4px) rotate(1deg);
+  }
+}
+@keyframes drizlo-tea-steam-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+  40% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-25px);
+  }
+}
+@media (max-width: 800px) {
+  .drizlo-tea-status {
+    bottom: calc(64px + env(safe-area-inset-bottom));
+    font-size: 11px;
+    padding: 7px 11px;
+  }
+  .drizlo-tea-cups {
+    left: 12px;
+    top: 42%;
+    font-size: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .drizlo-tea-diffusion,
+  .drizlo-tea-bag,
+  .drizlo-tea-steam path {
+    animation: none;
+  }
+}

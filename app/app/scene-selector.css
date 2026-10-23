@@ -1,0 +1,44 @@
+/* Scene switcher is independent from the timer and the header. */
+.drizlo-scene-selector {
+  position: fixed;
+  top: calc(96px + env(safe-area-inset-top));
+  right: 5%;
+  z-index: 45;
+  display: flex;
+  gap: 5px;
+  padding: 5px;
+  border: 1px solid rgba(255, 221, 182, 0.2);
+  border-radius: 999px;
+  background: rgba(30, 19, 19, 0.72);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15);
+}
+.drizlo-scene-selector button {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #ffe0c0;
+  padding: 8px 13px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.drizlo-scene-selector button.is-selected {
+  background: #f5b579;
+  color: #28170e;
+}
+.drizlo-scene-selector button:focus-visible {
+  outline: 2px solid #fff0dc;
+  outline-offset: 2px;
+}
+@media (max-width: 800px) {
+  .drizlo-scene-selector {
+    top: auto;
+    bottom: calc(96px + env(safe-area-inset-bottom));
+    right: 14px;
+    padding: 4px;
+  }
+  .drizlo-scene-selector button {
+    padding: 7px 10px;
+    font-size: 11px;
+  }
+}
