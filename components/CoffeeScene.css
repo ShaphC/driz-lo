@@ -27,24 +27,48 @@
   animation: drizlo-falling-drop 2.4s linear infinite;
   will-change: transform, opacity;
 }
-.drizlo-drop-a { animation-duration: 2.4s; }
-.drizlo-drop-b { animation-duration: 3.1s; animation-delay: -1.4s; }
+.drizlo-drop-a {
+  animation-duration: 2.4s;
+}
+.drizlo-drop-b {
+  animation-duration: 3.1s;
+  animation-delay: -1.4s;
+}
 @keyframes drizlo-falling-drop {
-  0% { transform: translateY(0); opacity: 0; }
-  12% { opacity: 1; }
-  80% { opacity: 1; }
-  100% { transform: translateY(var(--drop-distance, 90px)); opacity: 0; }
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(var(--drop-distance, 90px));
+    opacity: 0;
+  }
 }
 
-.drizlo-liquid { transition: y 0.7s linear, height 0.7s linear; }
+.drizlo-liquid {
+  transition:
+    y 0.7s linear,
+    height 0.7s linear;
+}
 .drizlo-liquid-active {
   transform-box: fill-box;
   transform-origin: center;
   animation: drizlo-coffee-surface 3s ease-in-out infinite;
 }
 @keyframes drizlo-coffee-surface {
-  0%, 100% { transform: scaleY(1); }
-  50% { transform: scaleY(1.14); }
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.14);
+  }
 }
 .drizlo-ripple {
   transform-box: fill-box;
@@ -52,21 +76,42 @@
   animation: drizlo-coffee-ripple 2.4s ease-out infinite;
 }
 @keyframes drizlo-coffee-ripple {
-  0% { transform: scaleX(0.3); opacity: 0.8; }
-  100% { transform: scaleX(3.8); opacity: 0; }
+  0% {
+    transform: scaleX(0.3);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scaleX(3.8);
+    opacity: 0;
+  }
 }
 .drizlo-steam {
   opacity: 0;
   animation: drizlo-steam-rise 4.8s ease-in-out infinite;
   animation-play-state: paused;
 }
-.is-brewing .drizlo-steam { opacity: 0.65; animation-play-state: running; }
-.drizlo-steam-2 { animation-delay: -1.6s; }
-.drizlo-steam-3 { animation-delay: -3.2s; }
+.is-brewing .drizlo-steam {
+  opacity: 0.65;
+  animation-play-state: running;
+}
+.drizlo-steam-2 {
+  animation-delay: -1.6s;
+}
+.drizlo-steam-3 {
+  animation-delay: -3.2s;
+}
 @keyframes drizlo-steam-rise {
-  0% { transform: translateY(8px); opacity: 0; }
-  35% { opacity: 0.55; }
-  100% { transform: translateY(-24px); opacity: 0; }
+  0% {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  35% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translateY(-24px);
+    opacity: 0;
+  }
 }
 
 .drizlo-completion-message {
@@ -92,10 +137,19 @@
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
   animation: drizlo-completion-appear 0.7s ease both;
 }
-.drizlo-completion-icon { color: #ffcb86; font-size: 20px; }
+.drizlo-completion-icon {
+  color: #ffcb86;
+  font-size: 20px;
+}
 @keyframes drizlo-completion-appear {
-  from { opacity: 0; transform: translate(-50%, -42%) scale(0.96); }
-  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, -42%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 .drizlo-scene-status {
@@ -126,8 +180,13 @@
   animation: drizlo-status-pulse 2s ease-in-out infinite;
 }
 @keyframes drizlo-status-pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* Scene UI overlays. The brewer and countertop remain in one SVG. */
@@ -191,7 +250,10 @@
     bottom: 17dvh;
     gap: 3px;
   }
-  .drizlo-cup { width: 36px; height: 38px; }
+  .drizlo-cup {
+    width: 36px;
+    height: 38px;
+  }
   .drizlo-completion-message {
     position: fixed;
     top: 42dvh;
@@ -201,14 +263,27 @@
   }
 }
 @media (max-width: 420px) {
-  .drizlo-completion-message { width: 85%; white-space: normal; }
-  .drizlo-cup { width: 32px; height: 34px; }
+  .drizlo-completion-message {
+    width: 85%;
+    white-space: normal;
+  }
+  .drizlo-cup {
+    width: 32px;
+    height: 34px;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .drizlo-drop, .drizlo-ripple, .drizlo-steam,
-  .drizlo-liquid-active, .drizlo-status-dot.active,
-  .drizlo-completion-message { animation: none !important; }
-  .drizlo-liquid { transition: none; }
+  .drizlo-drop,
+  .drizlo-ripple,
+  .drizlo-steam,
+  .drizlo-liquid-active,
+  .drizlo-status-dot.active,
+  .drizlo-completion-message {
+    animation: none !important;
+  }
+  .drizlo-liquid {
+    transition: none;
+  }
 }
 
 /* Mobile: nudge the entire brewer down together, keeping it on the countertop.

@@ -351,8 +351,10 @@ export default function CoffeeScene({
         {/* Brewer and countertop share one coordinate system.
             Coffee carafe base (local y=472) sits at scene y≈719.
             Never position the brewer separately with CSS. */}
-        <g className="drizlo-brewer-group" transform="translate(448 190) scale(1.12)">
-
+        <g
+          className="drizlo-brewer-group"
+          transform="translate(448 190) scale(1.12)"
+        >
           <defs>
             <linearGradient id={`${id}-ceramic`} x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stopColor="#FFF0D5" />
@@ -396,7 +398,7 @@ export default function CoffeeScene({
             fill="#2C160F"
             opacity=".55"
           />
-        
+
           {/* Brewing stand */}
           <rect x="421" y="172" width="13" height="291" rx="6" fill="#67402D" />
 
@@ -583,8 +585,6 @@ export default function CoffeeScene({
               />
             ))}
           </g>
-
-
         </g>
 
         {/* Warm atmosphere */}
@@ -618,53 +618,58 @@ export default function CoffeeScene({
 
       {/* Completed cups — left-side icons only, no collection panel */}
       {cups > 0 && (
-        <div className="drizlo-mug-stack" aria-label={`${completed} cups brewed`}>
+        <div
+          className="drizlo-mug-stack"
+          aria-label={`${completed} cups brewed`}
+        >
           {Array.from({ length: cups }, (_, index) => (
-                <svg
-                  key={index}
-                  className="drizlo-cup"
-                  viewBox="0 0 52 54"
-                  aria-hidden="true"
-                >
-                  <ellipse
-                    cx="24"
-                    cy="48"
-                    rx="20"
-                    ry="3"
-                    fill="#160B08"
-                    opacity=".4"
-                  />
+            <svg
+              key={index}
+              className="drizlo-cup"
+              viewBox="0 0 52 54"
+              aria-hidden="true"
+            >
+              <ellipse
+                cx="24"
+                cy="48"
+                rx="20"
+                ry="3"
+                fill="#160B08"
+                opacity=".4"
+              />
 
-                  <path
-                    d="
+              <path
+                d="
                         M35 17
                         C51 14 51 36 36 34
                       "
-                    fill="none"
-                    stroke="#F1D2A7"
-                    strokeWidth="5"
-                  />
+                fill="none"
+                stroke="#F1D2A7"
+                strokeWidth="5"
+              />
 
-                  <path
-                    d="
+              <path
+                d="
                         M10 15
                         H37
                         L34 42
                         Q23 48 13 42
                         Z
                       "
-                    fill="#F5D8AC"
-                    stroke="#FFF0D7"
-                    strokeWidth="2"
-                  />
+                fill="#F5D8AC"
+                stroke="#FFF0D7"
+                strokeWidth="2"
+              />
 
-                  <ellipse cx="23.5" cy="15" rx="13.5" ry="4" fill="#FFF0D7" />
+              <ellipse cx="23.5" cy="15" rx="13.5" ry="4" fill="#FFF0D7" />
 
-                  <ellipse cx="23.5" cy="15" rx="10" ry="2.5" fill="#7B4528" />
-                </svg>
+              <ellipse cx="23.5" cy="15" rx="10" ry="2.5" fill="#7B4528" />
+            </svg>
           ))}
           {completed > MAX_VISIBLE_CUPS && (
-            <span className="drizlo-mug-overflow">+{completed - MAX_VISIBLE_CUPS}</span>
+            <span className="drizlo-mug-overflow">
+              +{completed - MAX_VISIBLE_CUPS}
+            </span>
           )}
         </div>
       )}

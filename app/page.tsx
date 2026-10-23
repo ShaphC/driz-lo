@@ -1,240 +1,136 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import Link from "next/link";
 import CoffeeScene from "@/components/CoffeeScene";
+import CopyrightYear from "@/components/CopyrightYear";
+import "./landing.css";
 
-type TimerMode = "focus" | "break";
-interface TimerSession {
-  mode: TimerMode;
-  duration: number;
-  focusDuration: number;
-  remaining: number;
-  running: boolean;
-  endsAt: number | null;
-  completed: number;
-}
-const FOCUS = 25;
-const BREAK = 5;
-const STORAGE_KEY = "drizlo-session-v1";
-const LEGACY_STORAGE_KEY = "drizzlo-session-v1";
-const DEFAULT_SESSION: TimerSession = {
-  mode: "focus", duration: FOCUS, focusDuration: FOCUS,
-  remaining: FOCUS * 60, running: false, endsAt: null, completed: 0,
-};
+const features = [
+  {
+    number: "01",
+    title: "Choose your moment",
+    description: "Set aside 15, 25, 45, or 60 minutes. Make the time your own.",
+  },
+  {
+    number: "02",
+    title: "Watch it unfold",
+    description:
+      "As you focus, coffee slowly collects in the carafe. One drop at a time.",
+  },
+  {
+    number: "03",
+    title: "Enjoy the pause",
+    description: "A gentle sound lets you know when it's time for a break.",
+  },
+];
 
-function readSession(): TimerSession {
-  try {
-    let stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) {
-      stored = localStorage.getItem(LEGACY_STORAGE_KEY);
-      if (stored) {
-        localStorage.setItem(STORAGE_KEY, stored);
-        localStorage.removeItem(LEGACY_STORAGE_KEY);
-      }
-    }
-    if (!stored) return { ...DEFAULT_SESSION };
-    const saved = JSON.parse(stored) as Partial<TimerSession>;
-    const focusDuration =
-      typeof saved.focusDuration === "number" && Number.isFinite(saved.focusDuration) && saved.focusDuration > 0
-        ? saved.focusDuration : FOCUS;
-    const mode: TimerMode = saved.mode === "break" ? "break" : "focus";
-    const duration = mode === "break" ? BREAK : focusDuration;
-    const remaining = typeof saved.remaining === "number" && Number.isFinite(saved.remaining)
-      ? Math.min(duration * 60, Math.max(0, saved.remaining)) : duration * 60;
-    const running = saved.running === true && typeof saved.endsAt === "number" && Number.isFinite(saved.endsAt);
-    return {
-      mode, duration, focusDuration, remaining, running,
-      endsAt: running ? saved.endsAt! : null,
-      completed: typeof saved.completed === "number" && Number.isFinite(saved.completed)
-        ? Math.max(0, Math.floor(saved.completed)) : 0,
-    };
-  } catch {
-    return { ...DEFAULT_SESSION };
-  }
-}
-
-export default function Home() {
-  const [session, setSession] = useState<TimerSession | null>(null);
-  const [now, setNow] = useState(0);
-  const [justCompleted, setJustCompleted] = useState(false);
-  const [mobileSettingsOpen, setMobileSettingsOpen] = useState(false);
-
-  useEffect(() => { setSession(readSession()); setNow(Date.now()); }, []);
-  useEffect(() => { if (session) localStorage.setItem(STORAGE_KEY, JSON.stringify(session)); }, [session]);
-  useEffect(() => {
-    const interval = window.setInterval(() => setNow(Date.now()), 250);
-    return () => window.clearInterval(interval);
-  }, []);
-  useEffect(() => {
-    if (!session?.running || session.endsAt === null || now < session.endsAt) return;
-    const wasFocus = session.mode === "focus";
-    setSession((current) => {
-      if (!current?.running || current.endsAt === null || now < current.endsAt) return current;
-      const nextMode: TimerMode = current.mode === "focus" ? "break" : "focus";
-      const nextDuration = current.mode === "focus" ? BREAK : current.focusDuration;
-      return {
-        ...current, mode: nextMode, duration: nextDuration,
-        remaining: nextDuration * 60, running: false, endsAt: null,
-        completed: current.completed + (current.mode === "focus" ? 1 : 0),
-      };
-    });
-    if (wasFocus) setJustCompleted(true);
-  }, [now, session?.running, session?.endsAt, session?.mode]);
-  useEffect(() => {
-    if (!justCompleted) return;
-    const timeout = window.setTimeout(() => setJustCompleted(false), 3500);
-    return () => window.clearTimeout(timeout);
-  }, [justCompleted]);
-
-  if (!session) return (
-    <main className="scene"><div className="scene-overlay" />
-      <header className="topbar"><div className="brand">drizlo<span>.</span></div></header>
-    </main>
-  );
-
-  const seconds = session.running && session.endsAt !== null
-    ? Math.max(0, Math.ceil((session.endsAt - now) / 1000)) : session.remaining;
-  const totalSeconds = session.duration * 60;
-  const progress = totalSeconds > 0 ? Math.min(1, Math.max(0, 1 - seconds / totalSeconds)) : 0;
-  const time = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
-  const isFocus = session.mode === "focus";
-  const isRunning = session.running;
-  const actionLabel = isRunning ? "Pause" : seconds < totalSeconds ? "Resume" : "Start";
-
-  function toggleTimer(): void {
-    setJustCompleted(false);
-    setSession((current) => {
-      if (!current) return current;
-      if (current.running && current.endsAt !== null) return {
-        ...current, remaining: Math.max(0, Math.ceil((current.endsAt - Date.now()) / 1000)),
-        running: false, endsAt: null,
-      };
-      if (current.remaining <= 0) return current;
-      return { ...current, running: true, endsAt: Date.now() + current.remaining * 1000 };
-    });
-  }
-  function reset(): void {
-    setJustCompleted(false);
-    setSession((current) => current ? {
-      ...current, remaining: current.duration * 60, running: false, endsAt: null,
-    } : current);
-  }
-  function changeDuration(minutes: number): void {
-    setJustCompleted(false);
-    setSession((current) => {
-      if (!current || current.mode !== "focus" || current.running) return current;
-      return { ...current, duration: minutes, focusDuration: minutes,
-        remaining: minutes * 60, running: false, endsAt: null };
-    });
-  }
-  function switchMode(): void {
-    setJustCompleted(false);
-    setSession((current) => {
-      if (!current) return current;
-      const nextMode: TimerMode = current.mode === "focus" ? "break" : "focus";
-      const duration = nextMode === "focus" ? current.focusDuration : BREAK;
-      return { ...current, mode: nextMode, duration,
-        remaining: duration * 60, running: false, endsAt: null };
-    });
-  }
-
-  const durationControls = (prefix: string) => (
-    <div className="durations" role="group" aria-label="Focus duration">
-      {[15, 25, 45, 60].map((minutes) => (
-        <button type="button" key={`${prefix}-${minutes}`}
-          disabled={!isFocus || isRunning}
-          aria-pressed={isFocus && session.focusDuration === minutes}
-          className={session.focusDuration === minutes ? "selected" : ""}
-          onClick={() => changeDuration(minutes)}>{minutes}m</button>
-      ))}
-    </div>
-  );
-
+export default function LandingPage() {
   return (
-    <main className="scene">
-      <div className="scene-overlay" />
-      <header className="topbar">
-        <div className="brand">drizlo<span>.</span></div>
-        <div className="session-count">{session.completed} {session.completed === 1 ? "cup brewed" : "cups brewed"}</div>
+    <main className="landing">
+      <header className="landing-nav">
+        <Link className="landing-brand" href="/" aria-label="Drizlo home">
+          drizlo<span>.</span>
+        </Link>
+        <nav aria-label="Main navigation" className="landing-nav-links">
+          <a href="#how-it-works">How it works</a>
+          <Link className="landing-nav-cta" href="/app">
+            Open timer <span aria-hidden="true">↗</span>
+          </Link>
+        </nav>
       </header>
 
-      <section className="workspace">
-        <div className="scene-stage">
-          <CoffeeScene progress={progress} running={isRunning} mode={session.mode}
-            completed={session.completed} justCompleted={justCompleted} />
-          <div className="scene-label">
-            {justCompleted ? "Another beautiful moment of focus."
-              : isFocus ? isRunning ? "A little progress, one drop at a time."
-                : "Your next moment of focus awaits."
-                : "Your coffee is ready. Enjoy your break."}
+      <section className="landing-hero" aria-labelledby="landing-heading">
+        <div className="landing-hero-copy">
+          <p className="landing-kicker">
+            <span className="landing-kicker-dot" /> A LITTLE SPACE TO FOCUS
+          </p>
+          <h1 id="landing-heading">
+            Make time
+            <br />
+            <em>feel beautiful.</em>
+          </h1>
+          <p className="landing-lede">
+            A quiet corner for the things that matter. Set a timer, watch your
+            coffee brew, and let the minutes find their rhythm.
+          </p>
+          <div className="landing-hero-actions">
+            <Link className="landing-button landing-button-primary" href="/app">
+              Start focusing <span aria-hidden="true">↗</span>
+            </Link>
+            <a className="landing-text-link" href="#how-it-works">
+              See how it works <span aria-hidden="true">↓</span>
+            </a>
+          </div>
+          <p className="landing-free-note">Free to use · No account needed</p>
+        </div>
+        <div
+          className="landing-art"
+          aria-label="Illustrated sunset café with a brewing coffee carafe"
+        >
+          <div className="landing-art-scene" aria-hidden="true">
+            <CoffeeScene progress={0.43} running mode="focus" completed={0} />
+          </div>
+          <div className="landing-art-caption">
+            <span className="landing-live-dot" /> A moment in the making{" "}
+            <span>☕</span>
           </div>
         </div>
-
-        {/* Desktop: unchanged glass timer card. */}
-        <aside className="timer-panel desktop-timer" aria-label="Timer controls">
-          <span className="eyebrow">{isFocus ? "FOCUS SESSION" : "SHORT BREAK"}</span>
-          <div className="time">{time}</div>
-          <div className="progress-track"><div className="progress-fill" style={{ width: `${progress * 100}%` }} /></div>
-          <p className="timer-description">{justCompleted ? "Beautifully done. Take a moment."
-            : isFocus ? isRunning ? "One drop at a time." : "Ready when you are."
-              : "Take a moment for yourself."}</p>
-          <div className="controls">
-            <button type="button" className="primary-button" onClick={toggleTimer}>{actionLabel}</button>
-            <button type="button" className="secondary-button" onClick={reset}>Reset</button>
-          </div>
-          {durationControls("desktop")}
-          <button type="button" className="mode-button" onClick={switchMode}>
-            Switch to {isFocus ? "break" : "focus"}
-          </button>
-        </aside>
-
-        {/* Mobile: visible timer, no hidden scrolling card. */}
-        <section className="mobile-timer" aria-label="Focus timer">
-          <span className="eyebrow">{isFocus ? "FOCUS SESSION" : "SHORT BREAK"}</span>
-          <div className="mobile-time" role="timer" aria-live="off">{time}</div>
-          <div className="mobile-progress-track"><div className="progress-fill" style={{ width: `${progress * 100}%` }} /></div>
-          <p className="mobile-timer-description">
-            {justCompleted ? "Beautifully done. Take a moment."
-              : isFocus ? isRunning ? "One drop at a time." : "Ready when you are."
-                : "Take a moment for yourself."}
-          </p>
-          <div className="mobile-timer-actions">
-            <button type="button" className="primary-button" onClick={toggleTimer}>{actionLabel}</button>
-            <button type="button" className="secondary-button" onClick={reset}>Reset</button>
-          </div>
-          <button type="button" className="mobile-settings-toggle"
-            aria-expanded={mobileSettingsOpen} aria-controls="mobile-timer-settings"
-            onClick={() => setMobileSettingsOpen((open) => !open)}>
-            <span>More timer options</span>
-            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"
-              className={mobileSettingsOpen ? "mobile-chevron is-open" : "mobile-chevron"}>
-              <path d="m5 9 7 7 7-7" fill="none" stroke="currentColor" strokeWidth="2"
-                strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        </section>
+        <div className="landing-hero-footnote">
+          SLOW DOWN. SETTLE IN. BEGIN.
+        </div>
       </section>
 
-      {/* Mobile bottom drawer: overlays the scene instead of shifting the brewer. */}
-      {mobileSettingsOpen && (
-        <div className="mobile-settings-backdrop" onClick={() => setMobileSettingsOpen(false)}>
-          <section id="mobile-timer-settings" className="mobile-settings-drawer"
-            role="dialog" aria-modal="true" aria-label="Timer settings"
-            onClick={(event) => event.stopPropagation()}>
-            <div className="mobile-drawer-heading">
-              <span>Timer settings</span>
-              <button type="button" onClick={() => setMobileSettingsOpen(false)} aria-label="Close timer settings">✕</button>
-            </div>
-            <p className="mobile-drawer-label">{isFocus ? "FOCUS DURATION" : "FOCUS DURATION · AVAILABLE IN FOCUS MODE"}</p>
-            {durationControls("mobile")}
-            <button type="button" className="mode-button" onClick={() => { switchMode(); setMobileSettingsOpen(false); }}>
-              Switch to {isFocus ? "break" : "focus"}
-            </button>
-          </section>
+      <section
+        id="how-it-works"
+        className="landing-how"
+        aria-labelledby="landing-how-heading"
+      >
+        <div className="landing-section-heading">
+          <p className="landing-kicker">SIMPLE BY DESIGN</p>
+          <h2 id="landing-how-heading">
+            A little focus.
+            <br />
+            <em>A lovely difference.</em>
+          </h2>
+          <p>
+            Nothing to organize. Nothing to keep up with. Just you, your time,
+            and a coffee slowly brewing.
+          </p>
         </div>
-      )}
+        <div className="landing-steps">
+          {features.map((feature) => (
+            <article className="landing-step" key={feature.number}>
+              <span className="landing-step-number">{feature.number}</span>
+              <h3>{feature.title}</h3>
+              <p>{feature.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
 
-      <footer className="bottombar"><span>COFFEE SCENE</span><span>Make time feel beautiful.</span></footer>
+      <section
+        className="landing-close"
+        aria-labelledby="landing-close-heading"
+      >
+        <div className="landing-close-glow" aria-hidden="true" />
+        <p className="landing-kicker">YOUR TIME IS YOURS</p>
+        <h2 id="landing-close-heading">
+          Ready for a<br />
+          <em>beautiful moment?</em>
+        </h2>
+        <p>The coffee is waiting.</p>
+        <Link className="landing-button landing-button-primary" href="/app">
+          Open Drizlo <span aria-hidden="true">↗</span>
+        </Link>
+      </section>
+
+      <footer className="landing-footer">
+        <Link className="landing-brand" href="/">
+          drizlo<span>.</span>
+        </Link>
+        <span>Make time feel beautiful.</span>
+        <span>
+          © <CopyrightYear /> Drizlo
+        </span>{" "}
+      </footer>
     </main>
   );
 }

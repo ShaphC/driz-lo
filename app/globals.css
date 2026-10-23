@@ -487,18 +487,22 @@ button {
    MOBILE — UNOBSTRUCTED CAFÉ CONTROLS
    ========================================= */
 @media (max-width: 800px) {
-  /* No translucent panel or glass effect over the coffee. */
+  /* Restore the subtle translucent mobile timer panel. */
   .mobile-timer {
     top: calc(78px + env(safe-area-inset-top));
     width: min(92%, 340px);
     gap: 10px;
-    padding: 0 10px;
-    border: 0;
-    border-radius: 0;
-    background: none;
-    box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    padding: 12px 18px 10px;
+    border: 1px solid rgba(255, 220, 177, 0.12);
+    border-radius: 20px;
+    background: linear-gradient(
+      180deg,
+      rgba(37, 21, 18, 0.38),
+      rgba(37, 21, 18, 0.12)
+    );
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     pointer-events: none;
   }
   .mobile-timer > * {
@@ -552,5 +556,100 @@ button {
   .mobile-settings-toggle {
     min-height: 38px;
     padding: 2px 12px;
+  }
+}
+
+/* Mobile: centered transparent controls, original layout proportions. */
+@media (max-width: 800px) {
+  .mobile-timer {
+    align-items: center;
+    text-align: center;
+  }
+  .mobile-timer .eyebrow,
+  .mobile-time,
+  .mobile-progress-track,
+  .mobile-timer-description,
+  .mobile-timer-actions,
+  .mobile-settings-toggle {
+    position: relative;
+  }
+  .mobile-timer .eyebrow {
+    order: 1;
+  }
+  .mobile-time {
+    order: 2;
+  }
+  .mobile-progress-track {
+    order: 3;
+  }
+  .mobile-timer-description {
+    order: 4;
+  }
+  .mobile-timer-actions {
+    order: 5;
+  }
+  .mobile-settings-toggle {
+    order: 6;
+    align-self: center;
+  }
+}
+
+/* Sound and notification controls: desktop card and mobile settings drawer. */
+.timer-preferences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 18px;
+}
+.timer-preferences button {
+  border: 1px solid rgba(255, 220, 177, 0.24);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6d0a5;
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-size: 12px;
+}
+.timer-preferences button:hover:not(:disabled) {
+  background: rgba(255, 174, 105, 0.16);
+}
+.timer-preferences button:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+.timer-preferences button:focus-visible {
+  outline: 2px solid #ffb16e;
+  outline-offset: 3px;
+}
+
+/* Mobile refinement: keep header untouched; lift timer away from coffee steam. */
+@media (max-width: 800px) {
+  .mobile-timer {
+    top: calc(66px + env(safe-area-inset-top));
+    gap: 6px;
+    padding: 9px 16px 8px;
+  }
+  .mobile-settings-toggle {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 34px;
+    padding: 3px 12px;
+  }
+  .mobile-chevron {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+}
+@media (max-width: 800px) and (max-height: 680px) {
+  .mobile-timer {
+    top: calc(58px + env(safe-area-inset-top));
+    gap: 4px;
+    padding: 6px 12px;
+  }
+  .mobile-settings-toggle {
+    min-height: 30px;
+    padding: 2px 10px;
   }
 }
