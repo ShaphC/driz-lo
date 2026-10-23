@@ -230,12 +230,8 @@
 .drizlo-drop-a { animation-duration: 0.95s; }
 .drizlo-drop-b { animation-duration: 1.3s; animation-delay: -0.65s; }
 .drizlo-coffee-clouds { animation: drizlo-coffee-cloud-drift 45s ease-in-out infinite alternate; }
-.drizlo-coffee-water-shimmer { animation: drizlo-coffee-water-light 5s ease-in-out infinite alternate; }
 @keyframes drizlo-coffee-cloud-drift { from { transform: translateX(-22px); } to { transform: translateX(28px); } }
-@keyframes drizlo-coffee-water-light { from { opacity: .28; transform: translateX(-7px); } to { opacity: .68; transform: translateX(10px); } }
-@media (prefers-reduced-motion: reduce) { .drizlo-coffee-clouds, .drizlo-coffee-water-shimmer { animation: none; } }
 
-/* Stronger, visibly moving clouds and sunlight reflections. */
 .drizlo-coffee-cloud {
   transform-box: view-box;
   will-change: transform;
@@ -245,12 +241,6 @@
 .drizlo-coffee-cloud-three { animation: drizlo-cloud-left 12s ease-in-out infinite alternate-reverse; }
 @keyframes drizlo-cloud-left { from { transform: translateX(-85px); } to { transform: translateX(110px); } }
 @keyframes drizlo-cloud-right { from { transform: translateX(80px); } to { transform: translateX(-125px); } }
-.drizlo-coffee-glint { transform-box: view-box; will-change: transform, opacity; }
-.drizlo-coffee-glint-a { animation: drizlo-glint-a 2.4s ease-in-out infinite alternate; }
-.drizlo-coffee-glint-b { animation: drizlo-glint-b 3.2s ease-in-out infinite alternate; }
-.drizlo-coffee-glint-c { animation: drizlo-glint-a 3.8s ease-in-out infinite alternate-reverse; }
-@keyframes drizlo-glint-a { from { opacity: .25; transform: translateX(-25px) scaleX(.8); } to { opacity: .95; transform: translateX(25px) scaleX(1.1); } }
-@keyframes drizlo-glint-b { from { opacity: .85; transform: translateX(25px) scaleX(1.1); } to { opacity: .18; transform: translateX(-25px) scaleX(.75); } }
 @media (prefers-reduced-motion: reduce) {
-  .drizlo-coffee-cloud, .drizlo-coffee-glint { animation: none !important; }
+  .drizlo-coffee-cloud { animation: none !important; }
 }

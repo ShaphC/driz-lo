@@ -153,13 +153,6 @@ export default function CoffeeScene({
           {/* Water */}
           <rect x="340" y="540" width="1000" height="105" fill="#B96D67" />
 
-          {/* Bright sun reflection on the water, animated in independent bands. */}
-          <g className="drizlo-coffee-water-reflection" stroke="#FFE6A0" strokeLinecap="round" fill="none">
-            <path className="drizlo-coffee-glint drizlo-coffee-glint-a" d="M910 549 H1015 M925 560 H998" strokeWidth="5" />
-            <path className="drizlo-coffee-glint drizlo-coffee-glint-b" d="M878 575 H1035 M914 585 H1004" strokeWidth="6" />
-            <path className="drizlo-coffee-glint drizlo-coffee-glint-c" d="M855 600 H1060 M900 613 H1010" strokeWidth="5" />
-          </g>
-
           {/* City silhouette */}
           <path
             d="
