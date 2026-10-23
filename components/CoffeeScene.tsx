@@ -104,13 +104,22 @@ export default function CoffeeScene({
 
           <circle cx="955" cy="360" r="52" fill="#FFE5A0" />
 
-          {/* Clouds */}
-          <g fill="#F8AD80" opacity=".65">
-            <ellipse cx="590" cy="205" rx="100" ry="18" />
-            <ellipse cx="655" cy="198" rx="70" ry="13" />
-            <ellipse cx="1090" cy="175" rx="130" ry="17" />
-            <ellipse cx="1160" cy="165" rx="80" ry="13" />
-            <ellipse cx="840" cy="275" rx="90" ry="12" />
+          {/* Distinct cloud banks drifting across the upper window. */}
+          <g className="drizlo-coffee-cloud-layer" fill="#FFE0B5" opacity=".78">
+            <g className="drizlo-coffee-cloud drizlo-coffee-cloud-one">
+              <ellipse cx="505" cy="180" rx="92" ry="19" />
+              <ellipse cx="555" cy="167" rx="72" ry="23" />
+              <ellipse cx="609" cy="182" rx="87" ry="16" />
+            </g>
+            <g className="drizlo-coffee-cloud drizlo-coffee-cloud-two" opacity=".8">
+              <ellipse cx="1090" cy="135" rx="110" ry="17" />
+              <ellipse cx="1152" cy="122" rx="80" ry="21" />
+              <ellipse cx="1225" cy="138" rx="90" ry="15" />
+            </g>
+            <g className="drizlo-coffee-cloud drizlo-coffee-cloud-three" opacity=".6">
+              <ellipse cx="805" cy="255" rx="75" ry="12" />
+              <ellipse cx="852" cy="248" rx="60" ry="15" />
+            </g>
           </g>
 
           {/* Distant mountains */}
@@ -144,11 +153,11 @@ export default function CoffeeScene({
           {/* Water */}
           <rect x="340" y="540" width="1000" height="105" fill="#B96D67" />
 
-          <g stroke="#F7B77C" strokeWidth="4" opacity=".5">
-            <path d="M740 565 H1100" />
-            <path d="M820 585 H1040" />
-            <path d="M870 605 H1010" />
-            <path d="M910 625 H990" />
+          {/* Bright sun reflection on the water, animated in independent bands. */}
+          <g className="drizlo-coffee-water-reflection" stroke="#FFE6A0" strokeLinecap="round" fill="none">
+            <path className="drizlo-coffee-glint drizlo-coffee-glint-a" d="M910 549 H1015 M925 560 H998" strokeWidth="5" />
+            <path className="drizlo-coffee-glint drizlo-coffee-glint-b" d="M878 575 H1035 M914 585 H1004" strokeWidth="6" />
+            <path className="drizlo-coffee-glint drizlo-coffee-glint-c" d="M855 600 H1060 M900 613 H1010" strokeWidth="5" />
           </g>
 
           {/* City silhouette */}
