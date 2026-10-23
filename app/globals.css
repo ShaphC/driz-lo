@@ -266,8 +266,10 @@ button {
   html,
   body {
     width: 100%;
-    height: 100%;
-    overflow: hidden;
+    min-height: 100%;
+    height: auto;
+    overflow-x: clip;
+    overflow-y: auto;
   }
   .scene {
     height: 100dvh;
