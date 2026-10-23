@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useId, type CSSProperties } from "react";
 import "./CoffeeScene.css";
 
 type CoffeeSceneProps = {
@@ -26,10 +26,12 @@ export default function CoffeeScene({
   const fill = isFocus ? Math.max(0, Math.min(1, progress)) : 1;
 
   const brewing = isFocus && running && fill < 1;
+
   const liquidBottom = 457;
   const liquidHeight = fill * 112;
   const liquidTop = liquidBottom - liquidHeight;
   const dropDistance = Math.max(0, liquidTop - 307);
+
   const cups = Math.min(completed, MAX_VISIBLE_CUPS);
 
   return (
@@ -73,7 +75,7 @@ export default function CoffeeScene({
         {/* Interior wall */}
         <rect width="1600" height="900" fill={`url(#${id}-room)`} />
 
-        {/* Window */}
+        {/* Window frame */}
         <rect
           x="322"
           y="52"
@@ -85,6 +87,7 @@ export default function CoffeeScene({
           strokeWidth="20"
         />
 
+        {/* View outside */}
         <g clipPath={`url(#${id}-window-clip)`}>
           <rect
             x="340"
@@ -94,8 +97,8 @@ export default function CoffeeScene({
             fill={`url(#${id}-sky)`}
           />
 
-          {/* Sunset glow */}
           <circle cx="955" cy="360" r="250" fill={`url(#${id}-sun-glow)`} />
+
           <circle cx="955" cy="360" r="52" fill="#FFE5A0" />
 
           {/* Clouds */}
@@ -107,13 +110,31 @@ export default function CoffeeScene({
             <ellipse cx="840" cy="275" rx="90" ry="12" />
           </g>
 
-          {/* Mountains */}
+          {/* Distant mountains */}
           <path
-            d="M340 490 L510 360 L640 445 L790 330 L980 465 L1120 365 L1340 475 V645 H340 Z"
+            d="
+              M340 490
+              L510 360
+              L640 445
+              L790 330
+              L980 465
+              L1120 365
+              L1340 475
+              V645 H340 Z
+            "
             fill="#81506A"
           />
+
           <path
-            d="M340 545 L560 435 L730 515 L940 410 L1120 510 L1340 425 V645 H340 Z"
+            d="
+              M340 545
+              L560 435
+              L730 515
+              L940 410
+              L1120 510
+              L1340 425
+              V645 H340 Z
+            "
             fill="#62445B"
           />
 
@@ -129,60 +150,93 @@ export default function CoffeeScene({
 
           {/* City silhouette */}
           <path
-            d="M340 620 V580 H380 V555 H420 V590 H455 V560 H500 V600 H540 V565 H580 V590 H620 V550 H665 V605 H710 V575 H750 V615 H790 V570 H830 V600 H880 V555 H925 V590 H965 V565 H1010 V610 H1050 V580 H1090 V550 H1130 V600 H1180 V570 H1220 V610 H1270 V565 H1340 V645 H340 Z"
+            d="
+              M340 620 V580
+              H380 V555
+              H420 V590
+              H455 V560
+              H500 V600
+              H540 V565
+              H580 V590
+              H620 V550
+              H665 V605
+              H710 V575
+              H750 V615
+              H790 V570
+              H830 V600
+              H880 V555
+              H925 V590
+              H965 V565
+              H1010 V610
+              H1050 V580
+              H1090 V550
+              H1130 V600
+              H1180 V570
+              H1220 V610
+              H1270 V565
+              H1340 V645
+              H340 Z
+            "
             fill="#4C354A"
             opacity=".8"
           />
         </g>
 
-        {/* Window frame */}
+        {/* Window dividers */}
         <g stroke="#764631" strokeWidth="18">
           <path d="M680 70 V645" />
           <path d="M1015 70 V645" />
           <path d="M340 315 H1340" />
         </g>
 
-        {/* Left wall shelves */}
+        {/* Left shelves */}
         <rect x="0" y="145" width="310" height="24" fill="#9C623F" />
         <rect x="0" y="166" width="310" height="12" fill="#3A211A" />
 
         {/* Coffee jars */}
-        <g>
-          {[75, 165, 245].map((x) => (
-            <g key={x}>
-              <rect
-                x={x - 30}
-                y="65"
-                width="60"
-                height="80"
-                rx="9"
-                fill="#5C392B"
-                stroke="#B17B56"
-                strokeWidth="4"
-              />
-              <rect
-                x={x - 35}
-                y="55"
-                width="70"
-                height="14"
-                rx="4"
-                fill="#8C5B3E"
-              />
-              <rect
-                x={x - 24}
-                y="100"
-                width="48"
-                height="38"
-                rx="5"
-                fill="#2E1B17"
-              />
-            </g>
-          ))}
-        </g>
+        {[75, 165, 245].map((x) => (
+          <g key={x}>
+            <rect
+              x={x - 30}
+              y="65"
+              width="60"
+              height="80"
+              rx="9"
+              fill="#5C392B"
+              stroke="#B17B56"
+              strokeWidth="4"
+            />
+            <rect
+              x={x - 35}
+              y="55"
+              width="70"
+              height="14"
+              rx="4"
+              fill="#8C5B3E"
+            />
+            <rect
+              x={x - 24}
+              y="100"
+              width="48"
+              height="38"
+              rx="5"
+              fill="#2E1B17"
+            />
+          </g>
+        ))}
 
         {/* Hanging plant */}
         <path d="M265 0 V95" stroke="#8B6A42" strokeWidth="5" />
-        <path d="M215 95 Q265 145 315 95 L295 140 H235 Z" fill="#9D623E" />
+
+        <path
+          d="
+            M215 95
+            Q265 145 315 95
+            L295 140
+            H235 Z
+          "
+          fill="#9D623E"
+        />
 
         <g fill="#54704B">
           <ellipse
@@ -228,15 +282,23 @@ export default function CoffeeScene({
           <path d="M265 130 Q270 210 250 250" />
         </g>
 
-        {/* Right-side pendant light */}
+        {/* Pendant light */}
         <path d="M1470 0 V125" stroke="#2A1916" strokeWidth="8" />
+
         <path
-          d="M1390 175 Q1400 115 1470 115 Q1540 115 1550 175 Z"
+          d="
+            M1390 175
+            Q1400 115 1470 115
+            Q1540 115 1550 175
+            Z
+          "
           fill="#38231D"
           stroke="#7D4B35"
           strokeWidth="5"
         />
+
         <ellipse cx="1470" cy="175" rx="80" ry="12" fill="#D7955B" />
+
         <ellipse
           cx="1470"
           cy="185"
@@ -246,28 +308,50 @@ export default function CoffeeScene({
           opacity=".8"
         />
 
-        {/* Full-width wooden counter */}
-        <rect
-          x="0"
-          y="695"
-          width="1600"
-          height="205"
-          fill={`url(#${id}-wood)`}
-        />
-        <rect x="0" y="687" width="1600" height="20" fill="#D39761" />
-        <rect x="0" y="706" width="1600" height="12" fill="#75452D" />
+        {/* ======================================
+            DEEP WOODEN COUNTERTOP
+           ====================================== */}
 
-        <g fill="none" stroke="#E2A16C" strokeWidth="3" opacity=".16">
-          <path d="M0 760 Q420 740 800 760 T1600 755" />
-          <path d="M0 815 Q350 800 750 825 T1600 810" />
-          <path d="M0 865 Q450 850 850 870 T1600 860" />
+        {/* Rear edge */}
+        <rect x="0" y="615" width="1600" height="18" fill="#C48A59" />
+
+        <rect x="0" y="630" width="1600" height="12" fill="#8B5438" />
+
+        {/* Main counter surface */}
+        <path d="M0 630 H1600 V900 H0 Z" fill={`url(#${id}-wood)`} />
+
+        {/* Warm reflected light */}
+        <path
+          d="
+            M0 650
+            Q450 625 800 655
+            T1600 645
+            V720
+            Q800 690 0 730
+            Z
+          "
+          fill="#E3A46D"
+          opacity=".12"
+        />
+
+        {/* Wood grain */}
+        <g fill="none" stroke="#E2A16C" strokeWidth="3" opacity=".17">
+          <path d="M0 690 Q420 670 800 690 T1600 685" />
+          <path d="M0 755 Q350 735 750 760 T1600 745" />
+          <path d="M0 820 Q450 800 850 825 T1600 810" />
+          <path d="M0 875 Q400 860 850 880 T1600 865" />
         </g>
 
-        {/* Warm overall atmosphere */}
+        {/* Front counter edge */}
+        <rect x="0" y="875" width="1600" height="25" fill="#5B3428" />
+
+        <rect x="0" y="875" width="1600" height="5" fill="#A86D47" />
+
+        {/* Warm atmosphere */}
         <rect width="1600" height="900" fill="#F4A56B" opacity=".045" />
       </svg>
 
-      {/* Foreground brewer */}
+      {/* Animated coffee brewer */}
       <div className="drizlo-coffee-illustration">
         <svg
           className="drizlo-coffee-art"
@@ -295,18 +379,37 @@ export default function CoffeeScene({
             </linearGradient>
 
             <clipPath id={`${id}-carafe-clip`}>
-              <path d="M232 324 H386 L403 427 Q408 458 367 462 H253 Q212 458 217 427 Z" />
+              <path
+                d="
+                  M232 324
+                  H386
+                  L403 427
+                  Q408 458 367 462
+                  H253
+                  Q212 458 217 427
+                  Z
+                "
+              />
             </clipPath>
           </defs>
 
-          {/* Stand */}
+          {/* Brewing stand */}
           <rect x="421" y="172" width="13" height="291" rx="6" fill="#67402D" />
+
           <rect x="370" y="205" width="63" height="12" rx="5" fill="#8B5738" />
+
           <circle cx="429" cy="211" r="8" fill="#A66D45" />
 
-          {/* Dripper */}
+          {/* Ceramic dripper */}
           <path
-            d="M207 183 Q310 173 413 183 L361 294 Q356 305 310 306 Q264 305 259 294 Z"
+            d="
+              M207 183
+              Q310 173 413 183
+              L361 294
+              Q356 305 310 306
+              Q264 305 259 294
+              Z
+            "
             fill={`url(#${id}-ceramic)`}
             stroke="#FFE7C5"
             strokeWidth="4"
@@ -331,34 +434,53 @@ export default function CoffeeScene({
             stroke="#FFF0D6"
             strokeWidth="3"
           />
+
           <ellipse cx="310" cy="185" rx="88" ry="11" fill="#63361E" />
+
           <ellipse cx="310" cy="186" rx="78" ry="8" fill="#26140F" />
 
           <path d="M297 303 H323 L319 314 H301 Z" fill="#B8794B" />
 
-          {/* Handle */}
+          {/* Carafe handle */}
           <path
-            d="M386 341 C449 316 473 365 458 407 C448 438 421 444 396 428"
+            d="
+              M386 341
+              C449 316 473 365 458 407
+              C448 438 421 444 396 428
+            "
             fill="none"
             stroke="#D3A477"
             strokeWidth="21"
           />
+
           <path
-            d="M389 342 C445 322 460 370 448 404 C438 428 420 431 400 417"
+            d="
+              M389 342
+              C445 322 460 370 448 404
+              C438 428 420 431 400 417
+            "
             fill="none"
             stroke="#4A291B"
             strokeWidth="10"
           />
 
-          {/* Glass */}
+          {/* Glass carafe */}
           <path
-            d="M230 323 L388 323 L404 427 Q411 461 368 464 H252 Q209 461 216 427 Z"
+            d="
+              M230 323
+              L388 323
+              L404 427
+              Q411 461 368 464
+              H252
+              Q209 461 216 427
+              Z
+            "
             fill={`url(#${id}-glass)`}
             stroke="#FFE6C5"
             strokeWidth="4"
           />
 
-          {/* Animated liquid */}
+          {/* Coffee liquid */}
           <g clipPath={`url(#${id}-carafe-clip)`}>
             <rect
               x="207"
@@ -396,7 +518,11 @@ export default function CoffeeScene({
 
           {/* Glass reflection */}
           <path
-            d="M238 338 Q225 384 231 428 Q234 446 250 452"
+            d="
+              M238 338
+              Q225 384 231 428
+              Q234 446 250 452
+            "
             fill="none"
             stroke="#FFF1D9"
             strokeWidth="9"
@@ -404,12 +530,12 @@ export default function CoffeeScene({
             strokeLinecap="round"
           />
 
-          {/* Dripping */}
+          {/* Falling droplets */}
           <g
             style={
               {
                 "--drop-distance": `${dropDistance}px`,
-              } as React.CSSProperties
+              } as CSSProperties
             }
           >
             {brewing && (
@@ -422,6 +548,7 @@ export default function CoffeeScene({
                   ry="6"
                   fill="#4E200D"
                 />
+
                 <ellipse
                   className="drizlo-drop drizlo-drop-b"
                   cx="310"
@@ -465,6 +592,7 @@ export default function CoffeeScene({
         </svg>
       </div>
 
+      {/* Completion message */}
       {justCompleted && (
         <div className="drizlo-completion-message">
           <span className="drizlo-completion-icon">✦</span>
@@ -472,8 +600,10 @@ export default function CoffeeScene({
         </div>
       )}
 
+      {/* Brewing status */}
       <div className="drizlo-scene-status" role="status">
         <span className={`drizlo-status-dot ${brewing ? "active" : ""}`} />
+
         <span>
           {!isFocus
             ? "Freshly brewed"
@@ -487,6 +617,7 @@ export default function CoffeeScene({
         </span>
       </div>
 
+      {/* Coffee collection */}
       <div className="drizlo-cup-shelf">
         <div className="drizlo-shelf-heading">
           <span>YOUR COFFEE COLLECTION</span>
@@ -515,19 +646,32 @@ export default function CoffeeScene({
                     fill="#160B08"
                     opacity=".4"
                   />
+
                   <path
-                    d="M35 17 C51 14 51 36 36 34"
+                    d="
+                        M35 17
+                        C51 14 51 36 36 34
+                      "
                     fill="none"
                     stroke="#F1D2A7"
                     strokeWidth="5"
                   />
+
                   <path
-                    d="M10 15 H37 L34 42 Q23 48 13 42 Z"
+                    d="
+                        M10 15
+                        H37
+                        L34 42
+                        Q23 48 13 42
+                        Z
+                      "
                     fill="#F5D8AC"
                     stroke="#FFF0D7"
                     strokeWidth="2"
                   />
+
                   <ellipse cx="23.5" cy="15" rx="13.5" ry="4" fill="#FFF0D7" />
+
                   <ellipse cx="23.5" cy="15" rx="10" ry="2.5" fill="#7B4528" />
                 </svg>
               ))}

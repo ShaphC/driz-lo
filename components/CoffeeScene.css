@@ -1,5 +1,5 @@
 /* =========================================
-   DRIZLO — COFFEE SCENE V5
+   DRIZLO — COFFEE SCENE V5.1
    ========================================= */
 
 .drizlo-coffee-scene {
@@ -16,9 +16,7 @@
   padding-bottom: 10px;
 }
 
-/* =========================================
-   FULL-SCREEN SVG ENVIRONMENT
-   ========================================= */
+/* Full-screen illustrated environment */
 
 .drizlo-environment {
   position: fixed;
@@ -31,22 +29,13 @@
   pointer-events: none;
 }
 
-/* =========================================
-   COFFEE BREWER
-   ========================================= */
+/* Coffee brewer */
 
 .drizlo-coffee-illustration {
   position: relative;
   width: 100%;
   max-width: 690px;
 
-  /*
-   * Move the entire brewer downward so
-   * its base sits on the wooden counter.
-   *
-   * The animation stays intact because
-   * the complete SVG moves together.
-   */
   transform: translateY(140px);
 
   filter: drop-shadow(0 12px 10px rgba(29, 11, 5, 0.28));
@@ -57,13 +46,10 @@
   width: 100%;
   height: auto;
   max-height: min(62vh, 650px);
-
   overflow: visible;
 }
 
-/* =========================================
-   COFFEE DRIPPING ANIMATION
-   ========================================= */
+/* Dripping */
 
 .drizlo-drop {
   animation: drizlo-falling-drop 2.4s linear infinite;
@@ -99,9 +85,7 @@
   }
 }
 
-/* =========================================
-   COFFEE LIQUID
-   ========================================= */
+/* Coffee liquid */
 
 .drizlo-liquid {
   transition:
@@ -127,9 +111,7 @@
   }
 }
 
-/* =========================================
-   COFFEE RIPPLE
-   ========================================= */
+/* Ripples */
 
 .drizlo-ripple {
   transform-box: fill-box;
@@ -150,9 +132,7 @@
   }
 }
 
-/* =========================================
-   STEAM
-   ========================================= */
+/* Steam */
 
 .drizlo-steam {
   opacity: 0;
@@ -191,9 +171,7 @@
   }
 }
 
-/* =========================================
-   COMPLETION NOTIFICATION
-   ========================================= */
+/* Completion message */
 
 .drizlo-completion-message {
   position: absolute;
@@ -201,7 +179,6 @@
 
   top: 42%;
   left: 50%;
-
   transform: translate(-50%, -50%);
 
   display: flex;
@@ -211,7 +188,6 @@
 
   width: max-content;
   max-width: 90%;
-
   padding: 15px 20px;
 
   border-radius: 14px;
@@ -246,9 +222,7 @@
   }
 }
 
-/* =========================================
-   BREWING STATUS
-   ========================================= */
+/* Brewing status */
 
 .drizlo-scene-status {
   position: relative;
@@ -276,13 +250,11 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-
   background: #ae8667;
 }
 
 .drizlo-status-dot.active {
   background: #ffc27d;
-
   box-shadow: 0 0 12px rgba(255, 181, 105, 0.65);
 
   animation: drizlo-status-pulse 2s ease-in-out infinite;
@@ -299,9 +271,7 @@
   }
 }
 
-/* =========================================
-   COFFEE COLLECTION
-   ========================================= */
+/* Coffee collection */
 
 .drizlo-cup-shelf {
   position: relative;
@@ -372,15 +342,12 @@
 .drizlo-extra-cups {
   display: block;
   margin-top: 8px;
-
   color: #edc49e;
   font-size: 11px;
   text-align: right;
 }
 
-/* =========================================
-   DESKTOP POSITIONING
-   ========================================= */
+/* Desktop */
 
 @media (min-width: 801px) {
   .drizlo-coffee-illustration {
@@ -396,34 +363,74 @@
   }
 }
 
-/* =========================================
-   TABLET / MOBILE
-   ========================================= */
+/* Mobile */
 
 @media (max-width: 800px) {
+  .drizlo-environment {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    z-index: -1;
+  }
+
+  .drizlo-coffee-scene {
+    position: relative;
+    width: 100%;
+    min-height: 100%;
+    padding-bottom: 0;
+  }
+
   .drizlo-coffee-illustration {
+    position: fixed;
+    top: 17dvh;
+    left: 50%;
+
+    width: min(100vw, 540px);
     max-width: 540px;
-    transform: translateY(35px);
+
+    transform: translateX(-50%);
+    z-index: 1;
   }
 
   .drizlo-coffee-art {
-    max-height: min(45vh, 440px);
+    width: 100%;
+    max-height: 48dvh;
   }
 
   .drizlo-scene-status {
-    margin-top: -8px;
-    transform: none;
+    position: fixed;
+    top: 57dvh;
+    left: 50%;
+
+    transform: translateX(-50%);
+    margin: 0;
+    z-index: 2;
   }
 
   .drizlo-cup-shelf {
-    margin-top: 20px;
-    transform: none;
+    position: fixed;
+    top: 65dvh;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: min(90vw, 470px);
+    margin: 0;
+    z-index: 2;
+  }
+
+  .drizlo-completion-message {
+    position: fixed;
+    top: 42dvh;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+    z-index: 10;
   }
 }
 
-/* =========================================
-   SMALL PHONES
-   ========================================= */
+/* Small phones */
 
 @media (max-width: 420px) {
   .drizlo-completion-message {
@@ -441,9 +448,7 @@
   }
 }
 
-/* =========================================
-   REDUCED MOTION
-   ========================================= */
+/* Accessibility */
 
 @media (prefers-reduced-motion: reduce) {
   .drizlo-drop,

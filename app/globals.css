@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* =========================================
+   DRIZLO — GLOBAL STYLES
+   ========================================= */
+
 :root {
   font-family: Arial, Helvetica, sans-serif;
   color: #fff2df;
@@ -24,17 +28,20 @@ button {
   cursor: pointer;
 }
 
-/* Full-screen illustrated environment */
+/* =========================================
+   MAIN SCENE
+   ========================================= */
 
 .scene {
   position: relative;
   min-height: 100dvh;
+
   display: flex;
   flex-direction: column;
+
   overflow-x: clip;
 
-  background: #281813 url("/scenes/coffee-sunset.png") center center / cover
-    no-repeat;
+  background: #34211e;
 }
 
 .scene-overlay {
@@ -44,15 +51,17 @@ button {
 
   background: linear-gradient(
     90deg,
-    rgba(18, 11, 10, 0.4) 0%,
-    rgba(18, 11, 10, 0.12) 45%,
-    rgba(18, 11, 10, 0.36) 100%
+    rgba(18, 11, 10, 0.06) 0%,
+    rgba(18, 11, 10, 0.02) 50%,
+    rgba(18, 11, 10, 0.15) 100%
   );
 
   pointer-events: none;
 }
 
-/* Header */
+/* =========================================
+   HEADER
+   ========================================= */
 
 .topbar {
   position: relative;
@@ -82,7 +91,9 @@ button {
   letter-spacing: 1.5px;
 }
 
-/* Shared scene workspace */
+/* =========================================
+   SHARED WORKSPACE
+   ========================================= */
 
 .workspace {
   position: relative;
@@ -97,35 +108,33 @@ button {
   padding: 20px 5% 45px;
 }
 
-/* Coffee artwork */
+/* =========================================
+   COFFEE ARTWORK
+   ========================================= */
 
-.scene {
+.scene-stage {
   position: relative;
-  min-height: 100dvh;
+  z-index: 1;
+
+  width: min(100%, 760px);
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
-  overflow-x: clip;
+  justify-content: center;
+  align-items: center;
 
-  background: #34211e;
-}
+  padding-top: 0;
+  margin-top: -25px;
 
-.scene-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-
-  background: linear-gradient(
-    90deg,
-    rgba(18, 11, 10, 0.06) 0%,
-    rgba(18, 11, 10, 0.02) 50%,
-    rgba(18, 11, 10, 0.15) 100%
-  );
-
-  pointer-events: none;
+  /* Center the coffee scene */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .scene-label {
   margin-top: 14px;
+
   color: #f1cda4;
   font-size: 13px;
   text-align: center;
@@ -133,7 +142,9 @@ button {
   line-height: 1.5;
 }
 
-/* Timer glass overlay */
+/* =========================================
+   TIMER GLASS OVERLAY
+   ========================================= */
 
 .timer-panel {
   position: absolute;
@@ -162,7 +173,9 @@ button {
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-/* Timer heading */
+/* =========================================
+   TIMER HEADING
+   ========================================= */
 
 .eyebrow {
   display: block;
@@ -171,7 +184,9 @@ button {
   letter-spacing: 3px;
 }
 
-/* Timer display */
+/* =========================================
+   TIMER DISPLAY
+   ========================================= */
 
 .time {
   margin: 15px 0;
@@ -181,10 +196,13 @@ button {
   font-weight: 300;
   line-height: 1.15;
   letter-spacing: -5px;
+
   font-variant-numeric: tabular-nums;
 }
 
-/* Progress */
+/* =========================================
+   PROGRESS BAR
+   ========================================= */
 
 .progress-track {
   height: 4px;
@@ -199,16 +217,21 @@ button {
   transition: width 0.5s linear;
 }
 
-/* Timer description */
+/* =========================================
+   TIMER DESCRIPTION
+   ========================================= */
 
 .timer-description {
   margin: 20px 0 30px;
+
   color: #e6b991;
   font-size: 14px;
   line-height: 1.5;
 }
 
-/* Timer buttons */
+/* =========================================
+   TIMER CONTROLS
+   ========================================= */
 
 .controls {
   display: flex;
@@ -217,6 +240,7 @@ button {
 
 .controls button {
   padding: 14px 24px;
+
   border-radius: 10px;
   border: none;
 
@@ -231,8 +255,10 @@ button {
 
 .primary-button {
   flex: 1;
+
   background: #f5b579;
   color: #27140c;
+
   font-weight: 700;
 }
 
@@ -249,7 +275,9 @@ button {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Duration presets */
+/* =========================================
+   DURATION PRESETS
+   ========================================= */
 
 .durations {
   display: flex;
@@ -288,7 +316,9 @@ button {
   cursor: not-allowed;
 }
 
-/* Switch mode */
+/* =========================================
+   SWITCH MODE
+   ========================================= */
 
 .mode-button {
   margin-top: 22px;
@@ -305,7 +335,9 @@ button {
   color: #ffddbd;
 }
 
-/* Footer */
+/* =========================================
+   FOOTER
+   ========================================= */
 
 .bottombar {
   position: relative;
@@ -322,7 +354,9 @@ button {
   letter-spacing: 1.5px;
 }
 
-/* Medium desktop */
+/* =========================================
+   MEDIUM DESKTOP
+   ========================================= */
 
 @media (min-width: 801px) and (max-width: 1150px) {
   .workspace {
@@ -346,13 +380,11 @@ button {
   }
 }
 
-/* Mobile */
+/* =========================================
+   MOBILE
+   ========================================= */
 
 @media (max-width: 800px) {
-  .scene {
-    background-position: center top;
-  }
-
   .scene-overlay {
     background: linear-gradient(
       180deg,
@@ -376,6 +408,8 @@ button {
   .scene-stage {
     width: 100%;
     max-width: 520px;
+
+    margin-top: 0;
     padding: 0;
   }
 
@@ -408,7 +442,9 @@ button {
   }
 }
 
-/* Small phones */
+/* =========================================
+   SMALL PHONES
+   ========================================= */
 
 @media (max-width: 420px) {
   .timer-panel {
@@ -433,7 +469,9 @@ button {
   }
 }
 
-/* Accessibility */
+/* =========================================
+   ACCESSIBILITY
+   ========================================= */
 
 @media (prefers-reduced-motion: reduce) {
   .progress-fill,
