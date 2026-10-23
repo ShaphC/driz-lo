@@ -40,12 +40,11 @@ button {
   flex-direction: column;
 
   overflow-x: clip;
-
   background: #34211e;
 }
 
 .scene-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 0;
 
@@ -60,18 +59,30 @@ button {
 }
 
 /* =========================================
-   HEADER
+   FIXED HEADER
    ========================================= */
 
 .topbar {
-  position: relative;
-  z-index: 10;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  width: 100%;
+  z-index: 100;
 
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
 
-  padding: 24px 5%;
+  padding: calc(22px + env(safe-area-inset-top)) 5% 22px;
+
+  pointer-events: none;
+}
+
+.topbar > * {
+  pointer-events: auto;
 }
 
 .brand {
@@ -105,7 +116,8 @@ button {
 
   display: block;
 
-  padding: 20px 5% 45px;
+  padding: calc(100px + env(safe-area-inset-top)) 5%
+    calc(100px + env(safe-area-inset-bottom));
 }
 
 /* =========================================
@@ -125,11 +137,8 @@ button {
   align-items: center;
 
   padding-top: 0;
-  margin-top: -25px;
 
-  /* Center the coffee scene */
-  margin-left: auto;
-  margin-right: auto;
+  margin: -25px auto 0;
 }
 
 .scene-label {
@@ -148,7 +157,7 @@ button {
 
 .timer-panel {
   position: absolute;
-  z-index: 5;
+  z-index: 20;
 
   top: 50%;
   right: 6%;
@@ -196,7 +205,6 @@ button {
   font-weight: 300;
   line-height: 1.15;
   letter-spacing: -5px;
-
   font-variant-numeric: tabular-nums;
 }
 
@@ -287,6 +295,7 @@ button {
 
 .durations button {
   flex: 1;
+  min-width: 0;
 
   padding: 10px 4px;
 
@@ -336,22 +345,34 @@ button {
 }
 
 /* =========================================
-   FOOTER
+   FIXED FOOTER
    ========================================= */
 
 .bottombar {
-  position: relative;
-  z-index: 10;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  width: 100%;
+  z-index: 100;
 
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
 
-  padding: 20px 5% 24px;
+  padding: 20px 5% calc(24px + env(safe-area-inset-bottom));
 
   color: #f3cfaa;
   font-size: 12px;
   letter-spacing: 1.5px;
+
+  pointer-events: none;
+}
+
+.bottombar > * {
+  pointer-events: auto;
 }
 
 /* =========================================
@@ -385,6 +406,28 @@ button {
    ========================================= */
 
 @media (max-width: 800px) {
+  /*
+   * Lock the page itself.
+   * Only the timer panel can scroll.
+   */
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .scene {
+    position: relative;
+
+    width: 100%;
+    height: 100dvh;
+    min-height: 0;
+
+    overflow: hidden;
+  }
+
   .scene-overlay {
     background: linear-gradient(
       180deg,
@@ -394,51 +437,143 @@ button {
     );
   }
 
+  /* Header always visible */
+
+  .topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    padding: calc(16px + env(safe-area-inset-top)) 20px 16px;
+
+    z-index: 100;
+  }
+
+  .brand {
+    font-size: 26px;
+  }
+
+  /* Footer always visible */
+
+  .bottombar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    padding: 14px 20px calc(14px + env(safe-area-inset-bottom));
+
+    font-size: 10px;
+    z-index: 100;
+  }
+
+  /* Stationary workspace */
+
   .workspace {
+    position: relative;
+    z-index: 10;
+
+    display: block;
+
+    flex: 1 1 auto;
+
+    width: 100%;
+    height: 100%;
     min-height: 0;
 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    margin: 0;
+    padding: 0;
 
-    gap: 24px;
-    padding: 10px 20px 35px;
+    overflow: hidden;
   }
+
+  /*
+   * Café illustration stays stationary.
+   * The brewer and countertop remain aligned
+   * because they share the same SVG.
+   */
 
   .scene-stage {
-    width: 100%;
-    max-width: 520px;
+    position: absolute;
+    inset: 0;
 
-    margin-top: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100%;
+    max-width: none;
+
+    height: 100%;
+    min-height: 0;
+
+    margin: 0;
     padding: 0;
+
+    pointer-events: none;
   }
 
-  .timer-panel {
-    position: relative;
+  .scene-label {
+    display: none;
+  }
 
-    top: auto;
+  /*
+   * Timer panel occupies the space between
+   * the fixed header and footer.
+   *
+   * When its content is taller than this
+   * available space, it scrolls internally.
+   */
+
+  .timer-panel {
+    position: absolute;
+
+    top: calc(90px + env(safe-area-inset-top));
+    bottom: calc(75px + env(safe-area-inset-bottom));
+
+    left: 50%;
     right: auto;
 
-    transform: none;
+    transform: translateX(-50%);
 
-    width: 100%;
+    width: calc(100% - 40px);
     max-width: 460px;
 
+    height: auto;
+    min-height: 0;
+    max-height: none;
+
+    margin: 0;
     padding: 24px;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+
+    z-index: 20;
+
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 190, 130, 0.35) transparent;
+  }
+
+  .timer-panel::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .timer-panel::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .timer-panel::-webkit-scrollbar-thumb {
+    background: rgba(255, 190, 130, 0.35);
+    border-radius: 999px;
   }
 
   .time {
     font-size: 66px;
-  }
-
-  .topbar,
-  .bottombar {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-
-  .bottombar {
-    font-size: 10px;
   }
 }
 
@@ -447,7 +582,18 @@ button {
    ========================================= */
 
 @media (max-width: 420px) {
+  .topbar {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .bottombar {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
   .timer-panel {
+    width: calc(100% - 32px);
     padding: 20px;
   }
 
