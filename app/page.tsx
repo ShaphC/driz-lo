@@ -6,19 +6,21 @@ import "./landing.css";
 const features = [
   {
     number: "01",
-    title: "Choose your moment",
-    description: "Set aside 15, 25, 45, or 60 minutes. Make the time your own.",
+    title: "Choose your scene",
+    description:
+      "Pick an atmosphere and set aside 15, 25, 45, or 60 minutes to focus.",
   },
   {
     number: "02",
-    title: "Watch it unfold",
+    title: "Watch your progress unfold",
     description:
-      "As you focus, coffee slowly collects in the carafe. One drop at a time.",
+      "Your animated scene evolves as your session moves forward. See your progress without watching the clock.",
   },
   {
     number: "03",
-    title: "Enjoy the pause",
-    description: "A gentle sound lets you know when it's time for a break.",
+    title: "Focus, then take a break",
+    description:
+      "Stay with your task until the timer ends, then take a well-earned break.",
   },
 ];
 
@@ -40,16 +42,16 @@ export default function LandingPage() {
       <section className="landing-hero" aria-labelledby="landing-heading">
         <div className="landing-hero-copy">
           <p className="landing-kicker">
-            <span className="landing-kicker-dot" /> A LITTLE SPACE TO FOCUS
+            <span className="landing-kicker-dot" /> A DIFFERENT KIND OF FOCUS TIMER
           </p>
           <h1 id="landing-heading">
-            Make time
+            Focus feels
             <br />
-            <em>feel beautiful.</em>
+            <em>different here.</em>
           </h1>
           <p className="landing-lede">
-            A quiet corner for the things that matter. Set a timer, watch your
-            coffee brew, and let the minutes find their rhythm.
+            A focus timer that brings your sessions to life. Watch animated
+            scenes evolve as you make progress, one session at a time.
           </p>
           <div className="landing-hero-actions">
             <Link className="landing-button landing-button-primary" href="/app">
@@ -69,12 +71,12 @@ export default function LandingPage() {
             <CoffeeScene progress={0.43} running mode="focus" completed={0} />
           </div>
           <div className="landing-art-caption">
-            <span className="landing-live-dot" /> A moment in the making{" "}
+            <span className="landing-live-dot" /> Focus in progress{" "}
             <span>☕</span>
           </div>
         </div>
         <div className="landing-hero-footnote">
-          SLOW DOWN. SETTLE IN. BEGIN.
+          CHOOSE A SCENE. SET YOUR TIME. GET FOCUSED.
         </div>
       </section>
 
@@ -84,15 +86,15 @@ export default function LandingPage() {
         aria-labelledby="landing-how-heading"
       >
         <div className="landing-section-heading">
-          <p className="landing-kicker">SIMPLE BY DESIGN</p>
+          <p className="landing-kicker">HOW IT WORKS</p>
           <h2 id="landing-how-heading">
-            A little focus.
+            Three steps to
             <br />
-            <em>A lovely difference.</em>
+            <em>finding your flow.</em>
           </h2>
           <p>
-            Nothing to organize. Nothing to keep up with. Just you, your time,
-            and a coffee slowly brewing.
+            Getting started is simple. Choose an atmosphere, set your focus
+            time, and let Drizlo handle the countdown.
           </p>
         </div>
         <div className="landing-steps">
@@ -111,14 +113,14 @@ export default function LandingPage() {
         aria-labelledby="landing-close-heading"
       >
         <div className="landing-close-glow" aria-hidden="true" />
-        <p className="landing-kicker">YOUR TIME IS YOURS</p>
+        <p className="landing-kicker">YOUR NEXT SESSION STARTS HERE</p>
         <h2 id="landing-close-heading">
-          Ready for a<br />
-          <em>beautiful moment?</em>
+          Ready to get<br />
+          <em>in the zone?</em>
         </h2>
-        <p>The coffee is waiting.</p>
+        <p>Pick a scene, set your timer, and see where your focus takes you.</p>
         <Link className="landing-button landing-button-primary" href="/app">
-          Open Drizlo <span aria-hidden="true">↗</span>
+          Start focusing <span aria-hidden="true">↗</span>
         </Link>
       </section>
 
@@ -126,7 +128,7 @@ export default function LandingPage() {
         <Link className="landing-brand" href="/">
           drizlo<span>.</span>
         </Link>
-        <span>Make time feel beautiful.</span>
+        <span>A different kind of focus timer.</span>
         <span>
           © <CopyrightYear /> Drizlo
         </span>{" "}

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Drizlo — Make Time Feel Beautiful",
+  title: "Drizlo — Focus Feels Different Here",
   description:
-    "A cozy animated focus timer where coffee brews, tea steeps, and every minute becomes something beautiful.",
+    "Drizlo is a visual focus timer with animated scenes that evolve as you work. Watch coffee brew, tea steep, and your progress unfold.",
 };
 
 export default function RootLayout({
