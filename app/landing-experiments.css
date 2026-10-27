@@ -978,3 +978,67 @@ html:has(.dx) body {
     padding-right: 16px;
   }
 }
+
+/* v9: single-column introduction before feature cards, no decorative device art */
+.dx-any-screen {
+  display: block;
+  text-align: center;
+  padding: 68px 24px 74px;
+  background: #f1dfca;
+}
+.dx-any-screen-inner {
+  max-width: 740px;
+  margin: 0 auto;
+}
+.dx-any-screen p {
+  max-width: 600px;
+  margin: 0 auto;
+}
+.dx-any-screen .dx-text-link {
+  margin-top: 22px;
+}
+.dx-highlights {
+  padding-top: 52px;
+}
+@media (max-width: 900px) {
+  .dx-any-screen {
+    display: block;
+    text-align: center;
+    padding: 58px 24px 62px;
+  }
+  .dx-any-screen-inner {
+    margin: 0 auto;
+  }
+  .dx-highlights {
+    padding-top: 38px;
+  }
+}
+@media (max-width: 580px) {
+  .dx-any-screen {
+    padding: 54px 20px 58px;
+  }
+  .dx-highlights {
+    padding-top: 30px;
+  }
+}
+
+/* v10: match the How it works section to the workspace section's warm tan */
+.dx-how {
+  background: #f1dfca;
+  box-shadow: 0 0 0 100vmax #f1dfca;
+  clip-path: inset(0 -100vmax);
+  padding-top: 88px;
+  padding-bottom: 100px;
+}
+@media (max-width: 900px) {
+  .dx-how {
+    padding-top: 68px;
+    padding-bottom: 78px;
+  }
+}
+@media (max-width: 580px) {
+  .dx-how {
+    padding-top: 58px;
+    padding-bottom: 68px;
+  }
+}

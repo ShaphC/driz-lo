@@ -104,6 +104,15 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <section className="dx-any-screen" aria-labelledby="dx-any-screen-title">
+        <div className="dx-any-screen-inner">
+          <span className="dx-eyebrow">MADE FOR YOUR WORKSPACE</span>
+          <h2 id="dx-any-screen-title">Your focus goes<br /><em>where you go.</em></h2>
+          <p>At your desk or on your phone, Drizlo keeps your focus sessions moving. Same timer, same animated scenes, wherever you decide to work.</p>
+          <a href="#top" className="dx-text-link">Explore the preview ↑</a>
+        </div>
+      </section>
+
       <section className="dx-highlights" aria-label="Why Drizlo feels different">
         <article className="dx-highlight-card">
           <span className="dx-card-symbol" aria-hidden="true">◷</span>
@@ -132,19 +141,6 @@ export default function LandingPage() {
           <div className="dx-step"><span className="dx-step-number">01</span><div><h3>Choose your scene.</h3><p>Coffee brewing or tea steeping? Pick the atmosphere that suits your session.</p></div></div>
           <div className="dx-step"><span className="dx-step-number">02</span><div><h3>Set your focus time.</h3><p>Choose your session length and start the timer. Your scene progresses alongside you.</p></div></div>
           <div className="dx-step"><span className="dx-step-number">03</span><div><h3>Focus, then take a break.</h3><p>Work through your session, watch your progress unfold, and take a break when the timer ends.</p></div></div>
-        </div>
-      </section>
-
-      <section className="dx-any-screen" aria-labelledby="dx-any-screen-title">
-        <div className="dx-screen-decoration" aria-hidden="true">
-          <span className="dx-screen-decoration-window"><span>☁</span><span>☕</span></span>
-          <span className="dx-screen-decoration-phone"><span>🍵</span></span>
-        </div>
-        <div className="dx-any-screen-inner">
-          <span className="dx-eyebrow">MADE FOR YOUR WORKSPACE</span>
-          <h2 id="dx-any-screen-title">Your focus goes<br /><em>where you go.</em></h2>
-          <p>At your desk or on your phone, Drizlo keeps your focus sessions moving. Same timer, same animated scenes, wherever you decide to work.</p>
-          <a href="#top" className="dx-text-link">Explore the preview ↑</a>
         </div>
       </section>
 
