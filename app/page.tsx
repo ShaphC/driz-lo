@@ -10,20 +10,37 @@ type Device = "desktop" | "mobile";
 type Drink = "coffee" | "tea";
 
 function Scene({ drink }: { drink: Drink }) {
-  const props = { progress: 0.55, running: true, mode: "focus" as const, completed: 0 };
+  const props = {
+    progress: 0.55,
+    running: true,
+    mode: "focus" as const,
+    completed: 0,
+  };
   return (
     <div className="dx-scene" aria-hidden="true">
-      {drink === "coffee" ? <CoffeeScene {...props} /> : <TeaScene {...props} />}
+      {drink === "coffee" ? (
+        <CoffeeScene {...props} />
+      ) : (
+        <TeaScene {...props} />
+      )}
     </div>
   );
 }
 
 function DevicePreview({ device, drink }: { device: Device; drink: Drink }) {
   return (
-    <div className={`dx-device dx-device--${device}`} aria-label={`${device} preview of Drizlo ${drink} timer`}>
+    <div
+      className={`dx-device dx-device--${device}`}
+      role="img"
+      aria-label={`${device} preview of Drizlo ${drink} timer`}
+    >
       <div className="dx-device-top">
-        <span className="dx-device-title">drizlo.</span>
-        <span className="dx-device-meta">{device === "mobile" ? "9:41" : "↗"}</span>
+        <span className="dx-device-title">
+          drizlo<span>.</span>
+        </span>
+        <span className="dx-device-meta">
+          {device === "mobile" ? "9:41" : "●  ●  ●"}
+        </span>
       </div>
       <div className="dx-screen">
         <Scene drink={drink} />
@@ -31,7 +48,9 @@ function DevicePreview({ device, drink }: { device: Device; drink: Drink }) {
           <span className="dx-timer-label">FOCUS TIME</span>
           <strong>14:32</strong>
           <small>Keep your focus going.</small>
-          <span className="dx-play" aria-hidden="true">Ⅱ</span>
+          <span className="dx-play" aria-hidden="true">
+            Ⅱ
+          </span>
         </div>
       </div>
       {device === "mobile" && <div className="dx-home-bar" />}
@@ -39,66 +58,177 @@ function DevicePreview({ device, drink }: { device: Device; drink: Drink }) {
   );
 }
 
-function CopyrightYear() {
-  const [year, setYear] = useState(2026);
-  useEffect(() => setYear(new Date().getFullYear()), []);
-  return <>{year}</>;
-}
+const features = [
+  {
+    number: "01",
+    symbol: "◷",
+    title: "Progress you can see.",
+    description:
+      "Watch the scene change as you work. A quieter, more satisfying way to see how far you've come.",
+  },
+  {
+    number: "02",
+    symbol: "☁",
+    title: "An atmosphere of your own.",
+    description:
+      "Coffee brewing, tea steeping, and more scenes to come. Find a setting that feels right for today.",
+  },
+  {
+    number: "03",
+    symbol: "✦",
+    title: "Nothing between you and focus.",
+    description:
+      "No complicated setup. No account needed. Just choose a scene, set the time, and begin.",
+  },
+];
+
+const steps = [
+  {
+    title: "Find your scene",
+    description: "Choose an animated atmosphere for your session.",
+  },
+  {
+    title: "Set your time",
+    description: "Pick a focus duration that fits what you want to get done.",
+  },
+  {
+    title: "Let the scene unfold",
+    description: "Focus on your work while your scene moves with you.",
+  },
+];
+
+const faqs = [
+  [
+    "Is Drizlo free to use?",
+    "Yes. You can use the focus timer and currently available scenes for free.",
+  ],
+  [
+    "Do I need an account?",
+    "No. Open Drizlo, choose a scene, and start your session.",
+  ],
+  [
+    "Does Drizlo work on mobile?",
+    "Yes. Drizlo works in your mobile browser. Dedicated Android and iOS apps are planned.",
+  ],
+  [
+    "What happens when my timer finishes?",
+    "Your focus session ends, and you can switch to a break before starting again.",
+  ],
+  [
+    "Can I customize my sessions?",
+    "You can choose between available scenes and session lengths to suit how you work.",
+  ],
+];
 
 export default function LandingPage() {
   const [device, setDevice] = useState<Device>("desktop");
-  const [drink, setDrink] = useState<Drink>("coffee");
-  const [autoCycle, setAutoCycle] = useState(true);
+  const [drink] = useState<Drink>("coffee");
+  const [cycleKey, setCycleKey] = useState(0);
+  const [year, setYear] = useState(2026);
 
+  useEffect(() => setYear(new Date().getFullYear()), []);
   useEffect(() => {
-    if (!autoCycle) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const interval = window.setInterval(() => {
-      setDevice((previous) => previous === "desktop" ? "mobile" : "desktop");
+      setDevice((previous) => (previous === "desktop" ? "mobile" : "desktop"));
     }, 6500);
     return () => window.clearInterval(interval);
-  }, [autoCycle]);
+  }, [cycleKey]);
 
   function chooseDevice(next: Device) {
     setDevice(next);
-    setAutoCycle(false);
+    setCycleKey((key) => key + 1);
   }
 
   return (
     <main className="dx" id="top">
-      <header className="dx-nav">
-        <Link href="/" className="dx-brand">drizlo<span>.</span></Link>
-        <nav className="dx-nav-right" aria-label="Landing navigation">
-          <a href="#how-it-works">How it works</a>
-          <a href="#faq">FAQ</a>
-          <Link href="/app" className="dx-nav-cta">Open timer ↗</Link>
-        </nav>
+      <header className="dx-nav-shell">
+        <div className="dx-nav">
+          <Link href="/" className="dx-brand" aria-label="Drizlo home">
+            drizlo<span>.</span>
+          </Link>
+          <nav className="dx-nav-right" aria-label="Main navigation">
+            <a href="#how-it-works">How it works</a>
+            <a href="#faq">FAQ</a>
+            <Link href="/app" className="dx-nav-cta">
+              Open timer <span aria-hidden="true">↗</span>
+            </Link>
+          </nav>
+        </div>
       </header>
 
-      <section className="dx-hero">
-        <div className="dx-hero-content">
-          <span className="dx-eyebrow">A DIFFERENT KIND OF FOCUS TIMER</span>
-          <h1>Focus feels<br /><em>different here.</em></h1>
-          <p>A focus timer that brings your sessions to life. Watch coffee brew, tea steep, and animated scenes evolve as you make progress.</p>
-          <div className="dx-actions">
-            <Link className="dx-primary" href="/app">Start focusing <span>↗</span></Link>
-            <a className="dx-secondary" href="#how-it-works">See how it works ↓</a>
-          </div>
-          <span className="dx-note">Free to use · No account needed</span>
-        </div>
-
-        <div className="dx-hero-visual">
-          <div className="dx-preview-stage">
-            <DevicePreview device={device} drink={drink} />
-          </div>
-          <div className="dx-preview-controls">
-            <div className="dx-toggle" aria-label="Device preview">
-              <button type="button" aria-pressed={device === "desktop"} onClick={() => chooseDevice("desktop")}>▣ Desktop</button>
-              <button type="button" aria-pressed={device === "mobile"} onClick={() => chooseDevice("mobile")}>▯ Mobile</button>
-              <button type="button" className="dx-auto" aria-pressed={autoCycle} onClick={() => setAutoCycle(v => !v)} title="Automatically switch devices">{autoCycle ? "Ⅱ Auto" : "▶ Auto"}</button>
+      <section className="dx-hero-shell" aria-labelledby="dx-hero-title">
+        <div className="dx-hero">
+          <div className="dx-hero-content">
+            <span className="dx-eyebrow">
+              <i aria-hidden="true" /> A DIFFERENT KIND OF FOCUS TIMER
+            </span>
+            <h1 id="dx-hero-title">
+              Focus feels
+              <br />
+              <em>different here.</em>
+            </h1>
+            <p>
+              Make room for the work that matters. Set a timer, settle into a
+              scene, and watch your progress come to life.
+            </p>
+            <div className="dx-actions">
+              <Link className="dx-primary" href="/app">
+                Start focusing <span aria-hidden="true">↗</span>
+              </Link>
+              <a className="dx-secondary" href="#how-it-works">
+                See how it works <span aria-hidden="true">↓</span>
+              </a>
             </div>
-            <div className="dx-toggle" aria-label="Drink preview">
-              <button type="button" aria-pressed={drink === "coffee"} onClick={() => setDrink("coffee")}>☕ Coffee</button>
-              <button type="button" aria-pressed={drink === "tea"} onClick={() => setDrink("tea")}>🍵 Tea</button>
+            <span className="dx-note">
+              Free to use <span aria-hidden="true">·</span> No account needed
+            </span>
+            <div className="dx-hero-smallprint">
+              <span className="dx-small-line" /> A LITTLE LESS CLOCK-WATCHING. A
+              LITTLE MORE DOING.
+            </div>
+          </div>
+
+          <div className="dx-hero-visual">
+            <div className="dx-showcase-top">
+              <span className="dx-showcase-label">
+                A GLIMPSE OF YOUR NEXT SESSION
+              </span>
+              <span className="dx-showcase-live">
+                <i aria-hidden="true" /> LIVE PREVIEW
+              </span>
+            </div>
+            <div className="dx-preview-stage">
+              <div
+                className="dx-stage-orbit dx-stage-orbit--one"
+                aria-hidden="true"
+              />
+              <div
+                className="dx-stage-orbit dx-stage-orbit--two"
+                aria-hidden="true"
+              />
+              <DevicePreview device={device} drink={drink} />
+            </div>
+            <div className="dx-preview-bottom">
+              <div className="dx-toggle" aria-label="Device preview">
+                <button
+                  type="button"
+                  aria-pressed={device === "desktop"}
+                  onClick={() => chooseDevice("desktop")}
+                >
+                  ▣ <span>Desktop</span>
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={device === "mobile"}
+                  onClick={() => chooseDevice("mobile")}
+                >
+                  ▯ <span>Mobile</span>
+                </button>
+              </div>
+              <span className="dx-preview-hint">
+                A little window into your focus time.
+              </span>
             </div>
           </div>
         </div>
@@ -106,71 +236,128 @@ export default function LandingPage() {
 
       <section className="dx-any-screen" aria-labelledby="dx-any-screen-title">
         <div className="dx-any-screen-inner">
-          <span className="dx-eyebrow">MADE FOR YOUR WORKSPACE</span>
-          <h2 id="dx-any-screen-title">Your focus goes<br /><em>where you go.</em></h2>
-          <p>At your desk or on your phone, Drizlo keeps your focus sessions moving. Same timer, same animated scenes, wherever you decide to work.</p>
-          <a href="#top" className="dx-text-link">Explore the preview ↑</a>
+          <span className="dx-eyebrow">WHEREVER YOU SETTLE IN</span>
+          <h2 id="dx-any-screen-title">
+            Your focus goes
+            <br />
+            <em>where you go.</em>
+          </h2>
+          <p>
+            At your desk or on your phone, your focus time feels familiar. One
+            simple space to begin, wherever the day takes you.
+          </p>
+        </div>
+        <div className="dx-any-screen-aside" aria-hidden="true">
+          <span>01 / 03</span>
+          <span className="dx-aside-rule" />
+          <span>MAKE SPACE FOR FOCUS</span>
         </div>
       </section>
 
-      <section className="dx-highlights" aria-label="Why Drizlo feels different">
-        <article className="dx-highlight-card">
-          <span className="dx-card-symbol" aria-hidden="true">◷</span>
-          <h3>Watch your progress unfold.</h3>
-          <p>Your scene changes as your session moves forward. A different way to see the time you've put in.</p>
-        </article>
-        <article className="dx-highlight-card">
-          <span className="dx-card-symbol" aria-hidden="true">☁</span>
-          <h3>Set the mood for focus.</h3>
-          <p>From brewing coffee to rainy evenings, choose an atmosphere that makes your workspace feel like yours.</p>
-        </article>
-        <article className="dx-highlight-card">
-          <span className="dx-card-symbol" aria-hidden="true">✦</span>
-          <h3>Just press start.</h3>
-          <p>Choose your scene, set your timer, and get going. No complicated setup or account required.</p>
-        </article>
+      <section
+        className="dx-highlights"
+        aria-label="Why Drizlo feels different"
+      >
+        {features.map((feature) => (
+          <article className="dx-highlight-card" key={feature.number}>
+            <div className="dx-card-top">
+              <span className="dx-card-symbol" aria-hidden="true">
+                {feature.symbol}
+              </span>
+              <span className="dx-card-index">{feature.number}</span>
+            </div>
+            <h3>{feature.title}</h3>
+            <p>{feature.description}</p>
+          </article>
+        ))}
       </section>
 
-      <section className="dx-how" id="how-it-works" aria-labelledby="dx-how-title">
-        <div className="dx-how-intro">
-          <span className="dx-eyebrow">HOW IT WORKS</span>
-          <h2 id="dx-how-title">Three steps to<br /><em>finding your flow.</em></h2>
-          <p>Getting started is simple. Pick your atmosphere, choose how long you want to focus, and let Drizlo handle the countdown.</p>
-        </div>
-        <div className="dx-steps">
-          <div className="dx-step"><span className="dx-step-number">01</span><div><h3>Choose your scene.</h3><p>Coffee brewing or tea steeping? Pick the atmosphere that suits your session.</p></div></div>
-          <div className="dx-step"><span className="dx-step-number">02</span><div><h3>Set your focus time.</h3><p>Choose your session length and start the timer. Your scene progresses alongside you.</p></div></div>
-          <div className="dx-step"><span className="dx-step-number">03</span><div><h3>Focus, then take a break.</h3><p>Work through your session, watch your progress unfold, and take a break when the timer ends.</p></div></div>
+      <section
+        className="dx-how-shell"
+        id="how-it-works"
+        aria-labelledby="dx-how-title"
+      >
+        <div className="dx-how">
+          <div className="dx-how-intro">
+            <span className="dx-eyebrow">THE SIMPLE PART</span>
+            <h2 id="dx-how-title">
+              Three steps to
+              <br />
+              <em>finding your flow.</em>
+            </h2>
+            <p>
+              Less time setting up. More time settling in. Getting started with
+              Drizlo takes just a moment.
+            </p>
+            <Link href="/app" className="dx-inline-link">
+              Try a focus session <span aria-hidden="true">↗</span>
+            </Link>
+          </div>
+          <div className="dx-steps">
+            {steps.map((step, index) => (
+              <div className="dx-step" key={step.title}>
+                <span className="dx-step-number">0{index + 1}</span>
+                <div>
+                  <h3>{step.title}</h3>
+                  <p>{step.description}</p>
+                </div>
+                <span className="dx-step-arrow" aria-hidden="true">
+                  ↗
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       <section className="dx-faq" id="faq" aria-labelledby="dx-faq-title">
         <div className="dx-faq-heading">
-          <span className="dx-eyebrow">FREQUENTLY ASKED QUESTIONS</span>
-          <h2 id="dx-faq-title">Good questions.<br /><em>Simple answers.</em></h2>
-          <p>A few things to know before getting started.</p>
+          <span className="dx-eyebrow">THE DETAILS</span>
+          <h2 id="dx-faq-title">
+            Good questions.
+            <br />
+            <em>Simple answers.</em>
+          </h2>
+          <p>Everything you need to know before your first session.</p>
         </div>
         <div className="dx-faq-list">
-          <details><summary>Is Drizlo free to use?<span aria-hidden="true">+</span></summary><p>Yes. You can use the focus timer and currently available scenes for free.</p></details>
-          <details><summary>Do I need an account?<span aria-hidden="true">+</span></summary><p>No. Just open Drizlo, choose a scene, and start your session.</p></details>
-          <details><summary>Does Drizlo work on mobile?<span aria-hidden="true">+</span></summary><p>Yes. Drizlo works in your mobile browser. Dedicated Android and iOS apps are planned.</p></details>
-          <details><summary>What happens when my timer finishes?<span aria-hidden="true">+</span></summary><p>Your focus session ends and you can switch to a break before starting again.</p></details>
-          <details><summary>Can I customize my sessions?<span aria-hidden="true">+</span></summary><p>You can choose between available scenes and session lengths to suit how you work.</p></details>
+          {faqs.map(([question, answer]) => (
+            <details key={question}>
+              <summary>
+                {question}
+                <span aria-hidden="true">+</span>
+              </summary>
+              <p>{answer}</p>
+            </details>
+          ))}
         </div>
       </section>
 
       <section className="dx-final-cta">
-        <span className="dx-eyebrow">YOUR NEXT SESSION STARTS HERE</span>
-        <h2>Ready to get<br /><em>in the zone?</em></h2>
-        <p>Pick a scene, set your timer, and see where your focus takes you.</p>
-        <Link href="/app" className="dx-primary">Start focusing ↗</Link>
+        <div className="dx-final-decoration" aria-hidden="true">
+          ✳
+        </div>
+        <span className="dx-eyebrow">A FRESH START IS ONE CLICK AWAY</span>
+        <h2>
+          Ready to get
+          <br />
+          <em>in the zone?</em>
+        </h2>
+        <p>Pick a scene, set your timer, and make this moment yours.</p>
+        <Link href="/app" className="dx-primary">
+          Start focusing <span aria-hidden="true">↗</span>
+        </Link>
         <span className="dx-final-note">Free to use · No account needed</span>
       </section>
 
-      <footer className="dx-footer">
-        <Link href="/" className="dx-brand">drizlo<span>.</span></Link>
-        <span>A different kind of focus timer.</span>
-        <span>© <CopyrightYear /> Drizlo</span>
+      <footer className="dx-footer-shell">
+        <div className="dx-footer">
+          <Link href="/" className="dx-brand">
+            drizlo<span>.</span>
+          </Link>
+          <span>A different kind of focus timer.</span>
+          <span>© {year} Drizlo</span>
+        </div>
       </footer>
     </main>
   );
