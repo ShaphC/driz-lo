@@ -14,12 +14,15 @@ interface TimerSession {
   running: boolean;
   endsAt: number | null;
   completed: number;
+  roundsInSet: number;
+  setFinished: boolean;
 }
 const FOCUS = 25;
 const BREAK = 5;
 const STORAGE_KEY = "drizlo-session-v1";
 const LEGACY_STORAGE_KEY = "drizzlo-session-v1";
 const SOUND_KEY = "drizlo-sound-enabled-v1";
+const AMBIENCE_KEY = "drizlo-ambience-enabled-v1";
 const SCENE_KEY = "drizlo-scene-v1";
 type SceneChoice = "coffee" | "tea";
 
@@ -48,6 +51,61 @@ function playChime(kind: "start" | "focus-end" | "break-end") {
   } catch { /* Audio is optional; unsupported or blocked devices stay silent. */ }
 }
 
+function playCountdownTick(second: number) {
+  try {
+    const AudioContextClass = window.AudioContext;
+    if (!AudioContextClass) return;
+    const context = new AudioContextClass();
+    if (context.state === "suspended") void context.resume();
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const at = context.currentTime + 0.01;
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(second <= 3 ? 880 : 660, at);
+    gain.gain.setValueAtTime(0.0001, at);
+    gain.gain.exponentialRampToValueAtTime(0.06, at + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.12);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(at);
+    oscillator.stop(at + 0.13);
+    oscillator.onended = () => { void context.close(); };
+  } catch { /* Browser may restrict background audio. */ }
+}
+
+
+// Soft, locally generated rain-like ambience. No external audio files or network requests.
+function startAmbience(): { stop: () => void } | null {
+  try {
+    const context = new AudioContext();
+    const seconds = 3;
+    const buffer = context.createBuffer(1, context.sampleRate * seconds, context.sampleRate);
+    const data = buffer.getChannelData(0);
+    let brown = 0;
+    for (let i = 0; i < data.length; i++) {
+      brown = (brown + (Math.random() * 2 - 1) * 0.04) * 0.995;
+      data[i] = brown * 0.9;
+    }
+    const source = context.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    const filter = context.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 850;
+    const gain = context.createGain();
+    gain.gain.value = 0.12;
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(context.destination);
+    source.start();
+    void context.resume().catch(() => {});
+    return { stop: () => {
+      try { source.stop(); } catch { /* already stopped */ }
+      void context.close().catch(() => {});
+    } };
+  } catch { return null; }
+}
+
 function notifyCompletion(mode: TimerMode) {
   if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
   try {
@@ -61,6 +119,7 @@ function notifyCompletion(mode: TimerMode) {
 const DEFAULT_SESSION: TimerSession = {
   mode: "focus", duration: FOCUS, focusDuration: FOCUS,
   remaining: FOCUS * 60, running: false, endsAt: null, completed: 0,
+  roundsInSet: 0, setFinished: false,
 };
 
 function readSession(): TimerSession {
@@ -88,6 +147,9 @@ function readSession(): TimerSession {
       endsAt: running ? saved.endsAt! : null,
       completed: typeof saved.completed === "number" && Number.isFinite(saved.completed)
         ? Math.max(0, Math.floor(saved.completed)) : 0,
+      roundsInSet: typeof saved.roundsInSet === "number" && Number.isFinite(saved.roundsInSet)
+        ? Math.min(2, Math.max(0, Math.floor(saved.roundsInSet))) : 0,
+      setFinished: saved.setFinished === true,
     };
   } catch {
     return { ...DEFAULT_SESSION };
@@ -101,17 +163,27 @@ export default function Home() {
   const [justCompleted, setJustCompleted] = useState(false);
   const [mobileSettingsOpen, setMobileSettingsOpen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [ambienceEnabled, setAmbienceEnabled] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const completedEndRef = useRef<number | null>(null);
+  const lastCountdownTickRef = useRef<string | null>(null);
 
   useEffect(() => {
     setSession(readSession());
     try { setSceneChoice(localStorage.getItem(SCENE_KEY) === "tea" ? "tea" : "coffee"); } catch { /* ignore */ }
     setNow(Date.now());
     try { setSoundEnabled(localStorage.getItem(SOUND_KEY) !== "false"); } catch { /* ignore */ }
+    try { setAmbienceEnabled(localStorage.getItem(AMBIENCE_KEY) === "true"); } catch { /* ignore */ }
     setNotificationsEnabled(typeof Notification !== "undefined" && Notification.permission === "granted");
   }, []);
   useEffect(() => { if (session) localStorage.setItem(STORAGE_KEY, JSON.stringify(session)); }, [session]);
+  // Ambience is independent from alert sounds and stops on pause, completion, or unmount.
+  useEffect(() => {
+    if (!ambienceEnabled || !session?.running) return;
+    const audio = startAmbience();
+    return () => audio?.stop();
+  }, [ambienceEnabled, session?.running]);
+
   useEffect(() => {
     const refresh = () => setNow(Date.now());
     const interval = window.setInterval(refresh, 250);
@@ -126,26 +198,61 @@ export default function Home() {
     };
   }, []);
   useEffect(() => {
+    if (!session?.running || session.endsAt === null || !soundEnabled || now <= 0) return;
+    const secondsLeft = Math.ceil((session.endsAt - now) / 1000);
+    if (secondsLeft < 1 || secondsLeft > 10) return;
+    // Key by deadline and second so re-renders cannot repeat a tick.
+    const key = `${session.endsAt}:${secondsLeft}`;
+    if (lastCountdownTickRef.current === key) return;
+    lastCountdownTickRef.current = key;
+    playCountdownTick(secondsLeft);
+  }, [now, session?.running, session?.endsAt, soundEnabled]);
+
+  useEffect(() => {
     if (!session?.running || session.endsAt === null || now < session.endsAt) return;
-    // A deadline is authoritative, even if the tab was asleep for hours.
-    // Guard the side effects against repeated renders and React Strict Mode.
     if (completedEndRef.current === session.endsAt) return;
     completedEndRef.current = session.endsAt;
-    const finishedMode = session.mode;
-    if (soundEnabled) playChime(finishedMode === "focus" ? "focus-end" : "break-end");
-    notifyCompletion(finishedMode);
+    const completedDeadline = session.endsAt;
+
+    // Advance using scheduled deadlines, not the time the browser woke up.
+    // This also handles sleeping tabs and reloads without extending a break.
+    let next = { ...session };
+    const events: TimerMode[] = [];
+    let finishedFocus = false;
+    while (next.running && next.endsAt !== null && now >= next.endsAt) {
+      const boundary = next.endsAt;
+      events.push(next.mode);
+      if (next.mode === "focus") {
+        finishedFocus = true;
+        next.completed += 1;
+        next.roundsInSet += 1;
+        next.mode = "break";
+        next.duration = BREAK;
+        next.remaining = BREAK * 60;
+        next.endsAt = boundary + BREAK * 60_000;
+      } else if (next.roundsInSet >= 2) {
+        next = {
+          ...next, running: false, endsAt: null, remaining: 0,
+          setFinished: true,
+        };
+      } else {
+        next.mode = "focus";
+        next.duration = next.focusDuration;
+        next.remaining = next.duration * 60;
+        next.endsAt = boundary + next.duration * 60_000;
+      }
+    }
+    if (soundEnabled && events.length > 0) {
+      const last = events[events.length - 1];
+      playChime(last === "focus" ? "focus-end" : "break-end");
+    }
+    if (events.length > 0) notifyCompletion(events[events.length - 1]);
+    if (finishedFocus) setJustCompleted(true);
     setSession((current) => {
-      if (!current?.running || current.endsAt === null || now < current.endsAt) return current;
-      const nextMode: TimerMode = current.mode === "focus" ? "break" : "focus";
-      const nextDuration = current.mode === "focus" ? BREAK : current.focusDuration;
-      return {
-        ...current, mode: nextMode, duration: nextDuration,
-        remaining: nextDuration * 60, running: false, endsAt: null,
-        completed: current.completed + (current.mode === "focus" ? 1 : 0),
-      };
+      if (!current?.running || current.endsAt !== completedDeadline) return current;
+      return next;
     });
-    if (finishedMode === "focus") setJustCompleted(true);
-  }, [now, session?.running, session?.endsAt, session?.mode, soundEnabled]);
+  }, [now, session, soundEnabled]);
   useEffect(() => {
     if (!justCompleted) return;
     const timeout = window.setTimeout(() => setJustCompleted(false), 3500);
@@ -165,16 +272,21 @@ export default function Home() {
   const time = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
   const isFocus = session.mode === "focus";
   const isRunning = session.running;
-  const actionLabel = isRunning ? "Pause" : seconds < totalSeconds ? "Resume" : "Start";
+  const actionLabel = isRunning ? "Pause" : session.setFinished ? "Start again" : seconds < totalSeconds ? "Resume" : "Start";
 
   function toggleTimer(): void {
     setJustCompleted(false);
-    if (!isRunning && seconds > 0 && soundEnabled) playChime("start");
+    if (!isRunning && (seconds > 0 || session?.setFinished) && soundEnabled) playChime("start");
     setSession((current) => {
       if (!current) return current;
       if (current.running && current.endsAt !== null) return {
         ...current, remaining: Math.max(0, Math.ceil((current.endsAt - Date.now()) / 1000)),
         running: false, endsAt: null,
+      };
+      if (current.setFinished) return {
+        ...current, mode: "focus", duration: current.focusDuration,
+        remaining: current.focusDuration * 60, roundsInSet: 0, setFinished: false,
+        running: true, endsAt: Date.now() + current.focusDuration * 60_000,
       };
       if (current.remaining <= 0) return current;
       return { ...current, running: true, endsAt: Date.now() + current.remaining * 1000 };
@@ -182,8 +294,11 @@ export default function Home() {
   }
   function reset(): void {
     setJustCompleted(false);
+    completedEndRef.current = null;
     setSession((current) => current ? {
-      ...current, remaining: current.duration * 60, running: false, endsAt: null,
+      ...current, mode: "focus", duration: current.focusDuration,
+      remaining: current.focusDuration * 60, running: false, endsAt: null,
+      roundsInSet: 0, setFinished: false,
     } : current);
   }
   function changeDuration(minutes: number): void {
@@ -191,7 +306,8 @@ export default function Home() {
     setSession((current) => {
       if (!current || current.mode !== "focus" || current.running) return current;
       return { ...current, duration: minutes, focusDuration: minutes,
-        remaining: minutes * 60, running: false, endsAt: null };
+        remaining: minutes * 60, running: false, endsAt: null,
+        roundsInSet: 0, setFinished: false };
     });
   }
   function switchMode(): void {
@@ -201,7 +317,8 @@ export default function Home() {
       const nextMode: TimerMode = current.mode === "focus" ? "break" : "focus";
       const duration = nextMode === "focus" ? current.focusDuration : BREAK;
       return { ...current, mode: nextMode, duration,
-        remaining: duration * 60, running: false, endsAt: null };
+        remaining: duration * 60, running: false, endsAt: null,
+        roundsInSet: 0, setFinished: false };
     });
   }
 
@@ -213,6 +330,13 @@ export default function Home() {
   function toggleSound(): void {
     setSoundEnabled((current) => {
       try { localStorage.setItem(SOUND_KEY, String(!current)); } catch { /* ignore */ }
+      return !current;
+    });
+  }
+
+  function toggleAmbience(): void {
+    setAmbienceEnabled((current) => {
+      try { localStorage.setItem(AMBIENCE_KEY, String(!current)); } catch { /* ignore */ }
       return !current;
     });
   }
@@ -229,6 +353,8 @@ export default function Home() {
     <div className="timer-preferences" aria-label="Timer preferences">
       <button type="button" className="sound-toggle" aria-pressed={soundEnabled}
         onClick={toggleSound}>{soundEnabled ? "Sound on" : "Sound off"}</button>
+      <button type="button" className="sound-toggle" aria-pressed={ambienceEnabled}
+        onClick={toggleAmbience}>{ambienceEnabled ? "Ambience on" : "Ambience off"}</button>
       <button type="button" className="notification-toggle"
         onClick={() => void enableNotifications()}
         disabled={notificationsEnabled || typeof Notification === "undefined" || !window.isSecureContext || Notification.permission === "denied"}>
@@ -284,7 +410,7 @@ export default function Home() {
 
         {/* Desktop: unchanged glass timer card. */}
         <aside className="timer-panel desktop-timer" aria-label="Timer controls">
-          <span className="eyebrow">{isFocus ? "FOCUS SESSION" : "SHORT BREAK"}</span>
+          <span className="eyebrow">{session.setFinished ? "TWO ROUNDS COMPLETE" : `${isFocus ? "FOCUS SESSION" : "SHORT BREAK"} · ROUND ${Math.min(2, Math.max(1, session.roundsInSet + (isFocus ? 1 : 0)))}/2`}</span>
           <div className="time">{time}</div>
           <div className="progress-track"><div className="progress-fill" style={{ width: `${progress * 100}%` }} /></div>
           <p className="timer-description">{justCompleted ? "Beautifully done. Take a moment."
@@ -303,7 +429,7 @@ export default function Home() {
 
         {/* Mobile: visible timer, no hidden scrolling card. */}
         <section className="mobile-timer" aria-label="Focus timer">
-          <span className="eyebrow">{isFocus ? "FOCUS SESSION" : "SHORT BREAK"}</span>
+          <span className="eyebrow">{session.setFinished ? "TWO ROUNDS COMPLETE" : `${isFocus ? "FOCUS SESSION" : "SHORT BREAK"} · ROUND ${Math.min(2, Math.max(1, session.roundsInSet + (isFocus ? 1 : 0)))}/2`}</span>
           <div className="mobile-time" role="timer" aria-live="off">{time}</div>
           <div className="mobile-progress-track"><div className="progress-fill" style={{ width: `${progress * 100}%` }} /></div>
           <p className="mobile-timer-description">

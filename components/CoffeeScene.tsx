@@ -23,9 +23,11 @@ export default function CoffeeScene({
   const id = useId().replace(/:/g, "");
 
   const isFocus = mode === "focus";
-  // Focus fills the carafe; break gradually empties it.
-  const phaseProgress = Math.max(0, Math.min(1, progress));
-  const fill = isFocus ? phaseProgress : 1 - phaseProgress;
+  // Focus fills the carafe; the following break drains it.
+  const elapsed = Number.isFinite(progress) ? Math.max(0, Math.min(1, progress)) : 0;
+  // progress is elapsed fraction (0 at start, 1 at end).
+  // 0% -> 100% during focus; 100% -> 0% during breaks.
+  const fill = isFocus ? elapsed : 1 - elapsed;
 
   const brewing = isFocus && running && fill < 1;
 
@@ -104,22 +106,13 @@ export default function CoffeeScene({
 
           <circle cx="955" cy="360" r="52" fill="#FFE5A0" />
 
-          {/* Distinct cloud banks drifting across the upper window. */}
-          <g className="drizlo-coffee-cloud-layer" fill="#FFE0B5" opacity=".78">
-            <g className="drizlo-coffee-cloud drizlo-coffee-cloud-one">
-              <ellipse cx="505" cy="180" rx="92" ry="19" />
-              <ellipse cx="555" cy="167" rx="72" ry="23" />
-              <ellipse cx="609" cy="182" rx="87" ry="16" />
-            </g>
-            <g className="drizlo-coffee-cloud drizlo-coffee-cloud-two" opacity=".8">
-              <ellipse cx="1090" cy="135" rx="110" ry="17" />
-              <ellipse cx="1152" cy="122" rx="80" ry="21" />
-              <ellipse cx="1225" cy="138" rx="90" ry="15" />
-            </g>
-            <g className="drizlo-coffee-cloud drizlo-coffee-cloud-three" opacity=".6">
-              <ellipse cx="805" cy="255" rx="75" ry="12" />
-              <ellipse cx="852" cy="248" rx="60" ry="15" />
-            </g>
+          {/* Clouds */}
+          <g fill="#F8AD80" opacity=".65">
+            <ellipse cx="590" cy="205" rx="100" ry="18" />
+            <ellipse cx="655" cy="198" rx="70" ry="13" />
+            <ellipse cx="1090" cy="175" rx="130" ry="17" />
+            <ellipse cx="1160" cy="165" rx="80" ry="13" />
+            <ellipse cx="840" cy="275" rx="90" ry="12" />
           </g>
 
           {/* Distant mountains */}
@@ -152,6 +145,13 @@ export default function CoffeeScene({
 
           {/* Water */}
           <rect x="340" y="540" width="1000" height="105" fill="#B96D67" />
+
+          <g stroke="#F7B77C" strokeWidth="4" opacity=".5">
+            <path d="M740 565 H1100" />
+            <path d="M820 585 H1040" />
+            <path d="M870 605 H1010" />
+            <path d="M910 625 H990" />
+          </g>
 
           {/* City silhouette */}
           <path
@@ -497,6 +497,7 @@ export default function CoffeeScene({
               height={liquidHeight + 10}
               fill={`url(#${id}-coffee)`}
               className="drizlo-liquid"
+              style={{ transition: "y 0.25s linear, height 0.25s linear" }}
             />
 
             {fill > 0.005 && (
@@ -570,8 +571,7 @@ export default function CoffeeScene({
           </g>
 
           {/* Steam */}
-          {fill > 0.005 && (
-          <g className={brewing ? "is-brewing" : ""}>
+          <g className={isFocus ? (brewing ? "is-brewing" : "") : "is-steaming"}>
             {[
               "M275 163 C256 141 293 120 272 97",
               "M311 160 C334 135 299 114 318 90",
@@ -588,7 +588,7 @@ export default function CoffeeScene({
               />
             ))}
           </g>
-          )}
+
 
         </g>
 
@@ -610,7 +610,7 @@ export default function CoffeeScene({
 
         <span>
           {!isFocus
-            ? "Freshly brewed"
+            ? running ? "Enjoying your coffee..." : "Coffee break paused"
             : brewing
               ? "Brewing slowly..."
               : fill >= 1
