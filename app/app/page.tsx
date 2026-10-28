@@ -160,6 +160,7 @@ export default function Home() {
   const [session, setSession] = useState<TimerSession | null>(null);
   const [sceneChoice, setSceneChoice] = useState<SceneChoice>("coffee");
   const [now, setNow] = useState(0);
+  const [scrubSeconds, setScrubSeconds] = useState<number | null>(null);
   const [justCompleted, setJustCompleted] = useState(false);
   const [mobileSettingsOpen, setMobileSettingsOpen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -198,7 +199,7 @@ export default function Home() {
     };
   }, []);
   useEffect(() => {
-    if (!session?.running || session.endsAt === null || !soundEnabled || now <= 0) return;
+    if (scrubSeconds !== null || !session?.running || session.endsAt === null || !soundEnabled || now <= 0) return;
     const secondsLeft = Math.ceil((session.endsAt - now) / 1000);
     if (secondsLeft < 1 || secondsLeft > 10) return;
     // Key by deadline and second so re-renders cannot repeat a tick.
@@ -206,10 +207,10 @@ export default function Home() {
     if (lastCountdownTickRef.current === key) return;
     lastCountdownTickRef.current = key;
     playCountdownTick(secondsLeft);
-  }, [now, session?.running, session?.endsAt, soundEnabled]);
+  }, [now, session?.running, session?.endsAt, soundEnabled, scrubSeconds]);
 
   useEffect(() => {
-    if (!session?.running || session.endsAt === null || now < session.endsAt) return;
+    if (scrubSeconds !== null || !session?.running || session.endsAt === null || now < session.endsAt) return;
     if (completedEndRef.current === session.endsAt) return;
     completedEndRef.current = session.endsAt;
     const completedDeadline = session.endsAt;
@@ -252,7 +253,7 @@ export default function Home() {
       if (!current?.running || current.endsAt !== completedDeadline) return current;
       return next;
     });
-  }, [now, session, soundEnabled]);
+  }, [now, session, soundEnabled, scrubSeconds]);
   useEffect(() => {
     if (!justCompleted) return;
     const timeout = window.setTimeout(() => setJustCompleted(false), 3500);
@@ -265,31 +266,77 @@ export default function Home() {
     </main>
   );
 
-  const seconds = session.running && session.endsAt !== null
-    ? Math.max(0, Math.ceil((session.endsAt - now) / 1000)) : session.remaining;
+  const seconds = scrubSeconds !== null ? scrubSeconds : session.running && session.endsAt !== null
+    ? Math.max(0, Math.min(session.duration * 60, Math.ceil((session.endsAt - now) / 1000))) : session.remaining;
   const totalSeconds = session.duration * 60;
   const progress = totalSeconds > 0 ? Math.min(1, Math.max(0, 1 - seconds / totalSeconds)) : 0;
   const time = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+  const isSetFinished = session.setFinished;
   const isFocus = session.mode === "focus";
   const isRunning = session.running;
   const actionLabel = isRunning ? "Pause" : session.setFinished ? "Start again" : seconds < totalSeconds ? "Resume" : "Start";
 
-  function toggleTimer(): void {
+  // Scrubbing previews the liquid level immediately; committing changes the
+  // deadline without changing rounds or skipping the countdown sound.
+  function commitScrub(value: number): void {
+    const instant = Date.now();
+    setNow(instant);
+    setScrubSeconds(null);
     setJustCompleted(false);
-    if (!isRunning && (seconds > 0 || session?.setFinished) && soundEnabled) playChime("start");
+    completedEndRef.current = null;
+    lastCountdownTickRef.current = null;
+    setSession(current => {
+      if (!current || current.setFinished) return current;
+      const remaining = Math.max(1, Math.min(current.duration * 60, Math.round(value)));
+      return { ...current, remaining,
+        endsAt: current.running ? instant + remaining * 1000 : null };
+    });
+  }
+
+  function scrubber(prefix: string) {
+    return (
+      <div className="drizlo-scrubber">
+        <div className="drizlo-scrubber-fill" style={{ width: `${progress * 100}%` }} aria-hidden="true" />
+        <input id={`${prefix}-scrub`} type="range" min="0" max={totalSeconds} step="1"
+          value={totalSeconds - seconds}
+          disabled={isSetFinished}
+          aria-label="Adjust timer position"
+          onChange={event => setScrubSeconds(totalSeconds - Number(event.currentTarget.value))}
+          onPointerUp={event => commitScrub(totalSeconds - Number(event.currentTarget.value))}
+          onKeyUp={event => {
+            if (scrubSeconds !== null) commitScrub(totalSeconds - Number(event.currentTarget.value));
+          }}
+          onBlur={event => {
+            if (scrubSeconds !== null) commitScrub(totalSeconds - Number(event.currentTarget.value));
+          }}
+        />
+      </div>
+    );
+  }
+
+  function toggleTimer(): void {
+    const instant = Date.now();
+    setJustCompleted(false);
+    setScrubSeconds(null);
+    // Use the same timestamp for the display and the new deadline.
+    // Separate Date.now() calls can briefly display one extra second.
+    setNow(instant);
+    if (!isRunning && (seconds > 0 || isSetFinished) && soundEnabled) playChime("start");
     setSession((current) => {
       if (!current) return current;
       if (current.running && current.endsAt !== null) return {
-        ...current, remaining: Math.max(0, Math.ceil((current.endsAt - Date.now()) / 1000)),
+        ...current,
+        remaining: Math.max(0, Math.min(current.duration * 60,
+          Math.ceil((current.endsAt - instant) / 1000))),
         running: false, endsAt: null,
       };
       if (current.setFinished) return {
         ...current, mode: "focus", duration: current.focusDuration,
         remaining: current.focusDuration * 60, roundsInSet: 0, setFinished: false,
-        running: true, endsAt: Date.now() + current.focusDuration * 60_000,
+        running: true, endsAt: instant + current.focusDuration * 60_000,
       };
       if (current.remaining <= 0) return current;
-      return { ...current, running: true, endsAt: Date.now() + current.remaining * 1000 };
+      return { ...current, running: true, endsAt: instant + current.remaining * 1000 };
     });
   }
   function reset(): void {
@@ -303,6 +350,7 @@ export default function Home() {
   }
   function changeDuration(minutes: number): void {
     setJustCompleted(false);
+    setScrubSeconds(null);
     setSession((current) => {
       if (!current || current.mode !== "focus" || current.running) return current;
       return { ...current, duration: minutes, focusDuration: minutes,
@@ -312,6 +360,7 @@ export default function Home() {
   }
   function switchMode(): void {
     setJustCompleted(false);
+    setScrubSeconds(null);
     setSession((current) => {
       if (!current) return current;
       const nextMode: TimerMode = current.mode === "focus" ? "break" : "focus";
@@ -366,7 +415,7 @@ export default function Home() {
 
   const durationControls = (prefix: string) => (
     <div className="durations" role="group" aria-label="Focus duration">
-      {[15, 25, 45, 60].map((minutes) => (
+      {[15, 25, 35, 45].map((minutes) => (
         <button type="button" key={`${prefix}-${minutes}`}
           disabled={!isFocus || isRunning}
           aria-pressed={isFocus && session.focusDuration === minutes}
@@ -412,7 +461,7 @@ export default function Home() {
         <aside className="timer-panel desktop-timer" aria-label="Timer controls">
           <span className="eyebrow">{session.setFinished ? "TWO ROUNDS COMPLETE" : `${isFocus ? "FOCUS SESSION" : "SHORT BREAK"} · ROUND ${Math.min(2, Math.max(1, session.roundsInSet + (isFocus ? 1 : 0)))}/2`}</span>
           <div className="time">{time}</div>
-          <div className="progress-track"><div className="progress-fill" style={{ width: `${progress * 100}%` }} /></div>
+          {scrubber("desktop")}
           <p className="timer-description">{justCompleted ? "Beautifully done. Take a moment."
             : isFocus ? isRunning ? "One drop at a time." : "Ready when you are."
               : "Take a moment for yourself."}</p>
@@ -431,7 +480,7 @@ export default function Home() {
         <section className="mobile-timer" aria-label="Focus timer">
           <span className="eyebrow">{session.setFinished ? "TWO ROUNDS COMPLETE" : `${isFocus ? "FOCUS SESSION" : "SHORT BREAK"} · ROUND ${Math.min(2, Math.max(1, session.roundsInSet + (isFocus ? 1 : 0)))}/2`}</span>
           <div className="mobile-time" role="timer" aria-live="off">{time}</div>
-          <div className="mobile-progress-track"><div className="progress-fill" style={{ width: `${progress * 100}%` }} /></div>
+          {scrubber("mobile")}
           <p className="mobile-timer-description">
             {justCompleted ? "Beautifully done. Take a moment."
               : isFocus ? isRunning ? "One drop at a time." : "Ready when you are."
