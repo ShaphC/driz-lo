@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import CoffeeScene from "@/components/CoffeeScene";
 import TeaScene from "@/components/TeaScene";
 import "./scene-selector.css";
+import { trackEvent } from "@/lib/analytics";
 
 type TimerMode = "focus" | "break";
 interface TimerSession {
@@ -250,12 +251,22 @@ export default function Home() {
       playChime(last === "focus" ? "focus-end" : "break-end");
     }
     if (events.length > 0) notifyCompletion(events[events.length - 1]);
+
+    for (const mode of events) {
+      trackEvent(
+        mode === "focus" ? "focus_completed" : "break_completed",
+        {
+          scene: sceneChoice,
+          focus_duration_minutes: session.focusDuration,
+        }
+      );
+    }
     if (finishedFocus) setJustCompleted(true);
     setSession((current) => {
       if (!current?.running || current.endsAt !== completedDeadline) return current;
       return next;
     });
-  }, [now, session, soundEnabled, scrubSeconds]);
+  }, [now, session, soundEnabled, scrubSeconds, sceneChoice]);
   useEffect(() => {
     if (!justCompleted) return;
     const timeout = window.setTimeout(() => setJustCompleted(false), 3500);
@@ -364,6 +375,19 @@ export default function Home() {
   advanceFiveMinutesRef.current = advanceFiveMinutes;
 
   function toggleTimer(): void {
+    if (!session) return;
+    trackEvent(
+      isRunning
+        ? "timer_paused"
+        : seconds < totalSeconds && !isSetFinished
+          ? "timer_resumed"
+          : "timer_started",
+      {
+        mode: session.mode,
+        scene: sceneChoice,
+        focus_duration_minutes: session.focusDuration,
+      }
+    );
     const instant = Date.now();
     setJustCompleted(false);
     setScrubSeconds(null);
@@ -389,6 +413,11 @@ export default function Home() {
     });
   }
   function reset(): void {
+    if (!session) return;
+    trackEvent("timer_reset", {
+      mode: session.mode,
+      scene: sceneChoice,
+    });
     setJustCompleted(false);
     completedEndRef.current = null;
     setSession((current) => current ? {
@@ -398,6 +427,14 @@ export default function Home() {
     } : current);
   }
   function changeDuration(minutes: number): void {
+    if (!session) return;
+    if (
+      session.mode === "focus" &&
+      !session.running &&
+      minutes !== session.focusDuration
+    ) {
+      trackEvent("duration_selected", { minutes });
+    }
     setJustCompleted(false);
     setScrubSeconds(null);
     setSession((current) => {
@@ -421,6 +458,9 @@ export default function Home() {
   }
 
   function changeScene(next: SceneChoice): void {
+    if (next !== sceneChoice) {
+      trackEvent("scene_selected", { scene: next });
+    }
     setSceneChoice(next);
     try { localStorage.setItem(SCENE_KEY, next); } catch { /* ignore */ }
   }
