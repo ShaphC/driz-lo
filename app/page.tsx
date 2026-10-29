@@ -28,6 +28,14 @@ function Scene({ drink }: { drink: Drink }) {
 }
 
 function DevicePreview({ device, drink }: { device: Device; drink: Drink }) {
+  const [secondsRemaining, setSecondsRemaining] = useState(14 * 60 + 32);
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setSecondsRemaining(previous => previous > 0 ? previous - 1 : 14 * 60 + 32);
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, []);
+  const previewTime = `${String(Math.floor(secondsRemaining / 60)).padStart(2, "0")}:${String(secondsRemaining % 60).padStart(2, "0")}`;
   return (
     <div
       className={`dx-device dx-device--${device}`}
@@ -46,7 +54,7 @@ function DevicePreview({ device, drink }: { device: Device; drink: Drink }) {
         <Scene drink={drink} />
         <div className="dx-timer-preview">
           <span className="dx-timer-label">FOCUS TIME</span>
-          <strong>14:32</strong>
+          <strong aria-live="off">{previewTime}</strong>
           <small>Keep your focus going.</small>
           <span className="dx-play" aria-hidden="true">
             Ⅱ

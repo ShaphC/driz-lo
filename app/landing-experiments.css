@@ -177,7 +177,7 @@
   box-shadow: 0 14px 35px #21110e22;
   transition:
     transform 0.2s,
-background 0.2s;
+    background 0.2s;
 }
 .dx-primary:hover {
   background: #ffd0a3;
@@ -910,38 +910,112 @@ background 0.2s;
 }
 /* Desktop morphs the same preview element; mobile switches with lightweight fades. */
 @keyframes dx-preview-desktop-in {
-  from { opacity: .55; transform: translateY(6px) scale(.97); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0.55;
+    transform: translateY(6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 @keyframes dx-preview-mobile-in {
-  from { opacity: .55; transform: translateY(6px) scale(.97); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0.55;
+    transform: translateY(6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 @media (min-width: 701px) {
-  .dx-device { animation: none; transition: width .65s ease, height .65s ease, border-radius .65s ease, padding .65s ease; }
-  .dx-timer-preview { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .dx-device {
+    animation: none;
+    transition:
+      width 0.65s ease,
+      height 0.65s ease,
+      border-radius 0.65s ease,
+      padding 0.65s ease;
+  }
+  .dx-timer-preview {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
 }
 @media (max-width: 700px) {
-  .dx-device { transition: none; }
-  .dx-device--desktop { animation: dx-preview-desktop-in 320ms ease-out both; }
-  .dx-device--mobile { animation: dx-preview-mobile-in 320ms ease-out both; }
-  .dx-timer-preview { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .dx-device {
+    transition: none;
+  }
+  .dx-device--desktop {
+    animation: dx-preview-desktop-in 320ms ease-out both;
+  }
+  .dx-device--mobile {
+    animation: dx-preview-mobile-in 320ms ease-out both;
+  }
+  .dx-timer-preview {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .dx-device { animation: none !important; transition: none !important; }
+  .dx-device {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 /* Compact section spacing. */
-.dx-hero { padding-top: 52px; padding-bottom: 62px; gap: clamp(24px, 3vw, 46px); }
-.dx-any-screen { padding-top: 62px; padding-bottom: 62px; }
-.dx-highlights { padding-top: 62px; padding-bottom: 70px; }
-.dx-how { padding-top: 70px; padding-bottom: 76px; gap: clamp(24px, 4vw, 62px); }
-.dx-faq { padding-top: 72px; padding-bottom: 78px; gap: clamp(24px, 4vw, 62px); }
-.dx-final-cta { padding-top: 72px; padding-bottom: 78px; }
+.dx-hero {
+  padding-top: 52px;
+  padding-bottom: 62px;
+  gap: clamp(24px, 3vw, 46px);
+}
+.dx-any-screen {
+  padding-top: 62px;
+  padding-bottom: 62px;
+}
+.dx-highlights {
+  padding-top: 62px;
+  padding-bottom: 70px;
+}
+.dx-how {
+  padding-top: 70px;
+  padding-bottom: 76px;
+  gap: clamp(24px, 4vw, 62px);
+}
+.dx-faq {
+  padding-top: 72px;
+  padding-bottom: 78px;
+  gap: clamp(24px, 4vw, 62px);
+}
+.dx-final-cta {
+  padding-top: 72px;
+  padding-bottom: 78px;
+}
 @media (max-width: 700px) {
-  .dx-hero { padding-top: 38px; padding-bottom: 42px; gap: 24px; }
-  .dx-any-screen { padding-top: 48px; padding-bottom: 48px; }
-  .dx-highlights { padding-top: 45px; padding-bottom: 52px; }
-  .dx-how { padding-top: 52px; padding-bottom: 56px; }
-  .dx-faq { padding-top: 52px; padding-bottom: 56px; }
-  .dx-final-cta { padding-top: 56px; padding-bottom: 60px; }
+  .dx-hero {
+    padding-top: 38px;
+    padding-bottom: 42px;
+    gap: 24px;
+  }
+  .dx-any-screen {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+  .dx-highlights {
+    padding-top: 45px;
+    padding-bottom: 52px;
+  }
+  .dx-how {
+    padding-top: 52px;
+    padding-bottom: 56px;
+  }
+  .dx-faq {
+    padding-top: 52px;
+    padding-bottom: 56px;
+  }
+  .dx-final-cta {
+    padding-top: 56px;
+    padding-bottom: 60px;
+  }
 }
