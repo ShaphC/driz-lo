@@ -5,6 +5,7 @@ import CoffeeScene from "@/components/CoffeeScene";
 import TeaScene from "@/components/TeaScene";
 import "./scene-selector.css";
 import { trackEvent } from "@/lib/analytics";
+import { posthogTimerLogger } from "@/lib/posthog-logs";
 
 type TimerMode = "focus" | "break";
 interface TimerSession {
@@ -253,6 +254,11 @@ export default function Home() {
     if (events.length > 0) notifyCompletion(events[events.length - 1]);
 
     for (const mode of events) {
+      posthogTimerLogger.intervalCompleted({
+        mode,
+        scene: sceneChoice,
+        focusDurationMinutes: session.focusDuration,
+      });
       trackEvent(
         mode === "focus" ? "focus_completed" : "break_completed",
         {
@@ -376,6 +382,16 @@ export default function Home() {
 
   function toggleTimer(): void {
     if (!session) return;
+    const timerAction = isRunning
+      ? "paused"
+      : seconds < totalSeconds && !isSetFinished
+        ? "resumed"
+        : "started";
+    posthogTimerLogger.action(timerAction, {
+      mode: session.mode,
+      scene: sceneChoice,
+      focusDurationMinutes: session.focusDuration,
+    });
     trackEvent(
       isRunning
         ? "timer_paused"
@@ -414,6 +430,11 @@ export default function Home() {
   }
   function reset(): void {
     if (!session) return;
+    posthogTimerLogger.action("reset", {
+      mode: session.mode,
+      scene: sceneChoice,
+      focusDurationMinutes: session.focusDuration,
+    });
     trackEvent("timer_reset", {
       mode: session.mode,
       scene: sceneChoice,

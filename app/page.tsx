@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import CoffeeScene from "@/components/CoffeeScene";
 import TeaScene from "@/components/TeaScene";
+import { trackEvent } from "@/lib/analytics";
 import "./landing-experiments.css";
 
 type Device = "desktop" | "mobile";
@@ -148,6 +149,10 @@ export default function LandingPage() {
     setCycleKey((key) => key + 1);
   }
 
+  function openTimer(source: "navigation" | "hero" | "how_it_works" | "final_cta") {
+    trackEvent("timer_opened", { source });
+  }
+
   return (
     <main className="dx" id="top">
       <header className="dx-nav-shell">
@@ -158,7 +163,7 @@ export default function LandingPage() {
           <nav className="dx-nav-right" aria-label="Main navigation">
             <a href="#how-it-works">How it works</a>
             <a href="#faq">FAQ</a>
-            <Link href="/app" className="dx-nav-cta">
+            <Link href="/app" className="dx-nav-cta" onClick={() => openTimer("navigation")}>
               Open timer <span aria-hidden="true">↗</span>
             </Link>
           </nav>
@@ -181,7 +186,7 @@ export default function LandingPage() {
               scene, and watch your progress come to life.
             </p>
             <div className="dx-actions">
-              <Link className="dx-primary" href="/app">
+              <Link className="dx-primary" href="/app" onClick={() => openTimer("hero")}>
                 Start focusing <span aria-hidden="true">↗</span>
               </Link>
               <a className="dx-secondary" href="#how-it-works">
@@ -297,7 +302,7 @@ export default function LandingPage() {
               Less time setting up. More time settling in. Getting started with
               Drizlo takes just a moment.
             </p>
-            <Link href="/app" className="dx-inline-link">
+            <Link href="/app" className="dx-inline-link" onClick={() => openTimer("how_it_works")}>
               Try a focus session <span aria-hidden="true">↗</span>
             </Link>
           </div>
@@ -352,7 +357,7 @@ export default function LandingPage() {
           <em>in the zone?</em>
         </h2>
         <p>Pick a scene, set your timer, and make this moment yours.</p>
-        <Link href="/app" className="dx-primary">
+        <Link href="/app" className="dx-primary" onClick={() => openTimer("final_cta")}>
           Start focusing <span aria-hidden="true">↗</span>
         </Link>
         <span className="dx-final-note">Free to use · No account needed</span>
