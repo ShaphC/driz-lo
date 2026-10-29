@@ -570,6 +570,11 @@ export default function CoffeeScene({
             )}
           </g>
 
+          {/* Geometric hitbox read by the timer page. The environment SVG has
+              pointer-events:none, so React onClick handlers cannot work here. */}
+          <rect data-drizlo-liquid-hitbox="true" x="210" y="332" width="202" height="129" rx="12"
+            fill="transparent" aria-hidden="true" />
+
           {/* Steam */}
           <g className={isFocus ? (brewing ? "is-brewing" : "") : "is-steaming"}>
             {[

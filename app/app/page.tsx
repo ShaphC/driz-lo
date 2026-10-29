@@ -260,6 +260,29 @@ export default function Home() {
     return () => window.clearTimeout(timeout);
   }, [justCompleted]);
 
+  // Scene SVGs are decorative backgrounds with pointer-events:none. A normal
+  // onClick inside those SVGs cannot fire. Instead, measure the marked liquid
+  // container in viewport coordinates and listen for a click at that location.
+  // Future scenes only need a data-drizlo-liquid-hitbox SVG shape.
+  const advanceFiveMinutesRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    function handleContainerClick(event: MouseEvent) {
+      if (event.button !== 0) return;
+      const target = event.target;
+      if (target instanceof Element && target.closest('button, a, input, select, textarea, [role="slider"], [role="dialog"]')) return;
+      const hitbox = document.querySelector<SVGGraphicsElement>('[data-drizlo-liquid-hitbox="true"]');
+      if (!hitbox) return;
+      const rect = hitbox.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+      if (event.clientX >= rect.left && event.clientX <= rect.right &&
+          event.clientY >= rect.top && event.clientY <= rect.bottom) {
+        advanceFiveMinutesRef.current();
+      }
+    }
+    document.addEventListener('click', handleContainerClick, true);
+    return () => document.removeEventListener('click', handleContainerClick, true);
+  }, []);
+
   if (!session) return (
     <main className="scene"><div className="scene-overlay" />
       <header className="topbar"><div className="brand">drizlo<span>.</span></div></header>
@@ -286,7 +309,7 @@ export default function Home() {
     completedEndRef.current = null;
     lastCountdownTickRef.current = null;
     setSession(current => {
-      if (!current || current.setFinished) return current;
+      if (!current || current.setFinished || current.mode !== "focus") return current;
       const remaining = Math.max(1, Math.min(current.duration * 60, Math.round(value)));
       return { ...current, remaining,
         endsAt: current.running ? instant + remaining * 1000 : null };
@@ -313,6 +336,30 @@ export default function Home() {
       </div>
     );
   }
+
+  // Give five minutes back during focus only. The scene progress is derived
+  // from remaining time, so both coffee and tea liquid levels update together.
+  function advanceFiveMinutes(): void {
+    const instant = Date.now();
+    setNow(instant);
+    setScrubSeconds(null);
+    setJustCompleted(false);
+    lastCountdownTickRef.current = null;
+    setSession(current => {
+      if (!current || current.setFinished || current.mode !== "focus") return current;
+      const remaining = current.running && current.endsAt !== null
+        ? Math.max(0, Math.min(current.duration * 60, Math.ceil((current.endsAt - instant) / 1000)))
+        : current.remaining;
+      const nextRemaining = Math.min(current.duration * 60, remaining + 5 * 60);
+      return {
+        ...current,
+        remaining: nextRemaining,
+        endsAt: current.running ? instant + nextRemaining * 1000 : null,
+      };
+    });
+  }
+
+  advanceFiveMinutesRef.current = advanceFiveMinutes;
 
   function toggleTimer(): void {
     const instant = Date.now();
@@ -400,8 +447,20 @@ export default function Home() {
 
   const preferences = (prefix: string) => (
     <div className="timer-preferences" aria-label="Timer preferences">
-      <button type="button" className="sound-toggle" aria-pressed={soundEnabled}
-        onClick={toggleSound}>{soundEnabled ? "Sound on" : "Sound off"}</button>
+      <button type="button" className="sound-toggle drizlo-speaker-toggle"
+        aria-pressed={soundEnabled} aria-label={soundEnabled ? "Mute timer sounds" : "Unmute timer sounds"}
+        title={soundEnabled ? "Mute timer sounds" : "Unmute timer sounds"}
+        onClick={toggleSound}>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none"
+          stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M4 9v6h4l5 4V5L8 9H4Z" />
+          {soundEnabled ? (
+            <><path d="M16 9a4 4 0 0 1 0 6" /><path d="M18.5 6.5a7.5 7.5 0 0 1 0 11" /></>
+          ) : (
+            <path d="M3 3 21 21" strokeWidth="2.4" />
+          )}
+        </svg>
+      </button>
       <button type="button" className="sound-toggle" aria-pressed={ambienceEnabled}
         onClick={toggleAmbience}>{ambienceEnabled ? "Ambience on" : "Ambience off"}</button>
       <button type="button" className="notification-toggle"
@@ -443,7 +502,8 @@ export default function Home() {
         <div className="scene-stage">
           {sceneChoice === "coffee" ? (
             <CoffeeScene progress={progress} running={isRunning} mode={session.mode}
-              completed={session.completed} justCompleted={justCompleted} />
+              completed={session.completed} justCompleted={justCompleted}
+              />
           ) : (
             <TeaScene progress={progress} running={isRunning} mode={session.mode}
               completed={session.completed} justCompleted={justCompleted} />
