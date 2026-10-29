@@ -29,16 +29,20 @@ export function analyticsConsent():
 export function setAnalyticsConsent(
   value: "accepted" | "declined"
 ): void {
+  if (typeof window === "undefined") return;
+
   try {
     localStorage.setItem(CONSENT_KEY, value);
   } catch {
     // Storage may be unavailable.
   }
 
-  if (value === "declined") {
-    posthog.opt_out_capturing();
-  } else {
+  if (!posthog.__loaded) return;
+
+  if (value === "accepted") {
     posthog.opt_in_capturing();
+  } else {
+    posthog.opt_out_capturing();
   }
 }
 
@@ -46,7 +50,13 @@ export function trackEvent(
   name: string,
   properties: AnalyticsProperties = {}
 ): void {
-  if (analyticsConsent() === "accepted") {
-    posthog.capture(name, properties);
+  if (
+    typeof window === "undefined" ||
+    analyticsConsent() !== "accepted" ||
+    !posthog.__loaded
+  ) {
+    return;
   }
+
+  posthog.capture(name, properties);
 }
