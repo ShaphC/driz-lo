@@ -305,31 +305,60 @@
    DRIZLO — VISIBLE MOVING CLOUDS
    ========================================= */
 
-.drizlo-moving-clouds {
-  animation: drizlo-cloud-travel 12s ease-in-out infinite alternate;
-  will-change: transform;
+/* Slow, continuous cloud movement across the café window. */
+
+.drizlo-cloud {
+  animation-name: drizlo-cloud-crossing;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
   transform-box: view-box;
-  transform-origin: center;
+  will-change: transform;
 }
 
-@keyframes drizlo-cloud-travel {
-  0% {
-    transform: translateX(-90px);
-    opacity: 0.55;
+.drizlo-cloud-1 {
+  --cloud-start-x: 200px;
+  --cloud-end-x: 1550px;
+  --cloud-y: 205px;
+  animation-duration: 75s;
+  animation-delay: -12s;
+}
+
+.drizlo-cloud-2 {
+  --cloud-start-x: 150px;
+  --cloud-end-x: 1550px;
+  --cloud-y: 175px;
+  animation-duration: 90s;
+  animation-delay: -48s;
+}
+
+.drizlo-cloud-3 {
+  --cloud-start-x: 200px;
+  --cloud-end-x: 1500px;
+  --cloud-y: 275px;
+  animation-duration: 65s;
+  animation-delay: -35s;
+}
+
+.drizlo-cloud-4 {
+  --cloud-start-x: 100px;
+  --cloud-end-x: 1550px;
+  --cloud-y: 245px;
+  animation-duration: 85s;
+  animation-delay: -68s;
+}
+
+@keyframes drizlo-cloud-crossing {
+  from {
+    transform: translate(var(--cloud-start-x), var(--cloud-y));
   }
 
-  50% {
-    opacity: 0.8;
-  }
-
-  100% {
-    transform: translateX(110px);
-    opacity: 0.65;
+  to {
+    transform: translate(var(--cloud-end-x), var(--cloud-y));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .drizlo-moving-clouds {
+  .drizlo-cloud {
     animation: none;
     will-change: auto;
   }
