@@ -746,3 +746,15 @@ button {
     margin-inline: auto;
   }
 }
+
+.bottombar a {
+  color: inherit;
+  text-decoration: none;
+  opacity: 0.75;
+  transition: opacity 0.2s;
+}
+
+.bottombar a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}

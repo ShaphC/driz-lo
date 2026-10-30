@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import CoffeeScene from "@/components/CoffeeScene";
 import TeaScene from "@/components/TeaScene";
-import { trackEvent } from "@/lib/analytics";
 import "./landing-experiments.css";
 
 type Device = "desktop" | "mobile";
@@ -17,6 +16,7 @@ function Scene({ drink }: { drink: Drink }) {
     mode: "focus" as const,
     completed: 0,
   };
+
   return (
     <div className="dx-scene" aria-hidden="true">
       {drink === "coffee" ? (
@@ -30,13 +30,22 @@ function Scene({ drink }: { drink: Drink }) {
 
 function DevicePreview({ device, drink }: { device: Device; drink: Drink }) {
   const [secondsRemaining, setSecondsRemaining] = useState(14 * 60 + 32);
+
   useEffect(() => {
     const interval = window.setInterval(() => {
-      setSecondsRemaining(previous => previous > 0 ? previous - 1 : 14 * 60 + 32);
+      setSecondsRemaining((previous) =>
+        previous > 0 ? previous - 1 : 14 * 60 + 32,
+      );
     }, 1000);
+
     return () => window.clearInterval(interval);
   }, []);
-  const previewTime = `${String(Math.floor(secondsRemaining / 60)).padStart(2, "0")}:${String(secondsRemaining % 60).padStart(2, "0")}`;
+
+  const previewTime = `${String(Math.floor(secondsRemaining / 60)).padStart(
+    2,
+    "0",
+  )}:${String(secondsRemaining % 60).padStart(2, "0")}`;
+
   return (
     <div
       className={`dx-device dx-device--${device}`}
@@ -51,8 +60,10 @@ function DevicePreview({ device, drink }: { device: Device; drink: Drink }) {
           {device === "mobile" ? "9:41" : "●  ●  ●"}
         </span>
       </div>
+
       <div className="dx-screen">
         <Scene drink={drink} />
+
         <div className="dx-timer-preview">
           <span className="dx-timer-label">FOCUS TIME</span>
           <strong aria-live="off">{previewTime}</strong>
@@ -62,6 +73,7 @@ function DevicePreview({ device, drink }: { device: Device; drink: Drink }) {
           </span>
         </div>
       </div>
+
       {device === "mobile" && <div className="dx-home-bar" />}
     </div>
   );
@@ -135,22 +147,25 @@ export default function LandingPage() {
   const [cycleKey, setCycleKey] = useState(0);
   const [year, setYear] = useState(2026);
 
-  useEffect(() => setYear(new Date().getFullYear()), []);
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    setYear(new Date().getFullYear());
+  }, []);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
     const interval = window.setInterval(() => {
       setDevice((previous) => (previous === "desktop" ? "mobile" : "desktop"));
     }, 6500);
+
     return () => window.clearInterval(interval);
   }, [cycleKey]);
 
   function chooseDevice(next: Device) {
     setDevice(next);
     setCycleKey((key) => key + 1);
-  }
-
-  function openTimer(source: "navigation" | "hero" | "how_it_works" | "final_cta") {
-    trackEvent("timer_opened", { source });
   }
 
   return (
@@ -160,10 +175,11 @@ export default function LandingPage() {
           <Link href="/" className="dx-brand" aria-label="Drizlo home">
             drizlo<span>.</span>
           </Link>
+
           <nav className="dx-nav-right" aria-label="Main navigation">
             <a href="#how-it-works">How it works</a>
             <a href="#faq">FAQ</a>
-            <Link href="/app" className="dx-nav-cta" onClick={() => openTimer("navigation")}>
+            <Link href="/app" className="dx-nav-cta">
               Open timer <span aria-hidden="true">↗</span>
             </Link>
           </nav>
@@ -176,26 +192,32 @@ export default function LandingPage() {
             <span className="dx-eyebrow">
               <i aria-hidden="true" /> A DIFFERENT KIND OF FOCUS TIMER
             </span>
+
             <h1 id="dx-hero-title">
               Focus feels
               <br />
               <em>different here.</em>
             </h1>
+
             <p>
               Make room for the work that matters. Set a timer, settle into a
               scene, and watch your progress come to life.
             </p>
+
             <div className="dx-actions">
-              <Link className="dx-primary" href="/app" onClick={() => openTimer("hero")}>
+              <Link className="dx-primary" href="/app">
                 Start focusing <span aria-hidden="true">↗</span>
               </Link>
+
               <a className="dx-secondary" href="#how-it-works">
                 See how it works <span aria-hidden="true">↓</span>
               </a>
             </div>
+
             <span className="dx-note">
               Free to use <span aria-hidden="true">·</span> No account needed
             </span>
+
             <div className="dx-hero-smallprint">
               <span className="dx-small-line" /> A LITTLE LESS CLOCK-WATCHING. A
               LITTLE MORE DOING.
@@ -207,10 +229,12 @@ export default function LandingPage() {
               <span className="dx-showcase-label">
                 A GLIMPSE OF YOUR NEXT SESSION
               </span>
+
               <span className="dx-showcase-live">
                 <i aria-hidden="true" /> LIVE PREVIEW
               </span>
             </div>
+
             <div className="dx-preview-stage">
               <div
                 className="dx-stage-orbit dx-stage-orbit--one"
@@ -220,8 +244,10 @@ export default function LandingPage() {
                 className="dx-stage-orbit dx-stage-orbit--two"
                 aria-hidden="true"
               />
+
               <DevicePreview device={device} drink={drink} />
             </div>
+
             <div className="dx-preview-bottom">
               <div className="dx-toggle" aria-label="Device preview">
                 <button
@@ -231,6 +257,7 @@ export default function LandingPage() {
                 >
                   ▣ <span>Desktop</span>
                 </button>
+
                 <button
                   type="button"
                   aria-pressed={device === "mobile"}
@@ -239,6 +266,7 @@ export default function LandingPage() {
                   ▯ <span>Mobile</span>
                 </button>
               </div>
+
               <span className="dx-preview-hint">
                 A little window into your focus time.
               </span>
@@ -250,16 +278,19 @@ export default function LandingPage() {
       <section className="dx-any-screen" aria-labelledby="dx-any-screen-title">
         <div className="dx-any-screen-inner">
           <span className="dx-eyebrow">WHEREVER YOU SETTLE IN</span>
+
           <h2 id="dx-any-screen-title">
             Your focus goes
             <br />
             <em>where you go.</em>
           </h2>
+
           <p>
             At your desk or on your phone, your focus time feels familiar. One
             simple space to begin, wherever the day takes you.
           </p>
         </div>
+
         <div className="dx-any-screen-aside" aria-hidden="true">
           <span>01 / 03</span>
           <span className="dx-aside-rule" />
@@ -277,8 +308,10 @@ export default function LandingPage() {
               <span className="dx-card-symbol" aria-hidden="true">
                 {feature.symbol}
               </span>
+
               <span className="dx-card-index">{feature.number}</span>
             </div>
+
             <h3>{feature.title}</h3>
             <p>{feature.description}</p>
           </article>
@@ -293,27 +326,33 @@ export default function LandingPage() {
         <div className="dx-how">
           <div className="dx-how-intro">
             <span className="dx-eyebrow">THE SIMPLE PART</span>
+
             <h2 id="dx-how-title">
               Three steps to
               <br />
               <em>finding your flow.</em>
             </h2>
+
             <p>
               Less time setting up. More time settling in. Getting started with
               Drizlo takes just a moment.
             </p>
-            <Link href="/app" className="dx-inline-link" onClick={() => openTimer("how_it_works")}>
+
+            <Link href="/app" className="dx-inline-link">
               Try a focus session <span aria-hidden="true">↗</span>
             </Link>
           </div>
+
           <div className="dx-steps">
             {steps.map((step, index) => (
               <div className="dx-step" key={step.title}>
                 <span className="dx-step-number">0{index + 1}</span>
+
                 <div>
                   <h3>{step.title}</h3>
                   <p>{step.description}</p>
                 </div>
+
                 <span className="dx-step-arrow" aria-hidden="true">
                   ↗
                 </span>
@@ -326,13 +365,16 @@ export default function LandingPage() {
       <section className="dx-faq" id="faq" aria-labelledby="dx-faq-title">
         <div className="dx-faq-heading">
           <span className="dx-eyebrow">THE DETAILS</span>
+
           <h2 id="dx-faq-title">
             Good questions.
             <br />
             <em>Simple answers.</em>
           </h2>
+
           <p>Everything you need to know before your first session.</p>
         </div>
+
         <div className="dx-faq-list">
           {faqs.map(([question, answer]) => (
             <details key={question}>
@@ -350,16 +392,21 @@ export default function LandingPage() {
         <div className="dx-final-decoration" aria-hidden="true">
           ✳
         </div>
+
         <span className="dx-eyebrow">A FRESH START IS ONE CLICK AWAY</span>
+
         <h2>
           Ready to get
           <br />
           <em>in the zone?</em>
         </h2>
+
         <p>Pick a scene, set your timer, and make this moment yours.</p>
-        <Link href="/app" className="dx-primary" onClick={() => openTimer("final_cta")}>
+
+        <Link href="/app" className="dx-primary">
           Start focusing <span aria-hidden="true">↗</span>
         </Link>
+
         <span className="dx-final-note">Free to use · No account needed</span>
       </section>
 
@@ -368,8 +415,13 @@ export default function LandingPage() {
           <Link href="/" className="dx-brand">
             drizlo<span>.</span>
           </Link>
+
           <span>A different kind of focus timer.</span>
-          <span>© {year} Drizlo</span>
+
+          <div className="dx-footer-meta">
+            <Link href="/privacy">Privacy</Link>
+            <span>© {year} Drizlo</span>
+          </div>
         </div>
       </footer>
     </main>
