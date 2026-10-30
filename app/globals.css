@@ -1,5 +1,4 @@
 @import "tailwindcss";
-
 :root {
   font-family: Arial, Helvetica, sans-serif;
   color: #fff2df;
@@ -157,7 +156,7 @@ button {
   border-radius: 10px;
   border: none;
   transition:
-    background 0.2s ease,
+    background * 0.2s ease,
     transform 0.2s ease;
 }
 .controls button:active,
@@ -195,7 +194,7 @@ button {
   color: #e9c8a5;
   font-size: 13px;
   transition:
-    background 0.2s ease,
+    background * 0.2s ease,
     border-color 0.2s ease;
 }
 .durations button:hover:not(:disabled) {
@@ -484,7 +483,6 @@ button {
     transition: none;
   }
 }
-
 /* =========================================
    MOBILE — UNOBSTRUCTED CAFÉ CONTROLS
    ========================================= */
@@ -560,7 +558,6 @@ button {
     padding: 2px 12px;
   }
 }
-
 /* Mobile: centered transparent controls, original layout proportions. */
 @media (max-width: 800px) {
   .mobile-timer {
@@ -595,7 +592,6 @@ button {
     align-self: center;
   }
 }
-
 /* Sound and notification controls: desktop card and mobile settings drawer. */
 .timer-preferences {
   display: flex;
@@ -622,7 +618,6 @@ button {
   outline: 2px solid #ffb16e;
   outline-offset: 3px;
 }
-
 /* Mobile refinement: keep header untouched; lift timer away from coffee steam. */
 @media (max-width: 800px) {
   .mobile-timer {
@@ -655,7 +650,6 @@ button {
     padding: 2px 10px;
   }
 }
-
 /* Drizlo: integrated yellow timeline with draggable yellow circle. */
 .drizlo-scrubber {
   position: relative;
@@ -746,15 +740,95 @@ button {
     margin-inline: auto;
   }
 }
-
 .bottombar a {
   color: inherit;
   text-decoration: none;
   opacity: 0.75;
   transition: opacity 0.2s;
 }
-
 .bottombar a:hover {
   opacity: 1;
   text-decoration: underline;
+}
+/* Desktop timer layout and typography. */
+@media (min-width: 801px) {
+  .workspace .timer-panel.desktop-timer {
+    top: clamp(125px, 17vh, 195px);
+    transform: none;
+  }
+  .desktop-timer .timer-description {
+    color: #fff2df;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+    line-height: 1.5;
+    margin: 16px 0 18px;
+  }
+  .desktop-timer .drizlo-desktop-options-toggle {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    width: auto;
+    min-height: 32px;
+    margin: 5px 0 24px;
+    padding: 4px 0;
+    border: 0;
+    background: transparent;
+    color: #ffe0b8;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  }
+  .desktop-timer .drizlo-desktop-options-toggle .mobile-chevron {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+  .desktop-timer .drizlo-desktop-options {
+    width: 100%;
+    margin-top: 0;
+  }
+}
+
+/* Desktop: keep the scene and timer adjacent without overlap. */
+@media (min-width: 801px) {
+  .workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 760px) minmax(300px, 390px);
+    justify-content: center;
+    align-items: start;
+    column-gap: clamp(16px, 2.5vw, 36px);
+  }
+  .workspace .scene-stage {
+    grid-column: 1;
+    width: 100%;
+    max-width: 760px;
+    margin: -25px 0 0;
+  }
+  .workspace .timer-panel.desktop-timer {
+    position: relative;
+    grid-column: 2;
+    top: auto;
+    right: auto;
+    transform: none;
+    width: 100%;
+    max-width: 390px;
+    margin: 0;
+  }
+}
+@media (min-width: 801px) and (max-width: 1150px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 38%);
+    column-gap: 16px;
+  }
+  .workspace .scene-stage {
+    width: 100%;
+  }
+  .workspace .timer-panel.desktop-timer {
+    width: 100%;
+  }
 }

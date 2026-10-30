@@ -806,10 +806,6 @@ export default function Home() {
         <div className="brand">
           drizlo<span>.</span>
         </div>
-        <div className="session-count">
-          {session.completed}{" "}
-          {session.completed === 1 ? "cup brewed" : "cups brewed"}
-        </div>
       </header>
 
       <section className="workspace">
@@ -1054,7 +1050,7 @@ export default function Home() {
 
       <footer className="bottombar">
         <span>{sceneChoice === "tea" ? "TEA SCENE" : "COFFEE SCENE"}</span>
-        <span>Make time feel beautiful.</span>
+        <span>Focus feels different here.</span>
         <a href="/privacy">Privacy</a>
       </footer>
     </main>
