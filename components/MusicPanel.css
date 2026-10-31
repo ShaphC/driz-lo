@@ -1,21 +1,32 @@
+/* Music panel — shared layout */
 .drizlo-music {
   position: fixed;
-  left: 16px;
-  top: 110px;
   z-index: 80;
+  top: 110px;
+  left: 16px;
   width: 300px;
-  max-height: calc(100dvh - 210px);
+  max-height: calc(100dvh - 130px);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   pointer-events: none;
   color: #ffe4bd;
   font-family: Arial, Helvetica, sans-serif;
+  box-sizing: border-box;
+}
+.drizlo-music *,
+.drizlo-music *::before,
+.drizlo-music *::after {
+  box-sizing: border-box;
 }
 .drizlo-music > * {
   pointer-events: auto;
 }
+.drizlo-music button {
+  cursor: pointer;
+}
 .drizlo-music-toggle {
+  flex: 0 0 auto;
   border: 1px solid rgba(255, 221, 182, 0.32);
   border-radius: 999px;
   background: rgba(30, 19, 19, 0.88);
@@ -25,17 +36,21 @@
   font-weight: 700;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
-.drizlo-music-body {
-  display: none;
+.drizlo-music-body,
+.drizlo-music-player,
+.drizlo-music-spotify {
   width: 100%;
-  max-height: calc(100dvh - 425px);
-  overflow: auto;
   margin-top: 9px;
-  padding: 15px;
   border: 1px solid rgba(255, 221, 182, 0.22);
-  border-radius: 16px;
   background: rgba(30, 19, 19, 0.95);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  min-height: 0;
+}
+.drizlo-music-body {
+  display: none;
+  flex: 0 1 auto;
+  padding: 15px;
+  border-radius: 16px;
 }
 .drizlo-music-open .drizlo-music-body {
   display: block;
@@ -43,12 +58,14 @@
 .drizlo-music-heading {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
   align-items: center;
+  gap: 8px;
+  font-size: 13px;
 }
 .drizlo-music-heading span {
   font-size: 11px;
   color: #e7ad79;
+  text-align: right;
 }
 .drizlo-music-body p {
   font-size: 12px;
@@ -64,6 +81,22 @@
   padding: 10px;
   border-radius: 9px;
 }
+
+/* Library: scroll the playlist choices, not the form. */
+.drizlo-music-open.drizlo-music-library-mode .drizlo-music-body {
+  max-height: calc(100dvh - 185px);
+  overflow-y: auto; /* fallback for very short screens */
+  flex-shrink: 1;
+}
+.drizlo-music-saved-scroll {
+  max-height: 165px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 3px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(245, 181, 121, 0.55) transparent;
+}
 .drizlo-music-list {
   display: flex;
   flex-direction: column;
@@ -72,9 +105,11 @@
 .drizlo-music-item {
   display: flex;
   gap: 5px;
+  min-width: 0;
 }
 .drizlo-music-list button {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   text-align: left;
   border: 1px solid rgba(255, 221, 182, 0.2);
   border-radius: 8px;
@@ -82,6 +117,7 @@
   color: #ffe4bd;
   padding: 9px;
   font-size: 12px;
+  overflow-wrap: anywhere;
 }
 .drizlo-music-list button.is-active {
   border-color: #f5b579;
@@ -90,6 +126,32 @@
 .drizlo-music-list .drizlo-music-remove {
   flex: 0 0 32px;
   text-align: center;
+}
+.drizlo-music-list .drizlo-music-rename {
+  flex: 0 0 auto;
+  font-size: 11px;
+  padding: 8px;
+}
+.drizlo-music-rename-form {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 4px;
+}
+.drizlo-music-rename-form input {
+  min-width: 0;
+  flex: 1 1 auto;
+  width: 0;
+  border: 1px solid rgba(255, 221, 182, 0.4);
+  border-radius: 8px;
+  background: #352420;
+  color: #fff2df;
+  padding: 7px;
+  font-size: 12px;
+}
+.drizlo-music-rename-form button {
+  flex: 0 0 auto;
+  padding: 7px;
 }
 .drizlo-music-form {
   display: flex;
@@ -103,6 +165,7 @@
 }
 .drizlo-music-form input {
   width: 100%;
+  min-width: 0;
   border: 1px solid rgba(255, 221, 182, 0.25);
   border-radius: 8px;
   background: #352420;
@@ -122,45 +185,39 @@
   color: #ffb9a9;
   font-size: 11px;
 }
-.drizlo-music-browse {
-  display: inline-block;
+
+/* Browse links above the playlist list */
+.drizlo-music-browse-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
   margin-top: 12px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: #e9c8a5;
+}
+
+.drizlo-music-browse-links a {
+  color: #ffd1a5;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.drizlo-music-browse-links a:hover {
+  color: #fff2df;
+}
+
+.drizlo-music-browse {
   color: #ffd1a5;
   font-size: 12px;
 }
-.drizlo-music-player {
-  display: none;
-  width: 100%;
-  margin-top: 9px;
+
+/* Player: compact controls, with a single resizable iframe. */
+.drizlo-music-open.drizlo-music-player-mode .drizlo-music-body {
+  flex: 0 0 auto;
   padding: 9px;
-  background: rgba(30, 19, 19, 0.95);
-  border: 1px solid rgba(255, 221, 182, 0.22);
-  border-radius: 14px;
-}
-.drizlo-music-player.has-track {
-  display: block;
-}
-.drizlo-music-now {
-  font-size: 11px;
-  margin-bottom: 7px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.drizlo-music-player iframe {
-  display: block;
-  border: 0;
-  border-radius: 8px;
-}
-/* Player-first additions. Hide the iframe offscreen without unmounting it. */
-.drizlo-music:not(.drizlo-music-open) .drizlo-music-player,
-.drizlo-music-player.is-library-view {
-  position: absolute;
-  left: -10000px;
-  top: 0;
-  width: 300px;
-  display: block;
-  visibility: hidden;
+  overflow: visible;
 }
 .drizlo-music-switch,
 .drizlo-music-back {
@@ -171,78 +228,36 @@
   padding: 10px 12px;
   font-size: 12px;
   font-weight: 700;
-  cursor: pointer;
 }
 .drizlo-music-switch {
+  display: block;
   width: 100%;
-  margin-top: 6px;
+  margin: 0;
 }
 .drizlo-music-back {
   margin-top: 12px;
 }
-.drizlo-music-selected-name {
-  font-weight: 700;
-  color: #fff2df !important;
+.drizlo-music-player,
+.drizlo-music-spotify {
+  flex: 0 1 auto;
+  padding: 9px;
+  border-radius: 14px;
+  overflow-y: auto;
 }
-.drizlo-music-open:has(.drizlo-music-player.has-track:not(.is-library-view))
-  .drizlo-music-body {
-  max-height: 180px;
+.drizlo-music-player {
+  display: none;
 }
-@media (max-width: 800px) {
-  .drizlo-music {
-    left: 0;
-    right: 0;
-    top: auto;
-    bottom: calc(80px + env(safe-area-inset-bottom));
-    width: 100%;
-    max-height: calc(75dvh - 50px);
-    align-items: center;
-    padding: 0 12px;
-  }
-  .drizlo-music-toggle {
-    align-self: flex-start;
-    margin-left: 2px;
-  }
-  .drizlo-music-body {
-    max-height: 32dvh;
-    margin-top: 8px;
-    order: 2;
-  }
-  .drizlo-music-player.has-track {
-    order: 3;
-    max-width: 100%;
-  }
-  .drizlo-music-open {
-    bottom: calc(70px + env(safe-area-inset-bottom));
-  }
-  .drizlo-music-open .drizlo-music-body {
-    max-height: 28dvh;
-  }
-  .drizlo-music:not(.drizlo-music-open) .drizlo-music-player,
-  .drizlo-music-player.is-library-view {
-    width: 300px;
-    order: 3;
-  }
-  .drizlo-music-open:has(.drizlo-music-player.has-track:not(.is-library-view))
-    .drizlo-music-body {
-    max-height: 150px;
-  }
-  .drizlo-music-player iframe {
-    max-height: 45dvh;
-  }
+.drizlo-music-player.has-track {
+  display: block;
 }
-@media (min-width: 801px) and (max-width: 1250px) {
-  .drizlo-music {
-    top: 110px;
-    width: 245px;
-  }
-  .drizlo-music:not(.drizlo-music-open) .drizlo-music-player,
-  .drizlo-music-player.is-library-view {
-    width: 245px;
-  }
+.drizlo-music-player iframe,
+.drizlo-music-spotify iframe {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  border: 0;
+  border-radius: 8px;
 }
-
-/* Playlist resizing and saved-playlist renaming. Scoped to music only. */
 .drizlo-music-resize {
   display: flex;
   align-items: center;
@@ -265,213 +280,70 @@
 .drizlo-music-resize:focus-visible span {
   background: #f5b579;
 }
-.drizlo-music-rename {
-  flex: 0 0 auto !important;
-  font-size: 11px !important;
-  padding: 8px !important;
-}
-.drizlo-music-rename-form {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  gap: 4px;
-}
-.drizlo-music-rename-form input {
-  min-width: 0;
-  flex: 1;
-  width: 0;
-  border: 1px solid rgba(255, 221, 182, 0.4);
-  border-radius: 8px;
-  background: #352420;
-  color: #fff2df;
-  padding: 7px;
-  font-size: 12px;
-}
-.drizlo-music-rename-form button {
-  flex: 0 0 auto !important;
-  padding: 7px !important;
-}
-.drizlo-music-player {
-  min-height: 0;
-  overflow: hidden;
-}
-.drizlo-music-player iframe {
-  width: 100%;
-  max-height: none;
-}
-@media (max-width: 800px) {
-  .drizlo-music-player iframe {
-    max-height: min(50dvh, 500px);
-  }
-  .drizlo-music {
-    max-height: calc(100dvh - 155px);
-  }
-  .drizlo-music-player {
-    max-height: calc(100dvh - 270px);
-    overflow: auto;
-  }
-}
-
-/* ==========================================
-   Music panel — separate library/player layouts
-   ========================================== */
-
-/* Keep the music panel inside the viewport */
-.drizlo-music {
-  box-sizing: border-box;
-  max-height: calc(100dvh - 130px);
-}
-
-.drizlo-music-body {
-  box-sizing: border-box;
-  min-height: 0;
-}
-
-/* LIBRARY MODE: show the playlist selection form */
-.drizlo-music-open.drizlo-music-library-mode .drizlo-music-body {
-  height: auto;
-  min-height: 440px;
-  max-height: calc(100dvh - 190px);
-
-  overflow-y: auto;
-  resize: vertical;
-  flex-shrink: 1;
-}
-
-/* PLAYER MODE: compact information card */
-.drizlo-music-open.drizlo-music-player-mode .drizlo-music-body {
-  height: auto;
-  min-height: 0;
-  max-height: none;
-
-  overflow: visible;
-  resize: none;
-  flex-shrink: 0;
-}
-
-/* Prevent the selected playlist details from scrolling */
-.drizlo-music-player-mode .drizlo-music-player-view {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.drizlo-music-player-mode .drizlo-music-player-view p {
-  margin: 0;
-}
-
-.drizlo-music-player-mode .drizlo-music-switch {
-  margin-top: 4px;
-}
-
-/* Allow the SoundCloud iframe to use remaining space */
-.drizlo-music-player-mode .drizlo-music-player.has-track {
-  min-height: 0;
-  flex-shrink: 1;
-  overflow-y: auto;
-}
-
-/* Mobile adjustments */
-@media (max-width: 800px) {
-  .drizlo-music {
-    max-height: calc(100dvh - 155px);
-  }
-
-  .drizlo-music-open.drizlo-music-library-mode .drizlo-music-body {
-    min-height: 360px;
-    max-height: min(65dvh, 650px);
-  }
-
-  .drizlo-music-open.drizlo-music-player-mode .drizlo-music-body {
-    height: auto;
-    min-height: 0;
-    max-height: none;
-    overflow: visible;
-  }
-}
-
-/* Compact player controls */
-.drizlo-music-open.drizlo-music-player-mode .drizlo-music-body {
-  height: auto;
-  min-height: 0;
-  max-height: none;
-  padding: 9px;
-  overflow: visible;
-  resize: none;
-  flex-shrink: 0;
-}
-
-/* Change playlist button fills its container */
-.drizlo-music-player-mode .drizlo-music-switch {
-  display: block;
-  width: 100%;
-  margin: 0;
-}
-
-/* SoundCloud player occupies the remaining space */
-.drizlo-music-player-mode .drizlo-music-player.has-track {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-/* Keep library selection separate and resizable */
-.drizlo-music-open.drizlo-music-library-mode .drizlo-music-body {
-  height: auto;
-  min-height: 440px;
-  max-height: calc(100dvh - 190px);
-  overflow-y: auto;
-  resize: vertical;
-}
-
-/* Mobile */
-@media (max-width: 800px) {
-  .drizlo-music-open.drizlo-music-player-mode .drizlo-music-body {
-    height: auto;
-    min-height: 0;
-    max-height: none;
-    padding: 9px;
-    overflow: visible;
-  }
-
-  .drizlo-music-open.drizlo-music-library-mode .drizlo-music-body {
-    min-height: 360px;
-    max-height: 65dvh;
-  }
-}
-
-/* Spotify embedded player */
 .drizlo-music-spotify {
   display: none;
-  width: 100%;
-  min-height: 0;
-  margin-top: 9px;
-  padding: 9px;
-  border: 1px solid rgba(255, 221, 182, 0.22);
-  border-radius: 14px;
-  background: rgba(30, 19, 19, 0.95);
-  box-sizing: border-box;
-  overflow: auto;
 }
-
 .drizlo-music-spotify.is-visible {
   display: block;
 }
 
-.drizlo-music-spotify iframe {
+/* SoundCloud stays mounted but hidden when library/entire panel is closed. */
+.drizlo-music:not(.drizlo-music-open) .drizlo-music-player,
+.drizlo-music-player.is-library-view {
+  position: absolute;
+  left: -10000px;
+  top: 0;
+  width: 300px;
   display: block;
-  width: 100%;
-  max-width: 100%;
-  border: 0;
-  border-radius: 8px;
+  visibility: hidden;
 }
 
+@media (min-width: 801px) and (max-width: 1250px) {
+  .drizlo-music {
+    width: 245px;
+  }
+  .drizlo-music:not(.drizlo-music-open) .drizlo-music-player,
+  .drizlo-music-player.is-library-view {
+    width: 245px;
+  }
+}
 @media (max-width: 800px) {
+  .drizlo-music {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: calc(70px + env(safe-area-inset-bottom));
+    width: 100%;
+    max-height: calc(100dvh - 155px);
+    align-items: center;
+    padding: 0 12px;
+  }
+  .drizlo-music-toggle {
+    align-self: flex-start;
+    margin-left: 2px;
+  }
+  .drizlo-music-body {
+    order: 2;
+    margin-top: 8px;
+  }
+  .drizlo-music-open.drizlo-music-library-mode .drizlo-music-body {
+    max-height: min(65dvh, 650px);
+  }
+  .drizlo-music-saved-scroll {
+    max-height: 135px;
+  }
+  .drizlo-music-player,
   .drizlo-music-spotify {
+    order: 3;
     max-height: calc(100dvh - 270px);
   }
-
+  .drizlo-music-player iframe,
   .drizlo-music-spotify iframe {
     max-height: min(50dvh, 500px);
+  }
+  .drizlo-music:not(.drizlo-music-open) .drizlo-music-player,
+  .drizlo-music-player.is-library-view {
+    width: 300px;
+    order: 3;
   }
 }

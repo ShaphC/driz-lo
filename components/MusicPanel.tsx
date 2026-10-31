@@ -34,6 +34,7 @@ declare global {
   }
 }
 
+// Retain existing storage keys so previously saved playlists are preserved.
 const KEY = "drizlo-soundcloud-playlists-v1";
 const SELECTED_KEY = "drizlo-soundcloud-selected-v1";
 
@@ -401,10 +402,34 @@ export default function MusicPanel() {
         aria-hidden={!open}
       >
         {view === "library" && (
-          <div className="drizlo-music-heading">
-            <strong>Choose your music</strong>
-            <span>Spotify & SoundCloud</span>
-          </div>
+          <>
+            <div className="drizlo-music-heading">
+              <strong>Choose your music</strong>
+              <span>Spotify & SoundCloud</span>
+            </div>
+
+            <div className="drizlo-music-browse-links">
+              <span>Browse:</span>
+
+              <a
+                href="https://open.spotify.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Spotify ↗
+              </a>
+
+              <span>or</span>
+
+              <a
+                href="https://soundcloud.com/discover"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                SoundCloud ↗
+              </a>
+            </div>
+          </>
         )}
 
         {view === "player" && current ? (
@@ -427,108 +452,104 @@ export default function MusicPanel() {
               </button>
             )}
 
-            {CURATED.length > 0 && (
-              <>
-                <h3>Ambient picks</h3>
+            <h3>Playlists</h3>
 
-                <div className="drizlo-music-list">
-                  {CURATED.map((p) => (
-                    <button
-                      type="button"
-                      key={p.id}
-                      className={selected === p.id ? "is-active" : ""}
-                      onClick={() => choosePlaylist(p.id)}
-                    >
-                      {p.name}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
+            <div
+              className="drizlo-music-saved-scroll"
+              role="region"
+              aria-label="Available playlists"
+              tabIndex={0}
+            >
+              <div className="drizlo-music-list">
+                {CURATED.map((p) => (
+                  <button
+                    type="button"
+                    key={p.id}
+                    className={selected === p.id ? "is-active" : ""}
+                    onClick={() => choosePlaylist(p.id)}
+                  >
+                    {p.name}
+                  </button>
+                ))}
 
-            {playlists.length > 0 && (
-              <>
-                <h3>Your saved links</h3>
-
-                <div className="drizlo-music-list">
-                  {playlists.map((p) => (
-                    <div className="drizlo-music-item" key={p.id}>
-                      {renameId === p.id ? (
-                        <form
-                          className="drizlo-music-rename-form"
-                          onSubmit={(event) => {
-                            event.preventDefault();
-                            saveRename(p.id);
-                          }}
-                        >
-                          <input
-                            aria-label={`Rename ${p.name}`}
-                            maxLength={60}
-                            value={renameValue}
-                            onChange={(event) =>
-                              setRenameValue(event.target.value)
-                            }
-                            autoFocus
-                          />
-
-                          <button type="submit" aria-label="Save name">
-                            Save
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => setRenameId(null)}
-                            aria-label="Cancel rename"
-                          >
-                            Cancel
-                          </button>
-                        </form>
-                      ) : (
-                        <>
-                          <button
-                            type="button"
-                            className={selected === p.id ? "is-active" : ""}
-                            onClick={() => choosePlaylist(p.id)}
-                          >
-                            {p.name}
-                          </button>
-
-                          <button
-                            type="button"
-                            className="drizlo-music-rename"
-                            aria-label={`Rename ${p.name}`}
-                            onClick={() => {
-                              setRenameId(p.id);
-                              setRenameValue(p.name);
-                            }}
-                          >
-                            Rename
-                          </button>
-                        </>
-                      )}
-
-                      <button
-                        type="button"
-                        aria-label={`Remove ${p.name}`}
-                        className="drizlo-music-remove"
-                        onClick={() => {
-                          setPlaylists((prev) =>
-                            prev.filter((x) => x.id !== p.id),
-                          );
-
-                          if (selected === p.id) {
-                            setSelected(null);
-                            setView("library");
-                          }
+                {playlists.map((p) => (
+                  <div className="drizlo-music-item" key={p.id}>
+                    {renameId === p.id ? (
+                      <form
+                        className="drizlo-music-rename-form"
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          saveRename(p.id);
                         }}
                       >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
+                        <input
+                          aria-label={`Rename ${p.name}`}
+                          maxLength={60}
+                          value={renameValue}
+                          onChange={(event) =>
+                            setRenameValue(event.target.value)
+                          }
+                          autoFocus
+                        />
+
+                        <button type="submit" aria-label="Save name">
+                          Save
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setRenameId(null)}
+                          aria-label="Cancel rename"
+                        >
+                          Cancel
+                        </button>
+                      </form>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          className={selected === p.id ? "is-active" : ""}
+                          onClick={() => choosePlaylist(p.id)}
+                        >
+                          {p.name}
+                        </button>
+
+                        <button
+                          type="button"
+                          className="drizlo-music-rename"
+                          aria-label={`Rename ${p.name}`}
+                          onClick={() => {
+                            setRenameId(p.id);
+                            setRenameValue(p.name);
+                          }}
+                        >
+                          Rename
+                        </button>
+                      </>
+                    )}
+
+                    <button
+                      type="button"
+                      aria-label={`Remove ${p.name}`}
+                      className="drizlo-music-remove"
+                      onClick={() => {
+                        setPlaylists((prev) =>
+                          prev.filter((x) => x.id !== p.id),
+                        );
+
+                        if (selected === p.id) {
+                          // Return to the built-in playlist.
+                          setSelected(CURATED[0]?.id ?? null);
+                          setView("library");
+                        }
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
 
             <form onSubmit={addPlaylist} className="drizlo-music-form">
               <label htmlFor="drizlo-music-url">
@@ -563,20 +584,11 @@ export default function MusicPanel() {
                 </span>
               )}
             </form>
-
-            <a
-              className="drizlo-music-browse"
-              href="https://soundcloud.com/discover"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Browse SoundCloud ↗
-            </a>
           </div>
         )}
       </div>
 
-      {/* SoundCloud player stays mounted when its library is open. */}
+      {/* Keep SoundCloud mounted while its library is open. */}
       <div
         className={`drizlo-music-player ${
           provider === "soundcloud" ? "has-track" : ""
