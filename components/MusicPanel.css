@@ -439,3 +439,39 @@
     max-height: 65dvh;
   }
 }
+
+/* Spotify embedded player */
+.drizlo-music-spotify {
+  display: none;
+  width: 100%;
+  min-height: 0;
+  margin-top: 9px;
+  padding: 9px;
+  border: 1px solid rgba(255, 221, 182, 0.22);
+  border-radius: 14px;
+  background: rgba(30, 19, 19, 0.95);
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+.drizlo-music-spotify.is-visible {
+  display: block;
+}
+
+.drizlo-music-spotify iframe {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  border: 0;
+  border-radius: 8px;
+}
+
+@media (max-width: 800px) {
+  .drizlo-music-spotify {
+    max-height: calc(100dvh - 270px);
+  }
+
+  .drizlo-music-spotify iframe {
+    max-height: min(50dvh, 500px);
+  }
+}

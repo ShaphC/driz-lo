@@ -1,11 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { FormEvent } from "react";
+import type { FormEvent, PointerEvent as ReactPointerEvent } from "react";
 import "./MusicPanel.css";
 
-type Playlist = { id: string; name: string; url: string };
+type Playlist = {
+  id: string;
+  name: string;
+  url: string;
+};
+
 type View = "player" | "library";
+type MusicProvider = "soundcloud" | "spotify";
 
 type SoundCloudWidget = {
   bind: (event: string, callback: () => void) => void;
@@ -64,6 +70,42 @@ function validSoundCloudUrl(value: string): string | null {
   }
 }
 
+function validSpotifyUrl(value: string): string | null {
+  try {
+    const url = new URL(value.trim());
+
+    if (url.protocol !== "https:" || url.hostname !== "open.spotify.com") {
+      return null;
+    }
+
+    const parts = url.pathname.split("/").filter(Boolean);
+
+    if (parts[0]?.startsWith("intl-")) {
+      parts.shift();
+    }
+
+    const [type, id] = parts;
+
+    if (
+      !["playlist", "album", "track"].includes(type) ||
+      !/^[A-Za-z0-9]{22}$/.test(id ?? "") ||
+      parts.length !== 2
+    ) {
+      return null;
+    }
+
+    return `https://open.spotify.com/${type}/${id}`;
+  } catch {
+    return null;
+  }
+}
+
+function getMusicProvider(url: string): MusicProvider | null {
+  if (validSpotifyUrl(url)) return "spotify";
+  if (validSoundCloudUrl(url)) return "soundcloud";
+  return null;
+}
+
 export default function MusicPanel() {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<View>("library");
@@ -94,7 +136,7 @@ export default function MusicPanel() {
               typeof p?.id === "string" &&
               typeof p?.name === "string" &&
               typeof p?.url === "string" &&
-              !!validSoundCloudUrl(p.url),
+              !!getMusicProvider(p.url),
           )
           .slice(0, 30);
       }
@@ -146,16 +188,29 @@ export default function MusicPanel() {
   const all = useMemo(() => [...CURATED, ...playlists], [playlists]);
   const current = all.find((p) => p.id === selected) || null;
 
-  const embedUrl = current
-    ? `https://w.soundcloud.com/player/?url=${encodeURIComponent(
-        current.url,
-      )}&color=%23f5b579&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=false`
-    : null;
+  const provider = current ? getMusicProvider(current.url) : null;
 
-  // Advance only after the listener has manually started playback.
-  // This does not auto-play music on initial page load or playlist selection.
+  const embedUrl =
+    current && provider === "soundcloud"
+      ? `https://w.soundcloud.com/player/?url=${encodeURIComponent(
+          current.url,
+        )}&color=%23f5b579&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=false`
+      : null;
+
+  const spotifyEmbedUrl =
+    current && provider === "spotify"
+      ? validSpotifyUrl(current.url)?.replace(
+          "https://open.spotify.com/",
+          "https://open.spotify.com/embed/",
+        )
+      : null;
+
+  // Advance only after the listener manually starts playback.
+  // Single tracks stop naturally.
   useEffect(() => {
-    if (!current || !iframeRef.current) return;
+    if (provider !== "soundcloud" || !current || !iframeRef.current) {
+      return;
+    }
 
     let disposed = false;
     let advanceTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -167,8 +222,6 @@ export default function MusicPanel() {
       const activeWidget = api.Widget(iframeRef.current);
 
       const onFinish = () => {
-        // Single-track links should stop naturally.
-        // Playlists advance only when another track is available.
         activeWidget.getSounds((sounds) => {
           if (disposed || !Array.isArray(sounds) || sounds.length < 2) {
             return;
@@ -186,7 +239,6 @@ export default function MusicPanel() {
 
             activeWidget.skip(index + 1);
 
-            // Allow the next track to load before requesting playback.
             advanceTimeout = setTimeout(() => {
               if (!disposed) {
                 activeWidget.play();
@@ -228,13 +280,13 @@ export default function MusicPanel() {
       );
 
       script?.removeEventListener("load", connect);
-      // Do not call unbind on a detached iframe: SoundCloud internally
-      // calls postMessage on contentWindow, which may already be null.
-      // The disposed guard above makes old callbacks inert.
-    };
-  }, [current?.id]);
 
-  function beginResize(event: React.PointerEvent<HTMLDivElement>) {
+      // Do not unbind a detached iframe.
+      // The disposed guard makes old callbacks inert.
+    };
+  }, [current?.id, provider]);
+
+  function beginResize(event: ReactPointerEvent<HTMLDivElement>) {
     if (event.button !== 0) return;
 
     dragRef.current = {
@@ -246,7 +298,7 @@ export default function MusicPanel() {
     event.preventDefault();
   }
 
-  function resizePlayer(event: React.PointerEvent<HTMLDivElement>) {
+  function resizePlayer(event: ReactPointerEvent<HTMLDivElement>) {
     if (!dragRef.current) return;
 
     const maximum = Math.max(220, Math.min(650, window.innerHeight - 240));
@@ -287,11 +339,11 @@ export default function MusicPanel() {
   function addPlaylist(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const url = validSoundCloudUrl(link);
+    const url = validSpotifyUrl(link) ?? validSoundCloudUrl(link);
 
     if (!url) {
       setError(
-        "Paste a public SoundCloud track or playlist URL (https://soundcloud.com/...).",
+        "Paste a valid Spotify or SoundCloud playlist, album, or track URL.",
       );
       return;
     }
@@ -314,7 +366,7 @@ export default function MusicPanel() {
 
     const item: Playlist = {
       id: `saved-${Date.now()}`,
-      name: name.trim().slice(0, 60) || "My SoundCloud playlist",
+      name: name.trim().slice(0, 60) || "My music playlist",
       url,
     };
 
@@ -340,7 +392,7 @@ export default function MusicPanel() {
         aria-controls="drizlo-music-body"
         onClick={() => setOpen((value) => !value)}
       >
-        {open ? "✕ Close nusic" : "♫ Music"}
+        {open ? "✕ Close music" : "♫ Music"}
       </button>
 
       <div
@@ -351,7 +403,7 @@ export default function MusicPanel() {
         {view === "library" && (
           <div className="drizlo-music-heading">
             <strong>Choose your music</strong>
-            <span>SoundCloud</span>
+            <span>Spotify & SoundCloud</span>
           </div>
         )}
 
@@ -392,13 +444,6 @@ export default function MusicPanel() {
                   ))}
                 </div>
               </>
-            )}
-
-            {CURATED.length === 0 && (
-              <p className="drizlo-music-notice">
-                Curated ambient playlists are coming after we verify public
-                embeds. You can add your own now.
-              </p>
             )}
 
             {playlists.length > 0 && (
@@ -487,15 +532,15 @@ export default function MusicPanel() {
 
             <form onSubmit={addPlaylist} className="drizlo-music-form">
               <label htmlFor="drizlo-music-url">
-                Add SoundCloud track or playlist
+                Add Spotify or SoundCloud playlist
               </label>
 
               <input
                 id="drizlo-music-url"
                 type="url"
-                placeholder="https://soundcloud.com/..."
+                placeholder="Paste a Spotify or SoundCloud link"
                 value={link}
-                onChange={(e) => setLink(e.target.value)}
+                onChange={(event) => setLink(event.target.value)}
                 required
               />
 
@@ -507,7 +552,7 @@ export default function MusicPanel() {
                 maxLength={60}
                 placeholder="My focus music"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(event) => setName(event.target.value)}
               />
 
               <button type="submit">Save & load</button>
@@ -531,16 +576,14 @@ export default function MusicPanel() {
         )}
       </div>
 
-      {/* Keep the iframe mounted when changing views or collapsing the panel. */}
+      {/* SoundCloud player stays mounted when its library is open. */}
       <div
-        className={`drizlo-music-player ${current ? "has-track" : ""} ${
-          view === "library" ? "is-library-view" : ""
-        }`}
+        className={`drizlo-music-player ${
+          provider === "soundcloud" ? "has-track" : ""
+        } ${view === "library" ? "is-library-view" : ""}`}
       >
         {embedUrl && (
           <>
-            <div className="drizlo-music-now">{current?.name}</div>
-
             <iframe
               ref={iframeRef}
               key={current?.id}
@@ -588,6 +631,25 @@ export default function MusicPanel() {
           </>
         )}
       </div>
+
+      {/* Spotify embedded player */}
+      {spotifyEmbedUrl && (
+        <div
+          className={`drizlo-music-spotify ${
+            open && view === "player" ? "is-visible" : ""
+          }`}
+        >
+          <iframe
+            title={`Spotify: ${current?.name ?? "Playlist"}`}
+            src={spotifyEmbedUrl}
+            width="100%"
+            height={playerHeight}
+            style={{ height: playerHeight }}
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+          />
+        </div>
+      )}
     </aside>
   );
 }
