@@ -75,7 +75,7 @@ export default function MusicPanel() {
   const [ready, setReady] = useState(false);
   const [renameId, setRenameId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
-  const [playerHeight, setPlayerHeight] = useState(300);
+  const [playerHeight, setPlayerHeight] = useState(420);
 
   const dragRef = useRef<{ y: number; height: number } | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -348,27 +348,21 @@ export default function MusicPanel() {
         id="drizlo-music-body"
         aria-hidden={!open}
       >
-        <div className="drizlo-music-heading">
-          <strong>
-            {view === "player" && current ? "Now playing" : "Choose your music"}
-          </strong>
-          <span>SoundCloud</span>
-        </div>
+        {view === "library" && (
+          <div className="drizlo-music-heading">
+            <strong>Choose your music</strong>
+            <span>SoundCloud</span>
+          </div>
+        )}
 
         {view === "player" && current ? (
-          <div className="drizlo-music-player-view">
-            <p className="drizlo-music-selected-name">{current.name}</p>
-
-            <p>Music plays independently of your focus timer.</p>
-
-            <button
-              className="drizlo-music-switch"
-              type="button"
-              onClick={() => setView("library")}
-            >
-              Change playlist
-            </button>
-          </div>
+          <button
+            className="drizlo-music-switch"
+            type="button"
+            onClick={() => setView("library")}
+          >
+            Change playlist
+          </button>
         ) : (
           <div className="drizlo-music-library">
             {current && (

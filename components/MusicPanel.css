@@ -389,3 +389,53 @@
     overflow: visible;
   }
 }
+
+/* Compact player controls */
+.drizlo-music-open.drizlo-music-player-mode .drizlo-music-body {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  padding: 9px;
+  overflow: visible;
+  resize: none;
+  flex-shrink: 0;
+}
+
+/* Change playlist button fills its container */
+.drizlo-music-player-mode .drizlo-music-switch {
+  display: block;
+  width: 100%;
+  margin: 0;
+}
+
+/* SoundCloud player occupies the remaining space */
+.drizlo-music-player-mode .drizlo-music-player.has-track {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Keep library selection separate and resizable */
+.drizlo-music-open.drizlo-music-library-mode .drizlo-music-body {
+  height: auto;
+  min-height: 440px;
+  max-height: calc(100dvh - 190px);
+  overflow-y: auto;
+  resize: vertical;
+}
+
+/* Mobile */
+@media (max-width: 800px) {
+  .drizlo-music-open.drizlo-music-player-mode .drizlo-music-body {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    padding: 9px;
+    overflow: visible;
+  }
+
+  .drizlo-music-open.drizlo-music-library-mode .drizlo-music-body {
+    min-height: 360px;
+    max-height: 65dvh;
+  }
+}
