@@ -119,6 +119,7 @@ export default function MusicPanel() {
   const [renameId, setRenameId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [playerHeight, setPlayerHeight] = useState(420);
+  const [musicActivated, setMusicActivated] = useState(false);
 
   const dragRef = useRef<{ y: number; height: number } | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -158,7 +159,9 @@ export default function MusicPanel() {
         : (CURATED[0]?.id ?? null);
 
     setSelected(initial);
-    setView(initial ? "player" : "library");
+
+    // Remember the selected playlist, but don't load its player yet.
+    setView("library");
     setReady(true);
   }, []);
 
@@ -192,14 +195,14 @@ export default function MusicPanel() {
   const provider = current ? getMusicProvider(current.url) : null;
 
   const embedUrl =
-    current && provider === "soundcloud"
+    musicActivated && current && provider === "soundcloud"
       ? `https://w.soundcloud.com/player/?url=${encodeURIComponent(
           current.url,
         )}&color=%23f5b579&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=false`
       : null;
 
   const spotifyEmbedUrl =
-    current && provider === "spotify"
+    musicActivated && current && provider === "spotify"
       ? validSpotifyUrl(current.url)?.replace(
           "https://open.spotify.com/",
           "https://open.spotify.com/embed/",
@@ -209,7 +212,12 @@ export default function MusicPanel() {
   // Advance only after the listener manually starts playback.
   // Single tracks stop naturally.
   useEffect(() => {
-    if (provider !== "soundcloud" || !current || !iframeRef.current) {
+    if (
+      !musicActivated ||
+      provider !== "soundcloud" ||
+      !current ||
+      !iframeRef.current
+    ) {
       return;
     }
 
@@ -285,7 +293,7 @@ export default function MusicPanel() {
       // Do not unbind a detached iframe.
       // The disposed guard makes old callbacks inert.
     };
-  }, [current?.id, provider]);
+  }, [current?.id, provider, musicActivated]);
 
   function beginResize(event: ReactPointerEvent<HTMLDivElement>) {
     if (event.button !== 0) return;
@@ -333,6 +341,7 @@ export default function MusicPanel() {
 
   function choosePlaylist(id: string) {
     setSelected(id);
+    setMusicActivated(true);
     setView("player");
     setError("");
   }
