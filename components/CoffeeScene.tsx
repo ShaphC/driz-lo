@@ -23,7 +23,13 @@ export default function CoffeeScene({
   const id = useId().replace(/:/g, "");
 
   const isFocus = mode === "focus";
-  const fill = isFocus ? Math.max(0, Math.min(1, progress)) : 1;
+
+  // Progress increases from 0 to 1 in both timer modes.
+  // Focus: coffee fills as time passes.
+  // Break: coffee empties as time passes.
+  const normalizedProgress = Math.max(0, Math.min(1, progress));
+
+  const fill = isFocus ? normalizedProgress : 1 - normalizedProgress;
 
   const brewing = isFocus && running && fill < 1;
   // Steam follows actual visible liquid, not the timer running state.
@@ -586,21 +592,21 @@ export default function CoffeeScene({
           {/* Steam */}
           {hasCoffee && (
             <g className="is-brewing">
-            {[
-              "M275 163 C256 141 293 120 272 97",
-              "M311 160 C334 135 299 114 318 90",
-              "M345 164 C328 142 359 119 343 101",
-            ].map((d, index) => (
-              <path
-                key={index}
-                className={`drizlo-steam drizlo-steam-${index + 1}`}
-                d={d}
-                fill="none"
-                stroke="#FFE8CA"
-                strokeWidth="4"
-                strokeLinecap="round"
-              />
-            ))}
+              {[
+                "M275 163 C256 141 293 120 272 97",
+                "M311 160 C334 135 299 114 318 90",
+                "M345 164 C328 142 359 119 343 101",
+              ].map((d, index) => (
+                <path
+                  key={index}
+                  className={`drizlo-steam drizlo-steam-${index + 1}`}
+                  d={d}
+                  fill="none"
+                  stroke="#FFE8CA"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                />
+              ))}
             </g>
           )}
         </g>

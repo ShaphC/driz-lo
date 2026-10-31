@@ -447,20 +447,26 @@ export default function Home() {
 
   // Scrubbing previews the liquid level immediately; committing changes the
   // deadline without changing rounds or skipping the countdown sound.
+
   function commitScrub(value: number): void {
     const instant = Date.now();
+
     setNow(instant);
     setScrubSeconds(null);
     setJustCompleted(false);
     completedEndRef.current = null;
     lastCountdownTickRef.current = null;
+
     setSession((current) => {
-      if (!current || current.setFinished || current.mode !== "focus")
+      if (!current || current.setFinished) {
         return current;
+      }
+
       const remaining = Math.max(
         1,
         Math.min(current.duration * 60, Math.round(value)),
       );
+
       return {
         ...current,
         remaining,
