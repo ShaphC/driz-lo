@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import CoffeeScene from "@/components/CoffeeScene";
+import MusicPanel from "@/components/MusicPanel";
 import TeaScene from "@/components/TeaScene";
 import "./scene-selector.css";
 import { trackEvent } from "@/lib/analytics";
@@ -1077,6 +1078,7 @@ export default function Home() {
         </div>
       )}
 
+      <MusicPanel />
       <footer className="bottombar">
         <span>{sceneChoice === "tea" ? "TEA SCENE" : "COFFEE SCENE"}</span>
         <span>Focus feels different here.</span>
