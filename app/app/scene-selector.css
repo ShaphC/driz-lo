@@ -42,3 +42,28 @@
     font-size: 11px;
   }
 }
+
+/* Coffee / Tea toggle — top center */
+.workspace .drizlo-scene-selector {
+  position: fixed !important;
+  top: 32px !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+
+  transform: translateX(-50%) !important;
+  margin: 0 !important;
+  z-index: 100;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .workspace .drizlo-scene-selector {
+    top: 24px !important;
+  }
+}

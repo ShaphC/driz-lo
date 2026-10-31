@@ -363,3 +363,16 @@
     will-change: auto;
   }
 }
+
+.drizlo-drop-a {
+  animation-duration: 0.9s;
+  animation-timing-function: ease-in;
+  animation-iteration-count: infinite;
+}
+
+.drizlo-drop-b {
+  animation-duration: 0.9s;
+  animation-delay: -0.45s;
+  animation-timing-function: ease-in;
+  animation-iteration-count: infinite;
+}

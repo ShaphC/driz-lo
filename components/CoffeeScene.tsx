@@ -11,7 +11,7 @@ type CoffeeSceneProps = {
   justCompleted?: boolean;
 };
 
-const MAX_VISIBLE_CUPS = 6;
+// const MAX_VISIBLE_CUPS = 6;
 
 export default function CoffeeScene({
   progress,
@@ -40,7 +40,7 @@ export default function CoffeeScene({
   const liquidTop = liquidBottom - liquidHeight;
   const dropDistance = Math.max(0, liquidTop - 307);
 
-  const cups = Math.min(completed, MAX_VISIBLE_CUPS);
+  // const cups = Math.min(completed, MAX_VISIBLE_CUPS);
 
   return (
     <div className="drizlo-coffee-scene">
@@ -640,7 +640,7 @@ export default function CoffeeScene({
         </span>
       </div>
 
-      {/* Completed cups — left-side icons only, no collection panel */}
+      {/* Completed cups — left-side icons only, no collection panel
       {cups > 0 && (
         <div
           className="drizlo-mug-stack"
@@ -696,7 +696,7 @@ export default function CoffeeScene({
             </span>
           )}
         </div>
-      )}
+      )} */}
     </div>
   );
 }

@@ -727,66 +727,38 @@ export default function Home() {
     }
   }
 
-  const preferences = (prefix: string) => (
-    <div className="timer-preferences" aria-label="Timer preferences">
-      <button
-        type="button"
-        className="sound-toggle drizlo-speaker-toggle"
-        aria-pressed={soundEnabled}
-        aria-label={soundEnabled ? "Mute timer sounds" : "Unmute timer sounds"}
-        title={soundEnabled ? "Mute timer sounds" : "Unmute timer sounds"}
-        onClick={toggleSound}
+  const speakerButton = (prefix: string) => (
+    <button
+      type="button"
+      className="sound-toggle drizlo-speaker-toggle"
+      aria-pressed={soundEnabled}
+      aria-label={soundEnabled ? "Mute timer sounds" : "Unmute timer sounds"}
+      title={soundEnabled ? "Mute timer sounds" : "Unmute timer sounds"}
+      onClick={toggleSound}
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
       >
-        <svg
-          viewBox="0 0 24 24"
-          width="20"
-          height="20"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M4 9v6h4l5 4V5L8 9H4Z" />
-          {soundEnabled ? (
-            <>
-              <path d="M16 9a4 4 0 0 1 0 6" />
-              <path d="M18.5 6.5a7.5 7.5 0 0 1 0 11" />
-            </>
-          ) : (
-            <path d="M3 3 21 21" strokeWidth="2.4" />
-          )}
-        </svg>
-      </button>
-      <button
-        type="button"
-        className="sound-toggle"
-        aria-pressed={ambienceEnabled}
-        onClick={toggleAmbience}
-      >
-        {ambienceEnabled ? "Ambience on" : "Ambience off"}
-      </button>
-      <button
-        type="button"
-        className="notification-toggle"
-        onClick={() => void enableNotifications()}
-        disabled={
-          notificationsEnabled ||
-          typeof Notification === "undefined" ||
-          !window.isSecureContext ||
-          Notification.permission === "denied"
-        }
-      >
-        {notificationsEnabled
-          ? "Notifications on"
-          : typeof Notification === "undefined" || !window.isSecureContext
-            ? "Notifications unavailable"
-            : Notification.permission === "denied"
-              ? "Notifications blocked"
-              : "Enable notifications"}
-      </button>
-    </div>
+        <path d="M4 9v6h4l5 4V5L8 9H4Z" />
+
+        {soundEnabled ? (
+          <>
+            <path d="M16 9a4 4 0 0 1 0 6" />
+            <path d="M18.5 6.5a7.5 7.5 0 0 1 0 11" />
+          </>
+        ) : (
+          <path d="M3 3 21 21" strokeWidth="2.4" />
+        )}
+      </svg>
+    </button>
   );
 
   const durationControls = (prefix: string) => (
@@ -905,6 +877,8 @@ export default function Home() {
           className="timer-panel desktop-timer"
           aria-label="Timer controls"
         >
+          <div className="drizlo-timer-speaker">{speakerButton("desktop")}</div>
+
           <span className="eyebrow">
             {session.setFinished
               ? "TWO ROUNDS COMPLETE"
@@ -965,7 +939,7 @@ export default function Home() {
           {desktopSettingsOpen && (
             <div id="desktop-timer-options" className="drizlo-desktop-options">
               {durationControls("desktop")}
-              {preferences("desktop")}
+              {speakerButton("desktop")}
               <button
                 type="button"
                 className="mode-button"
@@ -979,6 +953,8 @@ export default function Home() {
 
         {/* Mobile: visible timer, no hidden scrolling card. */}
         <section className="mobile-timer" aria-label="Focus timer">
+          <div className="drizlo-timer-speaker">{speakerButton("mobile")}</div>
+
           <span className="eyebrow">
             {session.setFinished
               ? "TWO ROUNDS COMPLETE"
@@ -1069,7 +1045,7 @@ export default function Home() {
                 : "FOCUS DURATION · AVAILABLE IN FOCUS MODE"}
             </p>
             {durationControls("mobile")}
-            {preferences("mobile")}
+            {speakerButton("mobile")}
             <button
               type="button"
               className="mode-button"
