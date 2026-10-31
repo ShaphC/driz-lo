@@ -152,6 +152,42 @@
   border: 0;
   border-radius: 8px;
 }
+/* Player-first additions. Hide the iframe offscreen without unmounting it. */
+.drizlo-music:not(.drizlo-music-open) .drizlo-music-player,
+.drizlo-music-player.is-library-view {
+  position: absolute;
+  left: -10000px;
+  top: 0;
+  width: 300px;
+  display: block;
+  visibility: hidden;
+}
+.drizlo-music-switch,
+.drizlo-music-back {
+  border: 1px solid rgba(255, 221, 182, 0.3);
+  border-radius: 9px;
+  background: rgba(245, 181, 121, 0.14);
+  color: #ffe4bd;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.drizlo-music-switch {
+  width: 100%;
+  margin-top: 6px;
+}
+.drizlo-music-back {
+  margin-top: 12px;
+}
+.drizlo-music-selected-name {
+  font-weight: 700;
+  color: #fff2df !important;
+}
+.drizlo-music-open:has(.drizlo-music-player.has-track:not(.is-library-view))
+  .drizlo-music-body {
+  max-height: 180px;
+}
 @media (max-width: 800px) {
   .drizlo-music {
     left: 0;
@@ -176,19 +212,23 @@
     order: 3;
     max-width: 100%;
   }
-  .drizlo-music:not(.drizlo-music-open) .drizlo-music-player {
-    position: absolute;
-    left: -10000px;
-    top: 0;
-    width: 300px;
-    display: block;
-    visibility: hidden;
-  }
   .drizlo-music-open {
     bottom: calc(70px + env(safe-area-inset-bottom));
   }
   .drizlo-music-open .drizlo-music-body {
     max-height: 28dvh;
+  }
+  .drizlo-music:not(.drizlo-music-open) .drizlo-music-player,
+  .drizlo-music-player.is-library-view {
+    width: 300px;
+    order: 3;
+  }
+  .drizlo-music-open:has(.drizlo-music-player.has-track:not(.is-library-view))
+    .drizlo-music-body {
+    max-height: 150px;
+  }
+  .drizlo-music-player iframe {
+    height: 220px;
   }
 }
 @media (min-width: 801px) and (max-width: 1250px) {
@@ -196,22 +236,8 @@
     top: 120px;
     width: 245px;
   }
-  .drizlo-music:not(.drizlo-music-open) .drizlo-music-player {
-    position: absolute;
-    left: -10000px;
-    top: 0;
+  .drizlo-music:not(.drizlo-music-open) .drizlo-music-player,
+  .drizlo-music-player.is-library-view {
     width: 245px;
-    display: block;
-    visibility: hidden;
-  }
-}
-@media (min-width: 1251px) {
-  .drizlo-music:not(.drizlo-music-open) .drizlo-music-player {
-    position: absolute;
-    left: -10000px;
-    top: 0;
-    width: 300px;
-    display: block;
-    visibility: hidden;
   }
 }
