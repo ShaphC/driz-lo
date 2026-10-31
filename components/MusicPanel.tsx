@@ -326,7 +326,11 @@ export default function MusicPanel() {
 
   return (
     <aside
-      className={`drizlo-music ${open ? "drizlo-music-open" : ""}`}
+      className={`drizlo-music ${open ? "drizlo-music-open" : ""} ${
+        view === "library"
+          ? "drizlo-music-library-mode"
+          : "drizlo-music-player-mode"
+      }`}
       aria-label="Music player"
     >
       <button
@@ -336,7 +340,7 @@ export default function MusicPanel() {
         aria-controls="drizlo-music-body"
         onClick={() => setOpen((value) => !value)}
       >
-        {open ? "✕ Close music" : "♫ Music"}
+        {open ? "✕ Close nusic" : "♫ Music"}
       </button>
 
       <div
@@ -362,7 +366,7 @@ export default function MusicPanel() {
               type="button"
               onClick={() => setView("library")}
             >
-              Change music
+              Change playlist
             </button>
           </div>
         ) : (
