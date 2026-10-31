@@ -89,12 +89,30 @@ button {
   margin: -25px auto 0;
 }
 .scene-label {
-  margin-top: 14px;
-  color: #f1cda4;
-  font-size: 13px;
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translateX(-50%);
+  z-index: 5;
+  margin: 0;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  padding: 8px 14px;
+  border: 1px solid rgba(255, 213, 161, 0.3);
+  border-radius: 12px;
+  background: rgba(38, 22, 15, 0.76);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  color: #ffe4bd;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.2px;
   text-align: center;
-  letter-spacing: 0.3px;
-  line-height: 1.5;
+  pointer-events: none;
 }
 .timer-panel {
   position: absolute;
@@ -156,7 +174,7 @@ button {
   border-radius: 10px;
   border: none;
   transition:
-    background * 0.2s ease,
+    background 0.2s ease,
     transform 0.2s ease;
 }
 .controls button:active,
@@ -194,7 +212,7 @@ button {
   color: #e9c8a5;
   font-size: 13px;
   transition:
-    background * 0.2s ease,
+    background 0.2s ease,
     border-color 0.2s ease;
 }
 .durations button:hover:not(:disabled) {
@@ -793,7 +811,6 @@ button {
     margin-top: 0;
   }
 }
-
 /* Desktop: keep the scene and timer adjacent without overlap. */
 @media (min-width: 801px) {
   .workspace {
@@ -830,5 +847,29 @@ button {
   }
   .workspace .timer-panel.desktop-timer {
     width: 100%;
+  }
+}
+/* Compact, centered scene caption positioned above the coffee steam. */
+@media (min-width: 801px) {
+  .workspace .scene-stage .scene-label {
+    position: fixed !important;
+    top: clamp(100px, 18dvh, 170px) !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: translateX(-50%) !important;
+    width: max-content !important;
+    max-width: calc(100vw - 32px) !important;
+    margin: 0 !important;
+    padding: 7px 13px !important;
+    border: 1px solid rgba(255, 213, 161, 0.3) !important;
+    border-radius: 10px !important;
+    background: rgba(38, 22, 15, 0.78) !important;
+    color: #ffe4bd !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+    text-align: center !important;
+    z-index: 50 !important;
   }
 }

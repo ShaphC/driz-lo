@@ -26,6 +26,8 @@ export default function CoffeeScene({
   const fill = isFocus ? Math.max(0, Math.min(1, progress)) : 1;
 
   const brewing = isFocus && running && fill < 1;
+  // Steam follows actual visible liquid, not the timer running state.
+  const hasCoffee = fill > 0.01;
 
   const liquidBottom = 457;
   const liquidHeight = fill * 112;
@@ -582,7 +584,8 @@ export default function CoffeeScene({
           </g>
 
           {/* Steam */}
-          <g className={brewing ? "is-brewing" : ""}>
+          {hasCoffee && (
+            <g className="is-brewing">
             {[
               "M275 163 C256 141 293 120 272 97",
               "M311 160 C334 135 299 114 318 90",
@@ -598,7 +601,8 @@ export default function CoffeeScene({
                 strokeLinecap="round"
               />
             ))}
-          </g>
+            </g>
+          )}
         </g>
 
         {/* Warm atmosphere */}

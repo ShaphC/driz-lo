@@ -849,7 +849,36 @@ export default function Home() {
               justCompleted={justCompleted}
             />
           )}
-          <div className="scene-label">
+          <div
+            className="scene-label"
+            role="status"
+            style={{
+              position: "fixed",
+              top: "42dvh",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 6,
+              width: "max-content",
+              maxWidth: "calc(100vw - 32px)",
+              boxSizing: "border-box",
+              padding: "13px 22px",
+              borderRadius: "16px",
+              border: "1px solid rgba(255, 215, 165, 0.5)",
+              background: "rgba(39, 23, 22, 0.88)",
+              backdropFilter: "blur(14px)",
+              WebkitBackdropFilter: "blur(14px)",
+              color: "#FFE8C8",
+              fontSize: "clamp(13px, 1.4vw, 16px)",
+              fontWeight: 600,
+              lineHeight: 1.5,
+              letterSpacing: "0.01em",
+              textAlign: "center",
+              whiteSpace: "normal",
+              textShadow: "0 2px 8px rgba(0, 0, 0, 0.45)",
+              boxShadow: "0 12px 36px rgba(0, 0, 0, 0.32)",
+              pointerEvents: "none",
+            }}
+          >
             {justCompleted
               ? "Another beautiful moment of focus."
               : isFocus
