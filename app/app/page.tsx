@@ -939,7 +939,6 @@ export default function Home() {
           {desktopSettingsOpen && (
             <div id="desktop-timer-options" className="drizlo-desktop-options">
               {durationControls("desktop")}
-              {speakerButton("desktop")}
               <button
                 type="button"
                 className="mode-button"
@@ -1045,7 +1044,7 @@ export default function Home() {
                 : "FOCUS DURATION · AVAILABLE IN FOCUS MODE"}
             </p>
             {durationControls("mobile")}
-            {speakerButton("mobile")}
+            {/* {speakerButton("mobile")} */}
             <button
               type="button"
               className="mode-button"
