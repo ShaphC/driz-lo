@@ -74,8 +74,9 @@ export default function AnalyticsConsent() {
       </p>
 
       <p>
-        <strong>Optional:</strong>
-        <p>The timer works without it. No session recordings.</p>
+        <strong>
+          Optional: The timer works without it. No session recordings.
+        </strong>
       </p>
 
       <p style={{ margin: "0 0 14px", fontSize: 12 }}>
