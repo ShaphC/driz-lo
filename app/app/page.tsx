@@ -1044,7 +1044,6 @@ export default function Home() {
                 : "FOCUS DURATION · AVAILABLE IN FOCUS MODE"}
             </p>
             {durationControls("mobile")}
-            {/* {speakerButton("mobile")} */}
             <button
               type="button"
               className="mode-button"
