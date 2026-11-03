@@ -412,7 +412,7 @@ export default function Home() {
         <div className="scene-overlay" />
         <header className="topbar">
           <div className="brand">
-            drizlo<span>.</span>
+            DrizScape<span>.</span>
           </div>
         </header>
       </main>
@@ -783,7 +783,7 @@ export default function Home() {
       <div className="scene-overlay" />
       <header className="topbar">
         <div className="brand">
-          drizlo<span>.</span>
+          DrizScape<span>.</span>
         </div>
       </header>
 
