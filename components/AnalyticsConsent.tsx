@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 
 import {
   analyticsConsent,
+  CONSENT_CHANGED_EVENT,
   setAnalyticsConsent,
   trackEvent,
 } from "@/lib/analytics";
@@ -26,13 +27,10 @@ export default function AnalyticsConsent() {
     refreshConsent();
     setReady(true);
 
-    window.addEventListener("drizlo:analytics-consent-changed", refreshConsent);
+    window.addEventListener(CONSENT_CHANGED_EVENT, refreshConsent);
 
     return () => {
-      window.removeEventListener(
-        "drizlo:analytics-consent-changed",
-        refreshConsent,
-      );
+      window.removeEventListener(CONSENT_CHANGED_EVENT, refreshConsent);
     };
   }, []);
 
@@ -73,7 +71,18 @@ export default function AnalyticsConsent() {
         }}
       >
         May we use privacy-conscious analytics to learn how DrizScape is used?
-        Optional; the timer works without it. No session recordings.
+      </p>
+
+      <p
+        style={{
+          margin: "0 0 12px",
+          lineHeight: 1.5,
+        }}
+      >
+        <strong>Optional:</strong>
+        <span style={{ display: "block", marginTop: 4 }}>
+          The timer works without it. No session recordings.
+        </span>
       </p>
 
       <p style={{ margin: "0 0 14px", fontSize: 12 }}>
