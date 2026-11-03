@@ -1,4 +1,4 @@
-/* DRIZLO — unified SVG café scene */
+/* DRIZSCAPE — unified SVG café scene */
 .drizlo-coffee-scene {
   position: relative;
   width: 100%;
@@ -302,7 +302,7 @@
 }
 
 /* =========================================
-   DRIZLO — VISIBLE MOVING CLOUDS
+   DRIZSCAPE — VISIBLE MOVING CLOUDS
    ========================================= */
 
 /* Slow, continuous cloud movement across the café window. */

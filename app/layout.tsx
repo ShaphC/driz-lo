@@ -4,23 +4,24 @@ import AnalyticsConsent from "@/components/AnalyticsConsent";
 
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://drizlo.vercel.app";
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://drizscape.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
 
   title: {
-    default: "Drizlo — Focus Feels Different Here",
-    template: "%s | Drizlo",
+    default: "DrizScape — Focus Feels Different Here",
+    template: "%s | DrizScape",
   },
 
   description:
-    "Make focus time feel different. Drizlo is a cozy, animated focus timer with relaxing coffee and tea scenes, customizable sessions, and gentle breaks.",
+    "Make focus time feel different. DrizScape is a cozy, animated focus timer with relaxing coffee and tea scenes, customizable sessions, and gentle breaks.",
 
-  applicationName: "Drizlo",
+  applicationName: "DrizScape",
 
   keywords: [
-    "Drizlo",
+    "DrizScape",
     "focus timer",
     "cozy focus timer",
     "Pomodoro timer",
@@ -44,8 +45,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "/",
-    siteName: "Drizlo",
-    title: "Drizlo — Focus Feels Different Here",
+    siteName: "DrizScape",
+    title: "DrizScape — Focus Feels Different Here",
     description:
       "A cozy, animated focus timer. Watch coffee brew, tea steep, and your progress unfold.",
     images: [
@@ -53,14 +54,14 @@ export const metadata: Metadata = {
         url: "/opengraph-image.png",
         width: 1200,
         height: 630,
-        alt: "Drizlo — Focus Feels Different Here",
+        alt: "DrizScape — Focus Feels Different Here",
       },
     ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "Drizlo — Focus Feels Different Here",
+    title: "DrizScape — Focus Feels Different Here",
     description: "A cozy, animated focus timer with coffee and tea scenes.",
     images: ["/opengraph-image.png"],
   },

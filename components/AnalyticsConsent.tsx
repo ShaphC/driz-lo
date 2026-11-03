@@ -26,15 +26,12 @@ export default function AnalyticsConsent() {
     refreshConsent();
     setReady(true);
 
-    window.addEventListener(
-      "drizlo:analytics-consent-changed",
-      refreshConsent
-    );
+    window.addEventListener("drizlo:analytics-consent-changed", refreshConsent);
 
     return () => {
       window.removeEventListener(
         "drizlo:analytics-consent-changed",
-        refreshConsent
+        refreshConsent,
       );
     };
   }, []);
@@ -75,9 +72,8 @@ export default function AnalyticsConsent() {
           lineHeight: 1.5,
         }}
       >
-        May we use privacy-conscious analytics to learn how
-        Drizlo is used? Optional; the timer works without it.
-        No session recordings.
+        May we use privacy-conscious analytics to learn how DrizScape is used?
+        Optional; the timer works without it. No session recordings.
       </p>
 
       <p style={{ margin: "0 0 14px", fontSize: 12 }}>

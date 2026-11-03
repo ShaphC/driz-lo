@@ -26,7 +26,7 @@ export default function PrivacyPage() {
       <div className="privacy-container">
         <header className="privacy-header">
           <Link href="/" className="privacy-brand">
-            drizlo<span>.</span>
+            DrizScape<span>.</span>
           </Link>
           <Link href="/app" className="privacy-back">
             Back to timer
@@ -37,26 +37,26 @@ export default function PrivacyPage() {
           <span className="privacy-eyebrow">YOUR PRIVACY</span>
           <h1>A little more peace of mind.</h1>
           <p>
-            Drizlo is designed to help you focus, not to collect unnecessary
+            DrizScape is designed to help you focus, not to collect unnecessary
             information about you.
           </p>
         </div>
 
         <section className="privacy-section">
-          <h2>What Drizlo stores</h2>
+          <h2>What DrizScape stores</h2>
           <p>
-            Drizlo saves your timer session and preferences in your browser so
-            you can return to your focus session. This information stays on your
-            device.
+            DrizScape saves your timer session and preferences in your browser
+            so you can return to your focus session. This information stays on
+            your device.
           </p>
-          <p>Drizlo does not currently require an account.</p>
+          <p>DrizScape does not currently require an account.</p>
         </section>
 
         <section className="privacy-section">
           <h2>Optional analytics</h2>
           <p>
-            With your permission, Drizlo uses PostHog to understand how people
-            use the app and which features are useful.
+            With your permission, DrizScape uses PostHog to understand how
+            people use the app and which features are useful.
           </p>
           <p>
             This can include page visits, timer starts, pauses, completions,
@@ -65,8 +65,9 @@ export default function PrivacyPage() {
             characteristics.
           </p>
           <p>
-            Analytics is optional. Drizlo works whether you accept or decline.
-            We do not use session recordings or automatic click tracking.
+            Analytics is optional. DrizScape works whether you accept or
+            decline. We do not use session recordings or automatic click
+            tracking.
           </p>
         </section>
 
@@ -119,23 +120,23 @@ export default function PrivacyPage() {
         <section className="privacy-section">
           <h2>Third-party services</h2>
           <p>
-            Drizlo is hosted on Vercel and uses PostHog for optional analytics.
-            These providers may process technical information needed to operate
-            their services.
+            DrizScape is hosted on Vercel and uses PostHog for optional
+            analytics. These providers may process technical information needed
+            to operate their services.
           </p>
         </section>
 
         <section className="privacy-section">
           <h2>Updates to this page</h2>
           <p>
-            We may update this notice as Drizlo evolves, including when new
+            We may update this notice as DrizScape evolves, including when new
             features or services are introduced.
           </p>
         </section>
 
         <footer className="privacy-footer">
           <span>Make time feel beautiful.</span>
-          <Link href="/app">Return to Drizlo</Link>
+          <Link href="/app">Return to DrizScape</Link>
         </footer>
       </div>
     </main>

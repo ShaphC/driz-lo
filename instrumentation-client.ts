@@ -18,7 +18,7 @@ if (
     // No tracking until the visitor accepts.
     opt_out_capturing_by_default: true,
 
-    // We track only the events Drizlo needs.
+    // We track only the events DrizScape needs.
     autocapture: false,
     capture_pageview: false,
     capture_pageleave: false,
@@ -36,9 +36,7 @@ if (
 
   // Restore consent from a previous visit.
   try {
-    const consent = localStorage.getItem(
-      "drizlo-analytics-consent-v1"
-    );
+    const consent = localStorage.getItem("drizlo-analytics-consent-v1");
 
     if (consent === "accepted") {
       posthog.opt_in_capturing();

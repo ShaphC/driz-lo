@@ -50,11 +50,11 @@ function DevicePreview({ device, drink }: { device: Device; drink: Drink }) {
     <div
       className={`dx-device dx-device--${device}`}
       role="img"
-      aria-label={`${device} preview of Drizlo ${drink} timer`}
+      aria-label={`${device} preview of Drizscape ${drink} timer`}
     >
       <div className="dx-device-top">
         <span className="dx-device-title">
-          drizlo<span>.</span>
+          DrizScape<span>.</span>
         </span>
         <span className="dx-device-meta">
           {device === "mobile" ? "9:41" : "●  ●  ●"}
@@ -120,16 +120,16 @@ const steps = [
 
 const faqs = [
   [
-    "Is Drizlo free to use?",
+    "Is Drizscape free to use?",
     "Yes. You can use the focus timer and currently available scenes for free.",
   ],
   [
     "Do I need an account?",
-    "No. Open Drizlo, choose a scene, and start your session.",
+    "No. Open Drizscape, choose a scene, and start your session.",
   ],
   [
-    "Does Drizlo work on mobile?",
-    "Yes. Drizlo works in your mobile browser. Dedicated Android and iOS apps are planned.",
+    "Does Drizscape work on mobile?",
+    "Yes. Drizscape works in your mobile browser. Dedicated Android and iOS apps are planned.",
   ],
   [
     "What happens when my timer finishes?",
@@ -172,8 +172,8 @@ export default function LandingPage() {
     <main className="dx" id="top">
       <header className="dx-nav-shell">
         <div className="dx-nav">
-          <Link href="/" className="dx-brand" aria-label="Drizlo home">
-            drizlo<span>.</span>
+          <Link href="/" className="dx-brand" aria-label="Drizscape home">
+            DrizScape<span>.</span>
           </Link>
 
           <nav className="dx-nav-right" aria-label="Main navigation">
@@ -300,7 +300,7 @@ export default function LandingPage() {
 
       <section
         className="dx-highlights"
-        aria-label="Why Drizlo feels different"
+        aria-label="Why Drizscape feels different"
       >
         {features.map((feature) => (
           <article className="dx-highlight-card" key={feature.number}>
@@ -335,7 +335,7 @@ export default function LandingPage() {
 
             <p>
               Less time setting up. More time settling in. Getting started with
-              Drizlo takes just a moment.
+              Drizscape takes just a moment.
             </p>
 
             <Link href="/app" className="dx-inline-link">
@@ -413,14 +413,14 @@ export default function LandingPage() {
       <footer className="dx-footer-shell">
         <div className="dx-footer">
           <Link href="/" className="dx-brand">
-            drizlo<span>.</span>
+            DrizScape<span>.</span>
           </Link>
 
           <span>A different kind of focus timer.</span>
 
           <div className="dx-footer-meta">
             <Link href="/privacy">Privacy</Link>
-            <span>© {year} Drizlo</span>
+            <span>© {year} Drizscape</span>
           </div>
         </div>
       </footer>
