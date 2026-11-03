@@ -40,6 +40,11 @@ const SELECTED_KEY = "drizlo-soundcloud-selected-v1";
 
 const CURATED: Playlist[] = [
   {
+    id: "lofi-default",
+    name: "LoFi — SoundCloud",
+    url: "https://soundcloud.com/sc-playlists/sets/lo-fi-chill-beats",
+  },
+  {
     id: "ambient-default",
     name: "Ambient — SoundCloud",
     url: "https://soundcloud.com/ambientmusicstreaming/sets/ambient",
