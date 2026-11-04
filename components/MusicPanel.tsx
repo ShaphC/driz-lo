@@ -556,9 +556,7 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
     const url = validSpotifyUrl(link) ?? validSoundCloudUrl(link);
 
     if (!url) {
-      setError(
-        "Paste a valid Spotify or SoundCloud playlist, album, or track URL.",
-      );
+      setError("Paste a valid music playlist, album, or track URL.");
       return;
     }
 
@@ -622,13 +620,14 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
           <>
             <div className="drizlo-music-heading">
               <strong>Choose your music</strong>
-              <span>Spotify & SoundCloud</span>
+              {/* <span>Spotify & SoundCloud</span> */}
+              <span>SoundCloud</span>
             </div>
 
             <div className="drizlo-music-browse-links">
               <span>Browse:</span>
 
-              <a
+              {/* <a
                 href="https://open.spotify.com/"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -636,7 +635,7 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
                 Spotify ↗
               </a>
 
-              <span>or</span>
+              <span>or</span> */}
 
               <a
                 href="https://soundcloud.com/discover"
@@ -769,14 +768,15 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
             </div>
 
             <form onSubmit={addPlaylist} className="drizlo-music-form">
-              <label htmlFor="drizlo-music-url">
+              {/* <label htmlFor="drizlo-music-url">
                 Add Spotify or SoundCloud playlist
-              </label>
+              </label> */}
+              <label htmlFor="drizlo-music-url">Add music playlist</label>
 
               <input
                 id="drizlo-music-url"
                 type="url"
-                placeholder="Paste a Spotify or SoundCloud link"
+                placeholder="Paste a music link"
                 value={link}
                 onChange={(event) => setLink(event.target.value)}
                 required
