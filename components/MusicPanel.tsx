@@ -16,6 +16,16 @@ type MusicProvider = "soundcloud" | "spotify";
 type SoundCloudWidget = {
   bind: (event: string, callback: () => void) => void;
   unbind: (event: string) => void;
+  load: (
+    url: string,
+    options?: {
+      auto_play?: boolean;
+      show_comments?: boolean;
+      hide_related?: boolean;
+      visual?: boolean;
+      callback?: () => void;
+    },
+  ) => void;
   getSounds: (callback: (sounds: unknown[]) => void) => void;
   getCurrentSoundIndex: (callback: (index: number) => void) => void;
   getVolume: (callback: (volume: number) => void) => void;
@@ -39,7 +49,7 @@ declare global {
   }
 }
 
-// Preserve existing storage keys and saved playlists.
+// Preserve existing storage keys.
 const KEY = "drizlo-soundcloud-playlists-v1";
 const SELECTED_KEY = "drizlo-soundcloud-selected-v1";
 
@@ -142,13 +152,20 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
   const dragRef = useRef<{ y: number; height: number } | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const widgetRef = useRef<SoundCloudWidget | null>(null);
+
   const originalVolumeRef = useRef<number | null>(null);
   const duckedRef = useRef(false);
   const duckPendingRef = useRef(false);
   const duckRequestRef = useRef(0);
-  const duckMusicRef = useRef(duckMusic);
 
+  const duckMusicRef = useRef(duckMusic);
   duckMusicRef.current = duckMusic;
+
+  // Track which playlist is currently loaded into the widget.
+  const loadedPlaylistRef = useRef<string | null>(null);
+  const pendingPlaylistRef = useRef<string | null>(null);
+  const loadRequestRef = useRef(0);
+  const widgetReadyRef = useRef(false);
 
   function restoreMusicVolume(
     widget: SoundCloudWidget | null = widgetRef.current,
@@ -164,7 +181,10 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
     originalVolumeRef.current = null;
   }
 
-  // Restore playlists from local storage.
+  // --------------------------------------------------
+  // Saved playlists
+  // --------------------------------------------------
+
   useEffect(() => {
     let savedPlaylists: Playlist[] = [];
     let savedSelected: string | null = null;
@@ -204,7 +224,6 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
     setReady(true);
   }, []);
 
-  // Persist playlists.
   useEffect(() => {
     if (!ready) return;
 
@@ -215,7 +234,6 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
     }
   }, [playlists, ready]);
 
-  // Persist selected playlist.
   useEffect(() => {
     if (!ready) return;
 
@@ -231,15 +249,28 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
   }, [selected, ready]);
 
   const all = useMemo(() => [...CURATED, ...playlists], [playlists]);
+
   const current = all.find((p) => p.id === selected) || null;
   const provider = current ? getMusicProvider(current.url) : null;
 
-  const embedUrl =
-    musicActivated && current && provider === "soundcloud"
-      ? `https://w.soundcloud.com/player/?url=${encodeURIComponent(
-          current.url,
-        )}&color=%23f5b579&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=false`
-      : null;
+  // The iframe source is deliberately stable.
+  // Playlist changes are handled using widget.load().
+  const initialSoundCloudUrlRef = useRef<string | null>(null);
+
+  if (
+    !initialSoundCloudUrlRef.current &&
+    musicActivated &&
+    provider === "soundcloud" &&
+    current
+  ) {
+    initialSoundCloudUrlRef.current = current.url;
+  }
+
+  const soundCloudEmbedUrl = initialSoundCloudUrlRef.current
+    ? `https://w.soundcloud.com/player/?url=${encodeURIComponent(
+        initialSoundCloudUrlRef.current,
+      )}&color=%23f5b579&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=false`
+    : null;
 
   const spotifyEmbedUrl =
     musicActivated && current && provider === "spotify"
@@ -249,20 +280,21 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
         )
       : null;
 
-  // Reduce SoundCloud volume during the final countdown.
+  // --------------------------------------------------
+  // SoundCloud volume ducking
+  // --------------------------------------------------
+
   useEffect(() => {
     const widget = widgetRef.current;
 
-    if (!widget) return;
+    if (!widget || !widgetReadyRef.current) return;
 
     if (!duckMusic) {
       restoreMusicVolume(widget);
       return;
     }
 
-    if (duckedRef.current || duckPendingRef.current) {
-      return;
-    }
+    if (duckedRef.current || duckPendingRef.current) return;
 
     duckPendingRef.current = true;
     const requestId = ++duckRequestRef.current;
@@ -271,16 +303,15 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
       if (
         requestId !== duckRequestRef.current ||
         widgetRef.current !== widget ||
-        !duckMusicRef.current
+        !duckMusicRef.current ||
+        !widgetReadyRef.current
       ) {
         return;
       }
 
       duckPendingRef.current = false;
 
-      if (!Number.isFinite(volume)) {
-        return;
-      }
+      if (!Number.isFinite(volume)) return;
 
       const originalVolume = Math.max(0, Math.min(100, volume));
 
@@ -291,16 +322,12 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
     });
   }, [duckMusic, widgetVersion]);
 
-  // Connect SoundCloud Widget API.
+  // --------------------------------------------------
+  // Initialize SoundCloud once
+  // --------------------------------------------------
+
   useEffect(() => {
-    if (
-      !musicActivated ||
-      provider !== "soundcloud" ||
-      !current ||
-      !iframeRef.current
-    ) {
-      return;
-    }
+    if (!soundCloudEmbedUrl || !iframeRef.current) return;
 
     let disposed = false;
     let advanceTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -316,16 +343,17 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
 
       activeWidget = widget;
       widgetRef.current = widget;
-
-      originalVolumeRef.current = null;
-      duckedRef.current = false;
-      duckPendingRef.current = false;
-      duckRequestRef.current += 1;
+      widgetReadyRef.current = false;
 
       const onReady = () => {
         if (disposed || widgetRef.current !== widget) return;
 
-        setSoundCloudLoading(false);
+        widgetReadyRef.current = true;
+
+        if (!loadedPlaylistRef.current) {
+          loadedPlaylistRef.current = initialSoundCloudUrlRef.current;
+        }
+
         setWidgetVersion((version) => version + 1);
       };
 
@@ -347,9 +375,7 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
 
             widget.skip(index + 1);
 
-            if (advanceTimeout) {
-              clearTimeout(advanceTimeout);
-            }
+            if (advanceTimeout) clearTimeout(advanceTimeout);
 
             advanceTimeout = setTimeout(() => {
               if (!disposed) widget.play();
@@ -382,9 +408,7 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
     return () => {
       disposed = true;
 
-      if (advanceTimeout) {
-        clearTimeout(advanceTimeout);
-      }
+      if (advanceTimeout) clearTimeout(advanceTimeout);
 
       const script = document.querySelector<HTMLScriptElement>(
         "script[data-drizlo-soundcloud-api]",
@@ -392,19 +416,77 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
 
       script?.removeEventListener("load", connect);
 
-      if (activeWidget) {
-        if (widgetRef.current === activeWidget) {
-          restoreMusicVolume(activeWidget);
-          widgetRef.current = null;
+      if (activeWidget && widgetRef.current === activeWidget) {
+        restoreMusicVolume(activeWidget);
+        widgetRef.current = null;
+        widgetReadyRef.current = false;
+      }
+
+      // Do not unbind an iframe that React may have detached.
+    };
+  }, [soundCloudEmbedUrl]);
+
+  // --------------------------------------------------
+  // Switch playlists without replacing the iframe
+  // --------------------------------------------------
+
+  useEffect(() => {
+    if (
+      !musicActivated ||
+      provider !== "soundcloud" ||
+      !current ||
+      !widgetRef.current ||
+      !widgetReadyRef.current
+    ) {
+      return;
+    }
+
+    const widget = widgetRef.current;
+    const requestedUrl = current.url;
+
+    if (
+      loadedPlaylistRef.current === requestedUrl &&
+      !pendingPlaylistRef.current
+    ) {
+      setSoundCloudLoading(false);
+      return;
+    }
+
+    // Prevent duplicate loads of the same playlist.
+    if (pendingPlaylistRef.current === requestedUrl) return;
+
+    restoreMusicVolume(widget);
+
+    pendingPlaylistRef.current = requestedUrl;
+    const requestId = ++loadRequestRef.current;
+
+    setSoundCloudLoading(true);
+
+    widget.load(requestedUrl, {
+      auto_play: false,
+      hide_related: true,
+      show_comments: false,
+      visual: false,
+      callback: () => {
+        if (
+          requestId !== loadRequestRef.current ||
+          widgetRef.current !== widget
+        ) {
+          return;
         }
 
-        if (window.SC) {
-          activeWidget.unbind(window.SC.Widget.Events.READY);
-          activeWidget.unbind(window.SC.Widget.Events.FINISH);
-        }
-      }
-    };
-  }, [current?.id, provider, musicActivated]);
+        loadedPlaylistRef.current = requestedUrl;
+        pendingPlaylistRef.current = null;
+
+        setSoundCloudLoading(false);
+        setWidgetVersion((version) => version + 1);
+      },
+    });
+  }, [current?.id, current?.url, provider, musicActivated, widgetVersion]);
+
+  // --------------------------------------------------
+  // Player resizing
+  // --------------------------------------------------
 
   function beginResize(event: ReactPointerEvent<HTMLDivElement>) {
     if (event.button !== 0) return;
@@ -438,6 +520,10 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
     dragRef.current = null;
   }
 
+  // --------------------------------------------------
+  // Playlist management
+  // --------------------------------------------------
+
   function saveRename(id: string) {
     const next = renameValue.trim().slice(0, 60);
 
@@ -451,15 +537,12 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
   }
 
   function choosePlaylist(id: string) {
+    const nextPlaylist = all.find((p) => p.id === id);
+    if (!nextPlaylist) return;
+
     restoreMusicVolume();
 
-    const nextPlaylist = all.find((p) => p.id === id);
-
-    setSoundCloudLoading(
-      nextPlaylist
-        ? getMusicProvider(nextPlaylist.url) === "soundcloud"
-        : false,
-    );
+    setSoundCloudLoading(getMusicProvider(nextPlaylist.url) === "soundcloud");
 
     setSelected(id);
     setMusicActivated(true);
@@ -506,6 +589,10 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
     setLink("");
     setName("");
   }
+
+  // --------------------------------------------------
+  // UI
+  // --------------------------------------------------
 
   return (
     <aside
@@ -671,7 +758,6 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
                           restoreMusicVolume();
                           setSelected(CURATED[0]?.id ?? null);
                           setView("library");
-                          setSoundCloudLoading(false);
                         }
                       }}
                     >
@@ -719,15 +805,15 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
         )}
       </div>
 
-      {/* SoundCloud stays mounted when the music panel closes. */}
+      {/* One persistent SoundCloud iframe. */}
       <div
         className={`drizlo-music-player ${
-          provider === "soundcloud" ? "has-track" : ""
+          soundCloudEmbedUrl ? "has-track" : ""
         } ${view === "library" ? "is-library-view" : ""} ${
           soundCloudLoading ? "is-loading" : ""
         }`}
       >
-        {embedUrl && (
+        {soundCloudEmbedUrl && (
           <>
             {soundCloudLoading && (
               <div
@@ -750,9 +836,8 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
 
             <iframe
               ref={iframeRef}
-              key={current?.id}
-              title={`SoundCloud: ${current?.name}`}
-              src={embedUrl}
+              title="SoundCloud music player"
+              src={soundCloudEmbedUrl}
               width="100%"
               height={playerHeight}
               style={{ height: playerHeight }}
@@ -796,7 +881,7 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
         )}
       </div>
 
-      {/* Spotify stays unchanged until Fix 3. */}
+      {/* Spotify remains unchanged until Fix 3. */}
       {spotifyEmbedUrl && (
         <div
           className={`drizlo-music-spotify ${
