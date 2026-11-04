@@ -18,13 +18,18 @@ type SoundCloudWidget = {
   unbind: (event: string) => void;
   getSounds: (callback: (sounds: unknown[]) => void) => void;
   getCurrentSoundIndex: (callback: (index: number) => void) => void;
+  getVolume: (callback: (volume: number) => void) => void;
+  setVolume: (volume: number) => void;
   skip: (index: number) => void;
   play: () => void;
 };
 
 type SoundCloudAPI = {
   Widget: ((iframe: HTMLIFrameElement) => SoundCloudWidget) & {
-    Events: { READY: string; FINISH: string };
+    Events: {
+      READY: string;
+      FINISH: string;
+    };
   };
 };
 
@@ -34,9 +39,11 @@ declare global {
   }
 }
 
-// Retain existing storage keys so previously saved playlists are preserved.
+// Keep existing keys to preserve saved playlists.
 const KEY = "drizlo-soundcloud-playlists-v1";
 const SELECTED_KEY = "drizlo-soundcloud-selected-v1";
+
+const DUCK_VOLUME_RATIO = 0.25;
 
 const CURATED: Playlist[] = [
   {
@@ -112,7 +119,11 @@ function getMusicProvider(url: string): MusicProvider | null {
   return null;
 }
 
-export default function MusicPanel() {
+type MusicPanelProps = {
+  duckMusic?: boolean;
+};
+
+export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<View>("library");
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
@@ -126,9 +137,44 @@ export default function MusicPanel() {
   const [playerHeight, setPlayerHeight] = useState(420);
   const [musicActivated, setMusicActivated] = useState(false);
 
-  const dragRef = useRef<{ y: number; height: number } | null>(null);
+  // Increments when a SoundCloud player becomes ready.
+  const [widgetVersion, setWidgetVersion] = useState(0);
+
+  const dragRef = useRef<{
+    y: number;
+    height: number;
+  } | null>(null);
+
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
+  // SoundCloud volume management.
+  const widgetRef = useRef<SoundCloudWidget | null>(null);
+  const originalVolumeRef = useRef<number | null>(null);
+  const duckedRef = useRef(false);
+  const duckPendingRef = useRef(false);
+  const duckRequestRef = useRef(0);
+
+  // Keep the latest desired state available to callbacks.
+  const duckMusicRef = useRef(duckMusic);
+  duckMusicRef.current = duckMusic;
+
+  // Restore the previous volume without affecting playback.
+  function restoreMusicVolume(
+    widget: SoundCloudWidget | null = widgetRef.current,
+  ) {
+    // Invalidate pending asynchronous volume reads.
+    duckRequestRef.current += 1;
+    duckPendingRef.current = false;
+
+    if (widget && duckedRef.current && originalVolumeRef.current !== null) {
+      widget.setVolume(originalVolumeRef.current);
+    }
+
+    duckedRef.current = false;
+    originalVolumeRef.current = null;
+  }
+
+  // Read saved playlists and selection.
   useEffect(() => {
     let savedPlaylists: Playlist[] = [];
     let savedSelected: string | null = null;
@@ -165,21 +211,23 @@ export default function MusicPanel() {
 
     setSelected(initial);
 
-    // Remember the selected playlist, but don't load its player yet.
+    // Remember selection without loading the player yet.
     setView("library");
     setReady(true);
   }, []);
 
+  // Save playlists.
   useEffect(() => {
     if (!ready) return;
 
     try {
       localStorage.setItem(KEY, JSON.stringify(playlists));
     } catch {
-      // Storage optional.
+      // Storage is optional.
     }
   }, [playlists, ready]);
 
+  // Save selected playlist.
   useEffect(() => {
     if (!ready) return;
 
@@ -190,11 +238,12 @@ export default function MusicPanel() {
         localStorage.removeItem(SELECTED_KEY);
       }
     } catch {
-      // Storage optional.
+      // Storage is optional.
     }
   }, [selected, ready]);
 
   const all = useMemo(() => [...CURATED, ...playlists], [playlists]);
+
   const current = all.find((p) => p.id === selected) || null;
 
   const provider = current ? getMusicProvider(current.url) : null;
@@ -214,8 +263,64 @@ export default function MusicPanel() {
         )
       : null;
 
-  // Advance only after the listener manually starts playback.
-  // Single tracks stop naturally.
+  // --------------------------------------------------
+  // SoundCloud volume ducking
+  // --------------------------------------------------
+
+  useEffect(() => {
+    const widget = widgetRef.current;
+
+    if (!widget) return;
+
+    if (!duckMusic) {
+      // Restore the previous volume when the countdown
+      // ends, pauses, resets, or timer sounds are muted.
+      restoreMusicVolume(widget);
+      return;
+    }
+
+    // Already lowered, or waiting for a volume response.
+    if (duckedRef.current || duckPendingRef.current) {
+      return;
+    }
+
+    duckPendingRef.current = true;
+
+    const requestId = ++duckRequestRef.current;
+
+    widget.getVolume((volume) => {
+      // Ignore responses from outdated players or requests.
+      if (
+        requestId !== duckRequestRef.current ||
+        widgetRef.current !== widget ||
+        !duckMusicRef.current
+      ) {
+        return;
+      }
+
+      duckPendingRef.current = false;
+
+      if (!Number.isFinite(volume)) {
+        return;
+      }
+
+      const originalVolume = Math.max(0, Math.min(100, volume));
+
+      originalVolumeRef.current = originalVolume;
+      duckedRef.current = true;
+
+      // Lower music to 25% of its previous level.
+      // The music continues playing.
+      widget.setVolume(Math.round(originalVolume * DUCK_VOLUME_RATIO));
+    });
+  }, [duckMusic, widgetVersion]);
+
+  // --------------------------------------------------
+  // SoundCloud Widget API connection
+  // --------------------------------------------------
+
+  // Advance playlists only after playback was started
+  // manually. Single tracks stop naturally.
   useEffect(() => {
     if (
       !musicActivated ||
@@ -229,19 +334,44 @@ export default function MusicPanel() {
     let disposed = false;
     let advanceTimeout: ReturnType<typeof setTimeout> | null = null;
 
+    let activeWidget: SoundCloudWidget | null = null;
+    let readyHandler: (() => void) | null = null;
+    let finishHandler: (() => void) | null = null;
+
     function connect() {
-      if (disposed || !window.SC || !iframeRef.current) return;
+      if (disposed || !window.SC || !iframeRef.current || activeWidget) {
+        return;
+      }
 
       const api = window.SC;
-      const activeWidget = api.Widget(iframeRef.current);
+      const widget = api.Widget(iframeRef.current);
+
+      activeWidget = widget;
+      widgetRef.current = widget;
+
+      // Reset the volume tracking for the new widget.
+      originalVolumeRef.current = null;
+      duckedRef.current = false;
+      duckPendingRef.current = false;
+      duckRequestRef.current += 1;
+
+      const onReady = () => {
+        if (disposed || widgetRef.current !== widget) {
+          return;
+        }
+
+        // Triggers the volume effect even if the timer
+        // was already in its final 10 seconds.
+        setWidgetVersion((version) => version + 1);
+      };
 
       const onFinish = () => {
-        activeWidget.getSounds((sounds) => {
+        widget.getSounds((sounds) => {
           if (disposed || !Array.isArray(sounds) || sounds.length < 2) {
             return;
           }
 
-          activeWidget.getCurrentSoundIndex((index) => {
+          widget.getCurrentSoundIndex((index) => {
             if (
               disposed ||
               !Number.isInteger(index) ||
@@ -251,18 +381,26 @@ export default function MusicPanel() {
               return;
             }
 
-            activeWidget.skip(index + 1);
+            widget.skip(index + 1);
+
+            if (advanceTimeout) {
+              clearTimeout(advanceTimeout);
+            }
 
             advanceTimeout = setTimeout(() => {
               if (!disposed) {
-                activeWidget.play();
+                widget.play();
               }
             }, 250);
           });
         });
       };
 
-      activeWidget.bind(api.Widget.Events.FINISH, onFinish);
+      readyHandler = onReady;
+      finishHandler = onFinish;
+
+      widget.bind(api.Widget.Events.READY, onReady);
+      widget.bind(api.Widget.Events.FINISH, onFinish);
     }
 
     const existingScript = document.querySelector<HTMLScriptElement>(
@@ -275,9 +413,12 @@ export default function MusicPanel() {
       existingScript.addEventListener("load", connect);
     } else {
       const script = document.createElement("script");
+
       script.src = "https://w.soundcloud.com/player/api.js";
+
       script.async = true;
       script.dataset.drizloSoundcloudApi = "true";
+
       script.addEventListener("load", connect);
       document.head.appendChild(script);
     }
@@ -295,10 +436,29 @@ export default function MusicPanel() {
 
       script?.removeEventListener("load", connect);
 
-      // Do not unbind a detached iframe.
-      // The disposed guard makes old callbacks inert.
+      if (activeWidget) {
+        // Restore volume before disconnecting.
+        if (widgetRef.current === activeWidget) {
+          restoreMusicVolume(activeWidget);
+          widgetRef.current = null;
+        }
+
+        if (window.SC) {
+          if (readyHandler) {
+            activeWidget.unbind(window.SC.Widget.Events.READY);
+          }
+
+          if (finishHandler) {
+            activeWidget.unbind(window.SC.Widget.Events.FINISH);
+          }
+        }
+      }
     };
   }, [current?.id, provider, musicActivated]);
+
+  // --------------------------------------------------
+  // Player resizing
+  // --------------------------------------------------
 
   function beginResize(event: ReactPointerEvent<HTMLDivElement>) {
     if (event.button !== 0) return;
@@ -309,6 +469,7 @@ export default function MusicPanel() {
     };
 
     event.currentTarget.setPointerCapture(event.pointerId);
+
     event.preventDefault();
   }
 
@@ -332,6 +493,10 @@ export default function MusicPanel() {
     dragRef.current = null;
   }
 
+  // --------------------------------------------------
+  // Playlist management
+  // --------------------------------------------------
+
   function saveRename(id: string) {
     const next = renameValue.trim().slice(0, 60);
 
@@ -345,6 +510,9 @@ export default function MusicPanel() {
   }
 
   function choosePlaylist(id: string) {
+    // Restore any reduced volume before switching.
+    restoreMusicVolume();
+
     setSelected(id);
     setMusicActivated(true);
     setView("player");
@@ -390,6 +558,10 @@ export default function MusicPanel() {
     setLink("");
     setName("");
   }
+
+  // --------------------------------------------------
+  // UI
+  // --------------------------------------------------
 
   return (
     <aside
@@ -552,7 +724,7 @@ export default function MusicPanel() {
                         );
 
                         if (selected === p.id) {
-                          // Return to the built-in playlist.
+                          restoreMusicVolume();
                           setSelected(CURATED[0]?.id ?? null);
                           setView("library");
                         }
@@ -602,7 +774,7 @@ export default function MusicPanel() {
         )}
       </div>
 
-      {/* Keep SoundCloud mounted while its library is open. */}
+      {/* Keep SoundCloud mounted when the panel closes. */}
       <div
         className={`drizlo-music-player ${
           provider === "soundcloud" ? "has-track" : ""
@@ -658,7 +830,7 @@ export default function MusicPanel() {
         )}
       </div>
 
-      {/* Spotify embedded player */}
+      {/* Spotify remains unchanged until Fix 3. */}
       {spotifyEmbedUrl && (
         <div
           className={`drizlo-music-spotify ${

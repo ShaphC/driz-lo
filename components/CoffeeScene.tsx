@@ -615,14 +615,6 @@ export default function CoffeeScene({
         <rect width="1600" height="900" fill="#F4A56B" opacity=".045" />
       </svg>
 
-      {/* Completion message */}
-      {justCompleted && (
-        <div className="drizlo-completion-message">
-          <span className="drizlo-completion-icon">✦</span>
-          <span>Beautifully done. Your coffee is ready.</span>
-        </div>
-      )}
-
       {/* Brewing status */}
       <div className="drizlo-scene-status" role="status">
         <span className={`drizlo-status-dot ${brewing ? "active" : ""}`} />

@@ -29,35 +29,51 @@ const AMBIENCE_KEY = "drizlo-ambience-enabled-v1";
 const SCENE_KEY = "drizlo-scene-v1";
 type SceneChoice = "coffee" | "tea";
 
-function playChime(kind: "start" | "focus-end" | "break-end") {
+function playChime(kind: "start" | "pause" | "focus-end" | "break-end") {
   try {
     const AudioContextClass = window.AudioContext;
     if (!AudioContextClass) return;
+
     const context = new AudioContextClass();
+
     const tones =
       kind === "start"
-        ? [523.25]
-        : kind === "focus-end"
-          ? [659.25, 783.99]
-          : [523.25, 392];
+        ? [659.25]
+        : kind === "pause"
+          ? [440]
+          : kind === "focus-end"
+            ? [659.25, 783.99]
+            : [523.25, 392];
+
+    const peak = kind === "pause" ? 0.2 : 0.24;
     const start = context.currentTime + 0.02;
+
+    void context.resume().catch(() => {});
+
     tones.forEach((frequency, index) => {
       const oscillator = context.createOscillator();
       const gain = context.createGain();
       const at = start + index * 0.22;
+
       oscillator.type = "sine";
       oscillator.frequency.setValueAtTime(frequency, at);
+
       gain.gain.setValueAtTime(0.0001, at);
-      gain.gain.exponentialRampToValueAtTime(0.075, at + 0.025);
-      gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.3);
+      gain.gain.exponentialRampToValueAtTime(peak, at + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.28);
+
       oscillator.connect(gain);
       gain.connect(context.destination);
+
       oscillator.start(at);
-      oscillator.stop(at + 0.32);
+      oscillator.stop(at + 0.3);
     });
-    window.setTimeout(() => void context.close(), 1100);
+
+    window.setTimeout(() => {
+      void context.close().catch(() => {});
+    }, 1100);
   } catch {
-    /* Audio is optional; unsupported or blocked devices stay silent. */
+    // Audio may be unavailable or blocked.
   }
 }
 
@@ -65,25 +81,36 @@ function playCountdownTick(second: number) {
   try {
     const AudioContextClass = window.AudioContext;
     if (!AudioContextClass) return;
+
     const context = new AudioContextClass();
-    if (context.state === "suspended") void context.resume();
+
+    void context.resume().catch(() => {});
+
     const oscillator = context.createOscillator();
     const gain = context.createGain();
     const at = context.currentTime + 0.01;
+
     oscillator.type = "sine";
     oscillator.frequency.setValueAtTime(second <= 3 ? 880 : 660, at);
+
     gain.gain.setValueAtTime(0.0001, at);
-    gain.gain.exponentialRampToValueAtTime(0.06, at + 0.012);
-    gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.12);
+    gain.gain.exponentialRampToValueAtTime(
+      second <= 3 ? 0.32 : 0.26,
+      at + 0.012,
+    );
+    gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.16);
+
     oscillator.connect(gain);
     gain.connect(context.destination);
+
     oscillator.start(at);
-    oscillator.stop(at + 0.13);
+    oscillator.stop(at + 0.18);
+
     oscillator.onended = () => {
-      void context.close();
+      void context.close().catch(() => {});
     };
   } catch {
-    /* Browser may restrict background audio. */
+    // Browser may restrict background audio.
   }
 }
 
@@ -143,7 +170,7 @@ function notifyCompletion(mode: TimerMode) {
       {
         body:
           mode === "focus"
-            ? "Beautifully done. Your break is ready."
+            ? "Well done. Your break is ready."
             : "Ready for another moment of focus?",
         tag: "drizlo-timer-finished",
       },
@@ -573,8 +600,13 @@ export default function Home() {
     // Use the same timestamp for the display and the new deadline.
     // Separate Date.now() calls can briefly display one extra second.
     setNow(instant);
-    if (!isRunning && (seconds > 0 || isSetFinished) && soundEnabled)
-      playChime("start");
+    if (soundEnabled) {
+      if (isRunning) {
+        playChime("pause");
+      } else if (seconds > 0 || isSetFinished) {
+        playChime("start");
+      }
+    }
     setSession((current) => {
       if (!current) return current;
       if (current.running && current.endsAt !== null)
@@ -786,7 +818,6 @@ export default function Home() {
           DrizScape<span>.</span>
         </div>
       </header>
-
       <section className="workspace">
         <div
           className="drizlo-scene-selector"
@@ -888,7 +919,7 @@ export default function Home() {
           {scrubber("desktop")}
           <p className="timer-description">
             {justCompleted
-              ? "Beautifully done. Take a moment."
+              ? "Well done. Take a moment."
               : isFocus
                 ? isRunning
                   ? "One drop at a time."
@@ -964,7 +995,7 @@ export default function Home() {
           </div>
           <p className="mobile-timer-description">
             {justCompleted
-              ? "Beautifully done. Take a moment."
+              ? "Well done. Take a moment."
               : isFocus
                 ? isRunning
                   ? "One drop at a time."
@@ -1013,7 +1044,6 @@ export default function Home() {
           </button>
         </section>
       </section>
-
       {/* Mobile bottom drawer: overlays the scene instead of shifting the brewer. */}
       {mobileSettingsOpen && (
         <div
@@ -1057,8 +1087,15 @@ export default function Home() {
           </section>
         </div>
       )}
-
-      <MusicPanel />
+      <MusicPanel
+        duckMusic={
+          soundEnabled &&
+          session.running &&
+          scrubSeconds === null &&
+          seconds > 0 &&
+          seconds <= 10
+        }
+      />{" "}
       <footer className="bottombar">
         <span>{sceneChoice === "tea" ? "TEA SCENE" : "COFFEE SCENE"}</span>
         <span>Focus feels different here.</span>
