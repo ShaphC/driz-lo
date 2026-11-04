@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import CoffeeScene from "@/components/CoffeeScene";
 import MusicPanel from "@/components/MusicPanel";
@@ -438,9 +439,9 @@ export default function Home() {
       <main className="scene">
         <div className="scene-overlay" />
         <header className="topbar">
-          <div className="brand">
+          <Link href="/" className="brand" aria-label="DrizScape homepage">
             DrizScape<span>.</span>
-          </div>
+          </Link>
         </header>
       </main>
     );
@@ -814,9 +815,9 @@ export default function Home() {
     <main className="scene">
       <div className="scene-overlay" />
       <header className="topbar">
-        <div className="brand">
+        <Link href="/" className="brand" aria-label="DrizScape homepage">
           DrizScape<span>.</span>
-        </div>
+        </Link>
       </header>
       <section className="workspace">
         <div
