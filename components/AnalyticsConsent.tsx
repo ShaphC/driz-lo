@@ -20,6 +20,9 @@ export default function AnalyticsConsent() {
   const [choice, setChoice] = useState<Consent>(null);
   const [ready, setReady] = useState(false);
 
+  // Only display the consent banner inside the timer application.
+  const showConsentBanner = pathname === "/app";
+
   useEffect(() => {
     const refreshConsent = () => {
       setChoice(analyticsConsent());
@@ -35,6 +38,7 @@ export default function AnalyticsConsent() {
     };
   }, []);
 
+  // Track page views only when analytics consent has been accepted.
   useEffect(() => {
     if (!ready || choice !== "accepted") return;
 
@@ -53,7 +57,11 @@ export default function AnalyticsConsent() {
     trackEvent("page_viewed", properties);
   }, [ready, choice, pathname, searchParams]);
 
-  if (!ready || choice !== null) return null;
+  // Hide the banner on all pages except /app.
+  // Also hide it if the visitor has already made a decision.
+  if (!ready || choice !== null || !showConsentBanner) {
+    return null;
+  }
 
   return (
     <aside
