@@ -770,8 +770,8 @@ export default function Home() {
 
         {soundEnabled ? (
           <>
-            <path d="16 9a4 4 0 0 1 0 6" />
-            <path d="18.5 6.5a7.5 7.5 0 0 1 0 11" />
+            <path d="M16 9a4 4 0 0 1 0 6" />
+            <path d="M18.5 6.5a7.5 7.5 0 0 1 0 11" />
           </>
         ) : (
           <path d="M3 3 21 21" strokeWidth="2.4" />
