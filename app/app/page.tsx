@@ -7,7 +7,6 @@ import MusicPanel from "@/components/MusicPanel";
 import TeaScene from "@/components/TeaScene";
 import "./scene-selector.css";
 import { trackEvent } from "@/lib/analytics";
-import { posthogTimerLogger } from "@/lib/posthog-logs";
 
 type TimerMode = "focus" | "break";
 interface TimerSession {
@@ -375,11 +374,6 @@ export default function Home() {
     if (events.length > 0) notifyCompletion(events[events.length - 1]);
 
     for (const mode of events) {
-      posthogTimerLogger.intervalCompleted({
-        mode,
-        scene: sceneChoice,
-        focusDurationMinutes: session.focusDuration,
-      });
       trackEvent(mode === "focus" ? "focus_completed" : "break_completed", {
         scene: sceneChoice,
         focus_duration_minutes: session.focusDuration,
@@ -573,16 +567,6 @@ export default function Home() {
 
   function toggleTimer(): void {
     if (!session) return;
-    const timerAction = isRunning
-      ? "paused"
-      : seconds < totalSeconds && !isSetFinished
-        ? "resumed"
-        : "started";
-    posthogTimerLogger.action(timerAction, {
-      mode: session.mode,
-      scene: sceneChoice,
-      focusDurationMinutes: session.focusDuration,
-    });
     trackEvent(
       isRunning
         ? "timer_paused"
@@ -644,11 +628,6 @@ export default function Home() {
   }
   function reset(): void {
     if (!session) return;
-    posthogTimerLogger.action("reset", {
-      mode: session.mode,
-      scene: sceneChoice,
-      focusDurationMinutes: session.focusDuration,
-    });
     trackEvent("timer_reset", {
       mode: session.mode,
       scene: sceneChoice,
@@ -697,6 +676,11 @@ export default function Home() {
     });
   }
   function switchMode(): void {
+    if (!session) return;
+    trackEvent("timer_mode_switched", {
+      from_mode: session.mode,
+      to_mode: session.mode === "focus" ? "break" : "focus",
+    });
     setJustCompleted(false);
     setScrubSeconds(null);
     setSession((current) => {
@@ -729,6 +713,7 @@ export default function Home() {
   }
 
   function toggleSound(): void {
+    trackEvent("timer_sound_toggled", { enabled: !soundEnabled });
     setSoundEnabled((current) => {
       try {
         localStorage.setItem(SOUND_KEY, String(!current));
@@ -740,6 +725,7 @@ export default function Home() {
   }
 
   function toggleAmbience(): void {
+    trackEvent("timer_ambience_toggled", { enabled: !ambienceEnabled });
     setAmbienceEnabled((current) => {
       try {
         localStorage.setItem(AMBIENCE_KEY, String(!current));
@@ -784,8 +770,8 @@ export default function Home() {
 
         {soundEnabled ? (
           <>
-            <path d="M16 9a4 4 0 0 1 0 6" />
-            <path d="M18.5 6.5a7.5 7.5 0 0 1 0 11" />
+            <path d="16 9a4 4 0 0 1 0 6" />
+            <path d="18.5 6.5a7.5 7.5 0 0 1 0 11" />
           </>
         ) : (
           <path d="M3 3 21 21" strokeWidth="2.4" />

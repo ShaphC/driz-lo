@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 import {
   analyticsConsent,
@@ -15,6 +15,7 @@ type Consent = "accepted" | "declined" | null;
 
 export default function AnalyticsConsent() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [choice, setChoice] = useState<Consent>(null);
   const [ready, setReady] = useState(false);
@@ -37,10 +38,20 @@ export default function AnalyticsConsent() {
   useEffect(() => {
     if (!ready || choice !== "accepted") return;
 
-    trackEvent("page_viewed", {
+    const properties: Record<string, string> = {
       path: pathname,
-    });
-  }, [ready, choice, pathname]);
+    };
+
+    const source = searchParams.get("utm_source");
+    const campaign = searchParams.get("utm_campaign");
+    const medium = searchParams.get("utm_medium");
+
+    if (source) properties.utm_source = source.slice(0, 100);
+    if (campaign) properties.utm_campaign = campaign.slice(0, 100);
+    if (medium) properties.utm_medium = medium.slice(0, 100);
+
+    trackEvent("page_viewed", properties);
+  }, [ready, choice, pathname, searchParams]);
 
   if (!ready || choice !== null) return null;
 

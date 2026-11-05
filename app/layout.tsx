@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import AnalyticsConsent from "@/components/AnalyticsConsent";
 
@@ -76,7 +77,10 @@ export default function RootLayout({
     <html lang="en" data-scroll-behavior="smooth">
       <body>
         {children}
-        <AnalyticsConsent />
+
+        <Suspense fallback={null}>
+          <AnalyticsConsent />
+        </Suspense>
       </body>
     </html>
   );

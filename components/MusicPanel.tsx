@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent, PointerEvent as ReactPointerEvent } from "react";
+import { trackEvent } from "@/lib/analytics";
 import "./MusicPanel.css";
 
 type Playlist = {
@@ -39,6 +40,7 @@ type SoundCloudAPI = {
     Events: {
       READY: string;
       FINISH: string;
+      PLAY: string;
     };
   };
 };
@@ -129,6 +131,23 @@ function getMusicProvider(url: string): MusicProvider | null {
   return null;
 }
 
+function playlistAnalyticsProperties(
+  playlist: Playlist,
+  customPlaylists: Playlist[],
+) {
+  const curated = CURATED.some((item) => item.id === playlist.id);
+
+  return {
+    provider: getMusicProvider(playlist.url) ?? "unknown",
+    playlist_type: curated ? "curated" : "custom",
+    playlist_category: curated
+      ? playlist.id === "lofi-default"
+        ? "lofi"
+        : "ambient"
+      : "custom",
+  };
+}
+
 type MusicPanelProps = {
   duckMusic?: boolean;
 };
@@ -160,6 +179,12 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
 
   const duckMusicRef = useRef(duckMusic);
   duckMusicRef.current = duckMusic;
+
+  // Keep the currently selected playlist available to SoundCloud callbacks
+  // without reinitializing the widget when the selection changes.
+  const selectedPlaylistRef = useRef<Playlist | null>(null);
+  const customPlaylistsRef = useRef<Playlist[]>([]);
+  customPlaylistsRef.current = playlists;
 
   // Track which playlist is currently loaded into the widget.
   const loadedPlaylistRef = useRef<string | null>(null);
@@ -252,6 +277,8 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
 
   const current = all.find((p) => p.id === selected) || null;
   const provider = current ? getMusicProvider(current.url) : null;
+
+  selectedPlaylistRef.current = current;
 
   // The iframe source is deliberately stable.
   // Playlist changes are handled using widget.load().
@@ -354,7 +381,42 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
           loadedPlaylistRef.current = initialSoundCloudUrlRef.current;
         }
 
+        const activePlaylist = selectedPlaylistRef.current;
+
+        if (
+          activePlaylist &&
+          getMusicProvider(activePlaylist.url) === "soundcloud"
+        ) {
+          trackEvent(
+            "music_player_ready",
+            playlistAnalyticsProperties(
+              activePlaylist,
+              customPlaylistsRef.current,
+            ),
+          );
+        }
+
         setWidgetVersion((version) => version + 1);
+      };
+
+      const onPlay = () => {
+        if (disposed || widgetRef.current !== widget) return;
+
+        const activePlaylist = selectedPlaylistRef.current;
+
+        if (
+          !activePlaylist ||
+          getMusicProvider(activePlaylist.url) !== "soundcloud"
+        ) {
+          return;
+        }
+
+        trackEvent("music_playback_started", {
+          ...playlistAnalyticsProperties(
+            activePlaylist,
+            customPlaylistsRef.current,
+          ),
+        });
       };
 
       const onFinish = () => {
@@ -385,6 +447,7 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
       };
 
       widget.bind(api.Widget.Events.READY, onReady);
+      widget.bind(api.Widget.Events.PLAY, onPlay);
       widget.bind(api.Widget.Events.FINISH, onFinish);
     }
 
@@ -526,8 +589,16 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
 
   function saveRename(id: string) {
     const next = renameValue.trim().slice(0, 60);
+    const existing = playlists.find((p) => p.id === id);
 
-    if (next) {
+    if (next && existing) {
+      if (next !== existing.name) {
+        trackEvent("music_playlist_renamed", {
+          provider: getMusicProvider(existing.url) ?? "unknown",
+          playlist_type: "custom",
+        });
+      }
+
       setPlaylists((prev) =>
         prev.map((p) => (p.id === id ? { ...p, name: next } : p)),
       );
@@ -539,6 +610,11 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
   function choosePlaylist(id: string) {
     const nextPlaylist = all.find((p) => p.id === id);
     if (!nextPlaylist) return;
+
+    trackEvent(
+      "music_playlist_selected",
+      playlistAnalyticsProperties(nextPlaylist, playlists),
+    );
 
     restoreMusicVolume();
 
@@ -582,10 +658,39 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
       url,
     };
 
+    trackEvent("music_playlist_added", {
+      provider: getMusicProvider(url) ?? "unknown",
+      playlist_type: "custom",
+    });
+
     setPlaylists((prev) => [...prev, item]);
-    choosePlaylist(item.id);
+
+    // The newly added playlist is not in `all` until React renders again.
+    // Select it directly instead of calling choosePlaylist(item.id).
+    trackEvent("music_playlist_selected", {
+      provider: getMusicProvider(url) ?? "unknown",
+      playlist_type: "custom",
+      playlist_category: "custom",
+    });
+
+    restoreMusicVolume();
+    setSoundCloudLoading(getMusicProvider(url) === "soundcloud");
+    setSelected(item.id);
+    setMusicActivated(true);
+    setView("player");
+    setError("");
     setLink("");
     setName("");
+  }
+
+  function togglePanel() {
+    const nextOpen = !open;
+
+    trackEvent(nextOpen ? "music_panel_opened" : "music_panel_closed", {
+      view,
+    });
+
+    setOpen(nextOpen);
   }
 
   // --------------------------------------------------
@@ -606,7 +711,7 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
         type="button"
         aria-expanded={open}
         aria-controls="drizlo-music-body"
-        onClick={() => setOpen((value) => !value)}
+        onClick={togglePanel}
       >
         {open ? "✕ Close music" : "♫ Music"}
       </button>
@@ -620,22 +725,11 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
           <>
             <div className="drizlo-music-heading">
               <strong>Choose your music</strong>
-              {/* <span>Spotify & SoundCloud</span> */}
               <span>SoundCloud</span>
             </div>
 
             <div className="drizlo-music-browse-links">
               <span>Browse:</span>
-
-              {/* <a
-                href="https://open.spotify.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Spotify ↗
-              </a>
-
-              <span>or</span> */}
 
               <a
                 href="https://soundcloud.com/discover"
@@ -749,6 +843,11 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
                       aria-label={`Remove ${p.name}`}
                       className="drizlo-music-remove"
                       onClick={() => {
+                        trackEvent("music_playlist_removed", {
+                          provider: getMusicProvider(p.url) ?? "unknown",
+                          playlist_type: "custom",
+                        });
+
                         setPlaylists((prev) =>
                           prev.filter((x) => x.id !== p.id),
                         );
@@ -768,9 +867,6 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
             </div>
 
             <form onSubmit={addPlaylist} className="drizlo-music-form">
-              {/* <label htmlFor="drizlo-music-url">
-                Add Spotify or SoundCloud playlist
-              </label> */}
               <label htmlFor="drizlo-music-url">Add music playlist</label>
 
               <input
@@ -881,7 +977,7 @@ export default function MusicPanel({ duckMusic = false }: MusicPanelProps) {
         )}
       </div>
 
-      {/* Spotify remains unchanged until Fix 3. */}
+      {/* Spotify remains functional but is not advertised in the UI. */}
       {spotifyEmbedUrl && (
         <div
           className={`drizlo-music-spotify ${
